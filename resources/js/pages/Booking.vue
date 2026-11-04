@@ -1,11 +1,14 @@
-
 <script setup lang="ts">
 import BookingCalendar, { type BookedRange } from '@/components/BookingCalendar.vue';
+import MockPaymentModal from '@/components/MockPaymentModal.vue';
+import PromoCodeInput, { type AppliedCoupon } from '@/components/PromoCodeInput.vue';
+import RentalExtras from '@/components/RentalExtras.vue';
 import HomeLayout from '@/layouts/HomeLayout.vue';
-import { book } from '@/routes/fleet';
 import { login } from '@/routes';
+import { book } from '@/routes/fleet';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, watch } from 'vue';
+import { Lock, ShieldCheck } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 
 interface Car {
     id: number;
@@ -38,7 +41,41 @@ const form = useForm({
     end_date: '',
     pickup_location: '',
     return_location: '',
+    extras: [] as string[],
+    coupon_code: '',
+    payment_method: 'credit_card',
+    transaction_id: '',
 });
+
+const appliedCoupon = ref<AppliedCoupon | null>(null);
+const isPaymentModalOpen = ref(false);
+
+const extrasCatalog = [
+    {
+        id: 'insurance',
+        name: 'Zero-Deductible Insurance',
+        rate: 499,
+        type: 'per_day' as const,
+    },
+    {
+        id: 'gps',
+        name: 'GPS Navigation System',
+        rate: 149,
+        type: 'per_day' as const,
+    },
+    {
+        id: 'child_seat',
+        name: 'Child Safety Seat',
+        rate: 199,
+        type: 'per_day' as const,
+    },
+    {
+        id: 'additional_driver',
+        name: 'Additional Driver',
+        rate: 499,
+        type: 'fixed' as const,
+    },
+];
 
 const rentalDays = computed(() => {
     if (!form.start_date || !form.end_date) return 0;
@@ -71,13 +108,42 @@ const formatDisplayDate = (dateStr: string): string => {
 
 const dailyRate = computed(() => Number(car.value?.price_per_day) || 0);
 
-const subtotal = computed(() =>
+const carBaseCost = computed(() =>
     rentalDays.value > 0 ? rentalDays.value * dailyRate.value : 0
 );
 
-const tax = computed(() => subtotal.value * 0.07);
+const selectedExtrasBreakdown = computed(() => {
+    return extrasCatalog
+        .filter((item) => form.extras.includes(item.id))
+        .map((item) => {
+            const cost = item.type === 'per_day' ? item.rate * rentalDays.value : item.rate;
+            return {
+                ...item,
+                cost,
+            };
+        });
+});
 
-const total = computed(() => subtotal.value + tax.value);
+const extrasTotal = computed(() => {
+    return selectedExtrasBreakdown.value.reduce((acc, item) => acc + item.cost, 0);
+});
+
+const subtotal = computed(() => {
+    if (rentalDays.value <= 0) return 0;
+    return carBaseCost.value + extrasTotal.value;
+});
+
+const discountAmount = computed(() => {
+    return appliedCoupon.value ? appliedCoupon.value.discount_amount : 0;
+});
+
+const taxableAmount = computed(() => {
+    return Math.max(0, subtotal.value - discountAmount.value);
+});
+
+const tax = computed(() => taxableAmount.value * 0.07);
+
+const total = computed(() => taxableAmount.value + tax.value);
 
 const formatPrice = (amount: number | string) =>
     new Intl.NumberFormat('en-IN', {
@@ -97,16 +163,21 @@ const canSubmit = computed(() =>
     )
 );
 
-const submitBooking = () => {
+const handleCouponApplied = (coupon: AppliedCoupon) => {
+    appliedCoupon.value = coupon;
+    form.coupon_code = coupon.code;
+};
+
+const handleCouponRemoved = () => {
+    appliedCoupon.value = null;
+    form.coupon_code = '';
+};
+
+const openPaymentModal = () => {
     const user = page.props.auth?.user;
 
     if (!user) {
         router.get(login.url());
-        return;
-    }
-
-    if (user.role === 'client') {
-        form.post(book.url(car.value.id));
         return;
     }
 
@@ -115,7 +186,27 @@ const submitBooking = () => {
         return;
     }
 
-    alert('Your role does not allow booking.');
+    if (user.role !== 'client') {
+        alert('Your role does not allow booking.');
+        return;
+    }
+
+    if (!canSubmit.value) {
+        return;
+    }
+
+    isPaymentModalOpen.value = true;
+};
+
+const handlePaymentSubmit = (data: {
+    payment_method: 'credit_card' | 'upi' | 'cash';
+    transaction_id: string;
+}) => {
+    form.payment_method = data.payment_method;
+    form.transaction_id = data.transaction_id;
+    form.coupon_code = appliedCoupon.value?.code || '';
+    isPaymentModalOpen.value = false;
+    form.post(book.url(car.value.id));
 };
 
 watch(
@@ -166,7 +257,7 @@ const commonLocations = [
                     </nav>
 
                     <p class="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#C5D0DE]">
-                        Your journey starts here
+                        Complete Checkout
                     </p>
 
                     <h1 class="text-3xl font-bold sm:text-4xl">
@@ -174,7 +265,7 @@ const commonLocations = [
                     </h1>
 
                     <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-                        Choose your dates, select your locations, and review your rental total.
+                        Customize your journey with flexible add-ons, apply exclusive coupons, and finalize your booking securely.
                     </p>
                 </div>
             </section>
@@ -184,7 +275,7 @@ const commonLocations = [
                     <!-- Main column -->
                     <div class="space-y-7 lg:col-span-2">
                         <!-- Vehicle details -->
-                        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
                             <div class="relative h-64 bg-slate-200 sm:h-96">
                                 <img
                                     v-if="images[0]?.url"
@@ -200,7 +291,7 @@ const commonLocations = [
                                     Vehicle image unavailable
                                 </div>
 
-                                <div class="absolute bottom-4 left-4 rounded-lg bg-[#101D35]/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+                                <div class="absolute bottom-4 left-4 rounded-lg bg-[#101D35]/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xs">
                                     {{ car.year }} model
                                 </div>
                             </div>
@@ -248,7 +339,7 @@ const commonLocations = [
                         </section>
 
                         <!-- Booking form -->
-                        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+                        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-8">
                             <div class="mb-8 flex items-center gap-4">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#101D35] text-white">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,16 +349,16 @@ const commonLocations = [
 
                                 <div>
                                     <h2 class="text-xl font-bold text-[#101D35] sm:text-2xl">
-                                        Booking details
+                                        Reservation Details
                                     </h2>
                                     <p class="mt-1 text-sm text-slate-500">
-                                        Fields marked * are required.
+                                        Select your schedule, pickup stations, and optional vehicle upgrades.
                                     </p>
                                 </div>
                             </div>
 
-                            <form class="space-y-8" @submit.prevent="submitBooking">
-                                <!-- Dates -->
+                            <form class="space-y-8" @submit.prevent="openPaymentModal">
+                                <!-- 1. Rental period -->
                                 <div class="space-y-5">
                                     <h3 class="flex items-center gap-2 font-semibold text-[#101D35]">
                                         <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-[#58779D]">
@@ -320,7 +411,7 @@ const commonLocations = [
 
                                 <div class="border-t border-slate-200"></div>
 
-                                <!-- Locations -->
+                                <!-- 2. Locations -->
                                 <div>
                                     <h3 class="mb-4 flex items-center gap-2 font-semibold text-[#101D35]">
                                         <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-[#58779D]">
@@ -378,43 +469,51 @@ const commonLocations = [
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-200 bg-[#F4F6FA] p-4">
-                                    <p class="text-sm leading-6 text-slate-600">
-                                        Review your dates and locations before confirming your reservation. Your booking will be submitted to the server for validation.
-                                    </p>
+                                <div class="border-t border-slate-200"></div>
+
+                                <!-- 3. Rental Add-ons -->
+                                <RentalExtras
+                                    v-model="form.extras"
+                                    :rental-days="rentalDays"
+                                />
+
+                                <div class="border-t border-slate-200"></div>
+
+                                <!-- Submit CTA -->
+                                <div>
+                                    <button
+                                        type="submit"
+                                        :disabled="!canSubmit || form.processing"
+                                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#101D35] px-6 py-4 font-bold text-white transition hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                                    >
+                                        <Lock class="h-4 w-4" />
+                                        <span>
+                                            {{ form.processing ? 'Finalizing booking...' : (!page.props.auth?.user ? 'Log in to continue' : `Proceed to Payment • ${formatPrice(total)}`) }}
+                                        </span>
+                                    </button>
+
+                                    <div class="mt-3 flex items-center justify-center gap-4 text-xs text-slate-500">
+                                        <span class="inline-flex items-center gap-1">
+                                            <ShieldCheck class="h-3.5 w-3.5 text-emerald-600" />
+                                            Instant confirmation
+                                        </span>
+                                        <span>•</span>
+                                        <span>Free cancellation up to 24h</span>
+                                    </div>
                                 </div>
-
-                                <button
-                                    type="submit"
-                                    :disabled="!canSubmit || form.processing"
-                                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#101D35] px-6 py-4 font-bold text-white transition hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
-                                >
-                                    <svg v-if="form.processing" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                    </svg>
-
-                                    <span>
-                                        {{ form.processing ? 'Processing booking...' : (!page.props.auth?.user ? 'Log in to continue' : 'Confirm booking') }}
-                                    </span>
-
-                                    <svg v-if="!form.processing" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7 7 7-7 7" />
-                                    </svg>
-                                </button>
                             </form>
                         </section>
                     </div>
 
-                    <!-- Price summary -->
-                    <aside class="lg:sticky lg:top-6">
-                        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <!-- Price summary sidebar -->
+                    <aside class="space-y-6 lg:sticky lg:top-6">
+                        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
                             <div class="bg-[#101D35] p-6 text-white">
                                 <p class="text-sm font-medium text-slate-300">
                                     Your reservation
                                 </p>
                                 <h2 class="mt-1 text-2xl font-bold">
-                                    Price summary
+                                    Order summary
                                 </h2>
                                 <p class="mt-2 text-sm text-slate-300">
                                     {{ car.make }} {{ car.model }}
@@ -422,69 +521,114 @@ const commonLocations = [
                             </div>
 
                             <div class="space-y-5 p-6">
-                                <div class="rounded-xl bg-[#F4F6FA] p-4">
+                                <!-- Vehicle duration breakdown -->
+                                <div class="rounded-xl bg-[#F4F6FA] p-4 text-sm">
                                     <div class="flex items-center justify-between gap-3">
-                                        <span class="text-sm text-slate-600">Rental duration</span>
+                                        <span class="text-slate-600">Rental duration</span>
                                         <span class="font-bold text-[#101D35]">
                                             {{ rentalDays > 0 ? `${rentalDays} day${rentalDays === 1 ? '' : 's'}` : '—' }}
                                         </span>
                                     </div>
 
-                                    <div class="mt-4 flex items-center justify-between gap-3">
-                                        <span class="text-sm text-slate-600">Daily rate</span>
+                                    <div class="mt-3 flex items-center justify-between gap-3">
+                                        <span class="text-slate-600">Daily vehicle rate</span>
                                         <span class="font-semibold text-[#101D35]">
                                             {{ formatPrice(dailyRate) }}
                                         </span>
                                     </div>
+
+                                    <div class="mt-3 flex items-center justify-between gap-3 border-t border-slate-200 pt-3">
+                                        <span class="font-medium text-slate-700">Vehicle rental cost</span>
+                                        <span class="font-bold text-[#101D35]">
+                                            {{ formatPrice(carBaseCost) }}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <div class="flex items-center justify-between gap-3">
-                                    <span class="text-sm text-slate-600">Subtotal</span>
-                                    <span class="font-semibold text-[#101D35]">
+                                <!-- Add-ons Breakdown -->
+                                <div v-if="selectedExtrasBreakdown.length > 0" class="space-y-2 border-t border-slate-100 pt-4">
+                                    <p class="text-xs font-semibold uppercase tracking-wider text-[#58779D]">
+                                        Selected Add-ons ({{ selectedExtrasBreakdown.length }})
+                                    </p>
+                                    <div
+                                        v-for="extra in selectedExtrasBreakdown"
+                                        :key="extra.id"
+                                        class="flex items-center justify-between gap-3 text-xs"
+                                    >
+                                        <span class="text-slate-600">{{ extra.name }}</span>
+                                        <span class="font-semibold text-[#101D35]">
+                                            +{{ formatPrice(extra.cost) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Subtotal -->
+                                <div class="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                                    <span class="text-sm font-medium text-slate-700">Subtotal</span>
+                                    <span class="text-sm font-bold text-[#101D35]">
                                         {{ formatPrice(subtotal) }}
                                     </span>
                                 </div>
 
-                                <div class="flex items-center justify-between gap-3">
-                                    <span class="text-sm text-slate-600">Tax (7%)</span>
+                                <!-- Promo Code Input -->
+                                <div class="border-t border-slate-100 pt-4">
+                                    <PromoCodeInput
+                                        :subtotal="subtotal"
+                                        :applied-coupon="appliedCoupon"
+                                        @apply="handleCouponApplied"
+                                        @remove="handleCouponRemoved"
+                                    />
+                                </div>
+
+                                <!-- Discount Row (if applied) -->
+                                <div
+                                    v-if="appliedCoupon && discountAmount > 0"
+                                    class="flex items-center justify-between gap-3 text-sm text-emerald-700"
+                                >
+                                    <span class="font-medium">Promo Discount ({{ appliedCoupon.code }})</span>
+                                    <span class="font-bold">
+                                        -{{ formatPrice(discountAmount) }}
+                                    </span>
+                                </div>
+
+                                <!-- Taxes -->
+                                <div class="flex items-center justify-between gap-3 text-sm">
+                                    <span class="text-slate-600">Goods & Service Tax (7%)</span>
                                     <span class="font-semibold text-[#101D35]">
                                         {{ formatPrice(tax) }}
                                     </span>
                                 </div>
 
+                                <!-- Grand Total -->
                                 <div class="border-t border-dashed border-slate-300 pt-5">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
                                             <p class="text-base font-bold text-[#101D35]">
-                                                Estimated total
+                                                Grand Total
                                             </p>
                                             <p class="mt-1 text-xs text-slate-500">
-                                                For the selected rental period
+                                                All taxes and add-ons included
                                             </p>
                                         </div>
 
-                                        <p class="text-2xl font-bold text-[#101D35]">
+                                        <p class="font-mono text-2xl font-bold text-[#101D35]">
                                             {{ formatPrice(total) }}
                                         </p>
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-200 p-4">
-                                    <div class="flex items-start gap-3">
-                                        <svg class="mt-0.5 h-5 w-5 shrink-0 text-[#58779D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 3a11.955 11.955 0 01-8.618 2.984A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622C17.176 19.29 21 14.591 21 9c0-1.042-.133-2.053-.382-3.016z" />
-                                        </svg>
-
-                                        <div>
-                                            <p class="text-sm font-semibold text-[#101D35]">
-                                                Reservation details
-                                            </p>
-                                            <p class="mt-1 text-xs leading-5 text-slate-500">
-                                                Final booking acceptance and availability depend on server-side validation.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <!-- Action button in sidebar -->
+                                <button
+                                    type="button"
+                                    :disabled="!canSubmit || form.processing"
+                                    @click="openPaymentModal"
+                                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#101D35] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                                >
+                                    <Lock class="h-4 w-4" />
+                                    <span>
+                                        {{ !page.props.auth?.user ? 'Log in to continue' : 'Proceed to Payment' }}
+                                    </span>
+                                </button>
 
                                 <a href="/fleet" class="block text-center text-sm font-semibold text-[#58779D] transition hover:text-[#101D35]">
                                     ← Back to fleet
@@ -495,5 +639,13 @@ const commonLocations = [
                 </div>
             </div>
         </div>
+
+        <!-- Simulated Payment Modal -->
+        <MockPaymentModal
+            :is-open="isPaymentModalOpen"
+            :amount="total"
+            @close="isPaymentModalOpen = false"
+            @submit="handlePaymentSubmit"
+        />
     </HomeLayout>
 </template>

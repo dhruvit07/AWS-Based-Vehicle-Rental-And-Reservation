@@ -10,4 +10,5 @@ enum PaymentMethod: string
     case STRIPE = 'stripe';
     case BANK_TRANSFER = 'bank_transfer';
     case CASH = 'cash';
+    case UPI = 'upi';
 }

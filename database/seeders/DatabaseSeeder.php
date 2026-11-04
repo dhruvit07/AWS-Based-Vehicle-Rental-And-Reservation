@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ClientsSeeder::class,
             ReservationsPaymentsSeeder::class,
             TicketSeeder::class,
+            CouponsSeeder::class,
         ]);
     }
 }
