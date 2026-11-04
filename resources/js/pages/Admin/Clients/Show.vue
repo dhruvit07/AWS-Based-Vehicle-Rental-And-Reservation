@@ -111,9 +111,11 @@ function activateClient() {
   });
 }
 
-const statusStyle = computed(() => props.client.is_active
-  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-  : 'bg-red-50 text-red-700 ring-red-200');
+const statusStyle = computed(() => {
+  return props.client.is_active
+    ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
+    : 'border-rose-500/20 bg-rose-500/10 text-rose-800 dark:text-rose-300';
+});
 
 const kycBadge = computed(() => {
   const status = (props.client.kyc_status || 'unsubmitted').toLowerCase();
@@ -121,25 +123,25 @@ const kycBadge = computed(() => {
     case 'verified':
       return {
         label: 'Verified Driver',
-        class: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        class: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300',
         dot: 'bg-emerald-500',
       };
     case 'pending':
       return {
         label: 'Under Review',
-        class: 'bg-amber-50 text-amber-700 ring-amber-200',
+        class: 'border-amber-500/20 bg-amber-500/10 text-amber-800 dark:text-amber-300',
         dot: 'bg-amber-500',
       };
     case 'rejected':
       return {
         label: 'Rejected',
-        class: 'bg-rose-50 text-rose-700 ring-rose-200',
+        class: 'border-rose-500/20 bg-rose-500/10 text-rose-800 dark:text-rose-300',
         dot: 'bg-rose-500',
       };
     default:
       return {
         label: 'Not Submitted',
-        class: 'bg-slate-100 text-slate-700 ring-slate-200',
+        class: 'border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300',
         dot: 'bg-slate-400',
       };
   }
@@ -185,15 +187,15 @@ function submitRejectKyc() {
 function badgeStyle(status: string) {
   const value = status.toLowerCase();
   if (['confirmed', 'completed', 'paid', 'success', 'succeeded', 'active'].includes(value)) {
-    return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
+    return 'border-emerald-500/20 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300';
   }
   if (['pending', 'processing', 'in_progress'].includes(value)) {
-    return 'bg-amber-50 text-amber-700 ring-amber-200';
+    return 'border-amber-500/20 bg-amber-500/10 text-amber-800 dark:text-amber-300';
   }
   if (['cancelled', 'canceled', 'failed', 'rejected', 'refunded', 'suspended'].includes(value)) {
-    return 'bg-red-50 text-red-700 ring-red-200';
+    return 'border-rose-500/20 bg-rose-500/10 text-rose-800 dark:text-rose-300';
   }
-  return 'bg-slate-100 text-slate-700 ring-slate-200';
+  return 'border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300';
 }
 </script>
 
@@ -201,113 +203,112 @@ function badgeStyle(status: string) {
   <Head :title="`Client ${client.name}`" />
 
   <AdminLayout>
-    <main class="min-h-screen space-y-7 bg-[#F4F6FA] p-4 sm:p-6 lg:p-8">
+    <main class="min-h-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <!-- Page heading -->
-      <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div class="flex items-start gap-3">
-          <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#101D35] text-white">
-            <UserRound class="size-6" />
+      <div class="glass-card flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
+        <div class="flex items-start gap-3.5">
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
+            <UserRound class="h-6 w-6" />
           </div>
           <div>
-            <p class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#58779D]">
-              Client Management
-            </p>
-            <h1 class="text-2xl font-bold tracking-tight text-[#101D35] sm:text-3xl">
-              {{ client.name }}
-            </h1>
-            <p class="mt-1 text-sm text-slate-500">{{ client.email }}</p>
-            <span
-              class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset"
-              :class="statusStyle"
-            >
-              <span class="size-2 rounded-full" :class="client.is_active ? 'bg-emerald-500' : 'bg-red-500'" />
-              {{ client.is_active ? 'Active Account' : 'Suspended Account' }}
-            </span>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                {{ client.name }}
+              </h1>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+                :class="statusStyle"
+              >
+                <span class="h-1.5 w-1.5 rounded-full" :class="client.is_active ? 'bg-emerald-500' : 'bg-rose-500'" />
+                {{ client.is_active ? 'Active Account' : 'Suspended' }}
+              </span>
+            </div>
+            <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{{ client.email }}</p>
           </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
           <Button
             v-if="client.is_active"
-            class="bg-red-600 text-white hover:bg-red-700"
+            class="h-9 rounded-xl bg-rose-600 text-xs font-medium text-white hover:bg-rose-700"
             @click="showSuspendDialog = true"
           >
             Suspend User
           </Button>
           <Button
             v-else
-            class="bg-emerald-600 text-white hover:bg-emerald-700"
+            class="h-9 rounded-xl bg-emerald-600 text-xs font-medium text-white hover:bg-emerald-700"
             @click="showActivateDialog = true"
           >
             Activate User
           </Button>
 
           <Link :href="index()">
-            <Button variant="outline" class="border-slate-300 bg-white text-[#263F60] hover:bg-slate-100">
-              <ArrowLeft class="mr-2 size-4" />
+            <Button variant="outline" class="h-9 rounded-xl border-black/10 dark:border-white/10 text-xs font-medium hover:bg-slate-100 dark:hover:bg-white/10">
+              <ArrowLeft class="mr-1.5 h-3.5 w-3.5" />
               Back to Clients
             </Button>
           </Link>
         </div>
       </div>
 
-      <!-- Client information -->
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div class="mb-5 flex items-center gap-2">
-          <div class="rounded-lg bg-[#E9EEF5] p-2 text-[#263F60]">
-            <ShieldCheck class="size-5" />
+      <!-- Account information -->
+      <section class="glass-card p-6">
+        <div class="mb-5 flex items-center gap-2.5">
+          <div class="rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF] p-2">
+            <ShieldCheck class="h-4 w-4" />
           </div>
           <div>
-            <h2 class="font-semibold text-[#101D35]">Account Information</h2>
-            <p class="text-xs text-slate-500">Client profile and account status</p>
+            <h2 class="font-semibold text-slate-900 dark:text-white">Account Information</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Client profile registration details</p>
           </div>
         </div>
 
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Client ID</p>
-            <p class="mt-1 font-semibold text-[#101D35]">#{{ client.id }}</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Client ID</p>
+            <p class="mt-0.5 font-semibold text-slate-900 dark:text-white">#{{ client.id }}</p>
           </div>
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Full Name</p>
-            <p class="mt-1 font-semibold text-[#101D35]">{{ client.name }}</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Full Name</p>
+            <p class="mt-0.5 font-semibold text-slate-900 dark:text-white">{{ client.name }}</p>
           </div>
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Email Address</p>
-            <p class="mt-1 break-all font-semibold text-[#101D35]">{{ client.email }}</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Email Address</p>
+            <p class="mt-0.5 break-all font-semibold text-slate-900 dark:text-white">{{ client.email }}</p>
           </div>
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Account Created</p>
-            <p class="mt-1 font-semibold text-[#101D35]">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Account Created</p>
+            <p class="mt-0.5 font-semibold text-slate-900 dark:text-white">
               {{ client.created_at ? fmtDate(client.created_at) : '—' }}
             </p>
           </div>
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Account Status</p>
-            <p class="mt-1 font-semibold text-[#101D35]">{{ client.is_active ? 'Active' : 'Suspended' }}</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Account Status</p>
+            <p class="mt-0.5 font-semibold text-slate-900 dark:text-white">{{ client.is_active ? 'Active' : 'Suspended' }}</p>
           </div>
         </div>
       </section>
 
       <!-- Driver Verification & License -->
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div class="mb-5 flex flex-col justify-between gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center">
+      <section class="glass-card p-6">
+        <div class="mb-5 flex flex-col justify-between gap-4 border-b border-black/5 dark:border-white/10 pb-5 sm:flex-row sm:items-center">
           <div class="flex items-center gap-3">
-            <div class="rounded-lg bg-[#E9EEF5] p-2 text-[#263F60]">
-              <ShieldCheck class="size-5" />
+            <div class="rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF] p-2">
+              <ShieldCheck class="h-4 w-4" />
             </div>
             <div>
-              <div class="flex items-center gap-2.5">
-                <h2 class="font-semibold text-[#101D35]">Driver Verification & License</h2>
+              <div class="flex items-center gap-2">
+                <h2 class="font-semibold text-slate-900 dark:text-white">Driver License & KYC Verification</h2>
                 <span
-                  class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset"
+                  class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold"
                   :class="kycBadge.class"
                 >
-                  <span class="size-1.5 rounded-full" :class="kycBadge.dot" />
+                  <span class="h-1.5 w-1.5 rounded-full" :class="kycBadge.dot" />
                   {{ kycBadge.label }}
                 </span>
               </div>
-              <p class="text-xs text-slate-500">Government driving credentials inspection and verification</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Inspection console for government-issued credentials</p>
             </div>
           </div>
 
@@ -315,31 +316,31 @@ function badgeStyle(status: string) {
           <div class="flex flex-wrap items-center gap-2">
             <Button
               v-if="client.kyc_status !== 'verified'"
-              class="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+              class="h-9 gap-1.5 rounded-xl bg-emerald-600 text-xs font-medium text-white hover:bg-emerald-700"
               :disabled="processingKyc"
               @click="approveKyc"
             >
-              <CheckCircle2 class="size-4" />
+              <CheckCircle2 class="h-3.5 w-3.5" />
               {{ processingKyc ? 'Processing...' : 'Approve License' }}
             </Button>
             <Button
               v-else
               variant="outline"
-              class="gap-1.5 border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+              class="h-9 gap-1.5 rounded-xl border-emerald-500/30 bg-emerald-500/10 text-xs font-medium text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/20"
               :disabled="processingKyc"
               @click="approveKyc"
             >
-              <CheckCircle2 class="size-4 text-emerald-600" />
+              <CheckCircle2 class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               Re-approve
             </Button>
 
             <Button
               variant="outline"
-              class="gap-1.5 border-rose-300 text-rose-700 hover:bg-rose-50"
+              class="h-9 gap-1.5 rounded-xl border-rose-500/30 text-xs font-medium text-rose-700 dark:text-rose-400 hover:bg-rose-500/10"
               :disabled="processingKyc"
               @click="openRejectDialog"
             >
-              <ShieldAlert class="size-4 text-rose-600" />
+              <ShieldAlert class="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
               Reject License
             </Button>
           </div>
@@ -348,13 +349,13 @@ function badgeStyle(status: string) {
         <!-- Rejection feedback banner if rejected -->
         <div
           v-if="client.kyc_status === 'rejected' && client.kyc_rejection_reason"
-          class="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"
+          class="mb-5 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-900 dark:text-rose-200"
         >
           <div class="flex items-start gap-2.5">
-            <ShieldAlert class="mt-0.5 size-4 shrink-0 text-rose-600" />
+            <ShieldAlert class="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <div>
-              <p class="font-semibold text-rose-950">Current Rejection Feedback</p>
-              <p class="mt-1 text-rose-800">{{ client.kyc_rejection_reason }}</p>
+              <p class="font-semibold text-rose-950 dark:text-rose-100">Current Rejection Feedback</p>
+              <p class="mt-0.5 text-xs text-rose-800 dark:text-rose-300">{{ client.kyc_rejection_reason }}</p>
             </div>
           </div>
         </div>
@@ -362,82 +363,82 @@ function badgeStyle(status: string) {
         <!-- License Metadata Grid -->
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">License Number</p>
-            <p class="mt-1 font-mono font-semibold text-[#101D35]">{{ client.license_number || '—' }}</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">License Number</p>
+            <p class="mt-0.5 font-mono font-semibold text-slate-900 dark:text-white">{{ client.license_number || '—' }}</p>
           </div>
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Expiration Date</p>
-            <p class="mt-1 font-semibold text-[#101D35]">{{ client.license_expiry ? fmtDate(client.license_expiry) : '—' }}</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Expiration Date</p>
+            <p class="mt-0.5 font-semibold text-slate-900 dark:text-white">{{ client.license_expiry ? fmtDate(client.license_expiry) : '—' }}</p>
           </div>
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Verification Status</p>
-            <p class="mt-1 font-semibold capitalize text-[#101D35]">{{ client.kyc_status || 'Unsubmitted' }}</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Verification Status</p>
+            <p class="mt-0.5 font-semibold capitalize text-slate-900 dark:text-white">{{ client.kyc_status || 'Unsubmitted' }}</p>
           </div>
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Verified At</p>
-            <p class="mt-1 font-semibold text-[#101D35]">{{ client.kyc_verified_at ? fmtDateTime(client.kyc_verified_at) : '—' }}</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Verified At</p>
+            <p class="mt-0.5 font-semibold text-slate-900 dark:text-white">{{ client.kyc_verified_at ? fmtDateTime(client.kyc_verified_at) : '—' }}</p>
           </div>
         </div>
 
         <!-- Document photo thumbnails -->
-        <div class="mt-6 border-t border-slate-100 pt-5">
-          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#58779D]">
-            License Documents
+        <div class="mt-6 border-t border-black/5 dark:border-white/10 pt-5">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Document Evidence
           </p>
 
           <div class="grid gap-4 sm:grid-cols-2">
             <!-- Front photo -->
-            <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-              <div class="mb-2 flex items-center justify-between">
-                <span class="text-xs font-semibold text-[#101D35]">Front of License</span>
+            <div class="rounded-2xl border border-black/5 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-4">
+              <div class="mb-2.5 flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-900 dark:text-white">Front of License</span>
                 <span v-if="client.license_front_url" class="text-[11px] text-slate-500">Click to enlarge</span>
               </div>
               <div
                 v-if="client.license_front_url"
-                class="group relative h-48 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-900"
+                class="group relative h-48 cursor-pointer overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-slate-900"
                 @click="previewImage = { url: client.license_front_url, title: 'License Front - ' + client.name }"
               >
                 <img
                   :src="client.license_front_url"
                   alt="License Front"
-                  class="h-full w-full object-cover transition duration-200 group-hover:scale-102 group-hover:opacity-90"
+                  class="h-full w-full object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-85"
                 />
-                <div class="absolute inset-0 flex items-center justify-center bg-[#101D35]/30 opacity-0 transition group-hover:opacity-100">
-                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#101D35] shadow-xs">
-                    <Eye class="size-3.5" />
+                <div class="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-xs opacity-0 transition group-hover:opacity-100">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-xs">
+                    <Eye class="h-3.5 w-3.5" />
                     Enlarge Image
                   </span>
                 </div>
               </div>
-              <div v-else class="flex h-48 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-xs text-slate-400">
+              <div v-else class="flex h-48 items-center justify-center rounded-xl border border-dashed border-black/15 dark:border-white/15 bg-slate-100/50 dark:bg-white/[0.02] text-xs text-slate-400">
                 Front image not submitted
               </div>
             </div>
 
             <!-- Back photo -->
-            <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-              <div class="mb-2 flex items-center justify-between">
-                <span class="text-xs font-semibold text-[#101D35]">Back of License</span>
+            <div class="rounded-2xl border border-black/5 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-4">
+              <div class="mb-2.5 flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-900 dark:text-white">Back of License</span>
                 <span v-if="client.license_back_url" class="text-[11px] text-slate-500">Click to enlarge</span>
               </div>
               <div
                 v-if="client.license_back_url"
-                class="group relative h-48 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-900"
+                class="group relative h-48 cursor-pointer overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-slate-900"
                 @click="previewImage = { url: client.license_back_url, title: 'License Back - ' + client.name }"
               >
                 <img
                   :src="client.license_back_url"
                   alt="License Back"
-                  class="h-full w-full object-cover transition duration-200 group-hover:scale-102 group-hover:opacity-90"
+                  class="h-full w-full object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-85"
                 />
-                <div class="absolute inset-0 flex items-center justify-center bg-[#101D35]/30 opacity-0 transition group-hover:opacity-100">
-                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#101D35] shadow-xs">
-                    <Eye class="size-3.5" />
+                <div class="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-xs opacity-0 transition group-hover:opacity-100">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-xs">
+                    <Eye class="h-3.5 w-3.5" />
                     Enlarge Image
                   </span>
                 </div>
               </div>
-              <div v-else class="flex h-48 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-xs text-slate-400">
+              <div v-else class="flex h-48 items-center justify-center rounded-xl border border-dashed border-black/15 dark:border-white/15 bg-slate-100/50 dark:bg-white/[0.02] text-xs text-slate-400">
                 Back image not submitted
               </div>
             </div>
@@ -445,119 +446,118 @@ function badgeStyle(status: string) {
         </div>
       </section>
 
-      <!-- Summary cards -->
+      <!-- Summary metrics cards -->
       <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="glass-card p-5">
           <div class="flex items-center justify-between">
-            <p class="text-sm font-medium text-slate-500">Total Spent</p>
-            <div class="rounded-xl bg-[#E9EEF5] p-3 text-[#263F60]">
-              <Wallet class="size-5" />
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Spent</p>
+            <div class="rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF] p-2.5">
+              <Wallet class="h-5 w-5" />
             </div>
           </div>
-          <p class="mt-4 text-2xl font-bold text-[#101D35]">{{ fmtMoney(stats.total_spent) }}</p>
-          <p class="mt-1 text-xs text-slate-500">Total recorded client spending</p>
+          <p class="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ fmtMoney(stats.total_spent) }}</p>
+          <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Lifetime client gross expenditure</p>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="glass-card p-5">
           <div class="flex items-center justify-between">
-            <p class="text-sm font-medium text-slate-500">Reservations</p>
-            <div class="rounded-xl bg-[#E9EEF5] p-3 text-[#263F60]">
-              <CarFront class="size-5" />
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Reservations</p>
+            <div class="rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF] p-2.5">
+              <CarFront class="h-5 w-5" />
             </div>
           </div>
-          <p class="mt-4 text-2xl font-bold text-[#101D35]">{{ stats.total_reservations }}</p>
-          <p class="mt-1 text-xs text-slate-500">Total client reservations</p>
+          <p class="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ stats.total_reservations }}</p>
+          <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Completed and active bookings</p>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:col-span-2 xl:col-span-1">
+        <div class="glass-card p-5 sm:col-span-2 xl:col-span-1">
           <div class="flex items-center justify-between">
-            <p class="text-sm font-medium text-slate-500">Payments</p>
-            <div class="rounded-xl bg-[#E9EEF5] p-3 text-[#263F60]">
-              <CreditCard class="size-5" />
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Payments</p>
+            <div class="rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF] p-2.5">
+              <CreditCard class="h-5 w-5" />
             </div>
           </div>
-          <p class="mt-4 text-2xl font-bold text-[#101D35]">{{ stats.total_payments }}</p>
-          <p class="mt-1 text-xs text-slate-500">Total recorded payments</p>
+          <p class="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ stats.total_payments }}</p>
+          <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Processed transaction receipts</p>
         </div>
       </section>
 
-      <!-- Reservations -->
-      <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="flex flex-col justify-between gap-3 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-center">
+      <!-- Reservations table -->
+      <section class="glass-card overflow-hidden">
+        <div class="flex flex-col justify-between gap-3 border-b border-black/5 dark:border-white/10 px-6 py-4 sm:flex-row sm:items-center">
           <div class="flex items-center gap-3">
-            <div class="rounded-xl bg-[#101D35] p-2.5 text-white">
-              <CalendarDays class="size-5" />
+            <div class="rounded-xl bg-slate-100 dark:bg-white/10 p-2 text-slate-700 dark:text-slate-300">
+              <CalendarDays class="h-4 w-4" />
             </div>
             <div>
-              <h2 class="font-semibold text-[#101D35]">Reservation History</h2>
-              <p class="text-sm text-slate-500">Vehicles booked by this client</p>
+              <h2 class="font-semibold text-slate-900 dark:text-white">Reservation History</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Vehicles booked by this client</p>
             </div>
           </div>
-          <span class="w-fit rounded-full bg-[#E9EEF5] px-3 py-1 text-xs font-semibold text-[#263F60]">
+          <span class="w-fit rounded-lg border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400">
             {{ stats.total_reservations }} total
           </span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="min-w-[760px] w-full text-left text-sm">
-            <thead class="bg-[#F4F6FA] text-xs uppercase tracking-wider text-[#58779D]">
+            <thead class="border-b border-black/5 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] text-xs font-semibold text-slate-600 dark:text-slate-400">
               <tr>
-                <th class="px-5 py-4 font-semibold">Reservation</th>
-                <th class="px-5 py-4 font-semibold">Vehicle</th>
-                <th class="px-5 py-4 font-semibold">Rental Dates</th>
-                <th class="px-5 py-4 font-semibold">Total</th>
-                <th class="px-5 py-4 font-semibold">Status</th>
-                <th class="px-5 py-4 text-right font-semibold">Action</th>
+                <th class="px-6 py-3.5">Reservation</th>
+                <th class="px-6 py-3.5">Vehicle</th>
+                <th class="px-6 py-3.5">Rental Dates</th>
+                <th class="px-6 py-3.5">Total</th>
+                <th class="px-6 py-3.5">Status</th>
+                <th class="px-6 py-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-for="r in reservations.data" :key="r.id" class="transition-colors hover:bg-[#F8FAFD]">
-                <td class="px-5 py-4">
-                  <span class="font-semibold text-[#263F60]">{{ r.reservation_number }}</span>
+            <tbody class="divide-y divide-black/5 dark:divide-white/5">
+              <tr v-for="r in reservations.data" :key="r.id" class="transition hover:bg-slate-50/50 dark:hover:bg-white/[0.02]">
+                <td class="px-6 py-4">
+                  <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">{{ r.reservation_number }}</span>
                 </td>
-                <td class="px-5 py-4">
-                  <p class="font-medium text-[#101D35]">
+                <td class="px-6 py-4">
+                  <p class="font-medium text-slate-900 dark:text-white">
                     {{ r.car ? `${r.car.year} ${r.car.make} ${r.car.model}` : 'Vehicle unavailable' }}
                   </p>
-                  <p class="mt-1 text-xs text-slate-500">{{ r.car?.license_plate || '—' }}</p>
+                  <p class="text-xs font-mono text-slate-500 dark:text-slate-400">{{ r.car?.license_plate || '—' }}</p>
                 </td>
-                <td class="px-5 py-4 whitespace-nowrap text-slate-600">
-                  {{ fmtDate(r.start_date) }}<br />
-                  <span class="text-xs text-slate-400">to {{ fmtDate(r.end_date) }}</span>
+                <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-600 dark:text-slate-300">
+                  {{ fmtDate(r.start_date) }} – {{ fmtDate(r.end_date) }}
                 </td>
-                <td class="px-5 py-4 font-semibold text-[#101D35]">{{ fmtMoney(r.total_amount) }}</td>
-                <td class="px-5 py-4">
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset" :class="badgeStyle(r.status)">
+                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">{{ fmtMoney(r.total_amount) }}</td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium" :class="badgeStyle(r.status)">
                     {{ r.status }}
                   </span>
                 </td>
-                <td class="px-5 py-4 text-right">
+                <td class="px-6 py-4 text-right">
                   <Link :href="`/admin/reservations/${r.id}`">
-                    <Button variant="outline" size="sm" class="border-slate-300 text-[#263F60] hover:bg-[#E9EEF5]">
+                    <Button variant="outline" size="sm" class="h-8 rounded-lg border-black/10 dark:border-white/10 text-xs hover:bg-slate-100 dark:hover:bg-white/10">
                       View
                     </Button>
                   </Link>
                 </td>
               </tr>
               <tr v-if="reservations.data.length === 0">
-                <td colspan="6" class="px-5 py-12 text-center">
-                  <CarFront class="mx-auto mb-3 size-8 text-slate-300" />
-                  <p class="font-medium text-[#263F60]">No reservations found</p>
-                  <p class="mt-1 text-sm text-slate-500">This client has no reservation records yet.</p>
+                <td colspan="6" class="px-6 py-12 text-center">
+                  <CarFront class="mx-auto mb-2 h-8 w-8 text-slate-400" />
+                  <p class="font-medium text-slate-900 dark:text-white">No reservations found</p>
+                  <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">This client has no reservation records yet.</p>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <nav v-if="reservations.links?.length > 3" class="flex flex-wrap gap-2 border-t border-slate-200 px-5 py-4">
+        <nav v-if="reservations.links?.length > 3" class="flex flex-wrap gap-2 border-t border-black/5 dark:border-white/10 px-6 py-4">
           <Link
             v-for="(link, i) in reservations.links"
             :key="i"
             :href="link.url || ''"
             :class="[
-              'rounded-lg px-3 py-2 text-sm transition-colors',
-              link.active ? 'bg-[#101D35] font-semibold text-white' : 'bg-[#F4F6FA] text-[#263F60] hover:bg-[#E9EEF5]',
+              'rounded-lg border px-3 py-1.5 text-xs font-medium transition',
+              link.active ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]' : 'border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10',
               !link.url && 'pointer-events-none opacity-40',
             ]"
           >
@@ -566,67 +566,67 @@ function badgeStyle(status: string) {
         </nav>
       </section>
 
-      <!-- Payments -->
-      <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="flex flex-col justify-between gap-3 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-center">
+      <!-- Payments table -->
+      <section class="glass-card overflow-hidden">
+        <div class="flex flex-col justify-between gap-3 border-b border-black/5 dark:border-white/10 px-6 py-4 sm:flex-row sm:items-center">
           <div class="flex items-center gap-3">
-            <div class="rounded-xl bg-[#101D35] p-2.5 text-white">
-              <CreditCard class="size-5" />
+            <div class="rounded-xl bg-slate-100 dark:bg-white/10 p-2 text-slate-700 dark:text-slate-300">
+              <CreditCard class="h-4 w-4" />
             </div>
             <div>
-              <h2 class="font-semibold text-[#101D35]">Payment History</h2>
-              <p class="text-sm text-slate-500">Transactions associated with this client</p>
+              <h2 class="font-semibold text-slate-900 dark:text-white">Payment Ledger</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Transactions associated with this client</p>
             </div>
           </div>
-          <span class="w-fit rounded-full bg-[#E9EEF5] px-3 py-1 text-xs font-semibold text-[#263F60]">
+          <span class="w-fit rounded-lg border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400">
             {{ stats.total_payments }} total
           </span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="min-w-[760px] w-full text-left text-sm">
-            <thead class="bg-[#F4F6FA] text-xs uppercase tracking-wider text-[#58779D]">
+            <thead class="border-b border-black/5 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] text-xs font-semibold text-slate-600 dark:text-slate-400">
               <tr>
-                <th class="px-5 py-4 font-semibold">Payment</th>
-                <th class="px-5 py-4 font-semibold">Reservation</th>
-                <th class="px-5 py-4 font-semibold">Amount</th>
-                <th class="px-5 py-4 font-semibold">Method</th>
-                <th class="px-5 py-4 font-semibold">Status</th>
-                <th class="px-5 py-4 font-semibold">Processed</th>
+                <th class="px-6 py-3.5">Payment</th>
+                <th class="px-6 py-3.5">Reservation</th>
+                <th class="px-6 py-3.5">Amount</th>
+                <th class="px-6 py-3.5">Method</th>
+                <th class="px-6 py-3.5">Status</th>
+                <th class="px-6 py-3.5">Processed</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-for="p in payments.data" :key="p.id" class="transition-colors hover:bg-[#F8FAFD]">
-                <td class="px-5 py-4 font-semibold text-[#263F60]">{{ p.payment_number }}</td>
-                <td class="px-5 py-4 text-slate-600">{{ p.reservation?.reservation_number || '—' }}</td>
-                <td class="px-5 py-4 font-semibold text-[#101D35]">{{ fmtMoney(p.amount) }}</td>
-                <td class="px-5 py-4 capitalize text-slate-600">{{ p.payment_method.replaceAll('_', ' ') }}</td>
-                <td class="px-5 py-4">
-                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset" :class="badgeStyle(p.status)">
+            <tbody class="divide-y divide-black/5 dark:divide-white/5">
+              <tr v-for="p in payments.data" :key="p.id" class="transition hover:bg-slate-50/50 dark:hover:bg-white/[0.02]">
+                <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">{{ p.payment_number }}</td>
+                <td class="px-6 py-4 font-mono text-xs text-slate-600 dark:text-slate-400">{{ p.reservation?.reservation_number || '—' }}</td>
+                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">{{ fmtMoney(p.amount) }}</td>
+                <td class="px-6 py-4 capitalize text-slate-600 dark:text-slate-300">{{ p.payment_method.replaceAll('_', ' ') }}</td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium" :class="badgeStyle(p.status)">
                     {{ p.status }}
                   </span>
                 </td>
-                <td class="px-5 py-4 text-slate-600">{{ fmtDateTime(p.processed_at) }}</td>
+                <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">{{ fmtDateTime(p.processed_at) }}</td>
               </tr>
               <tr v-if="payments.data.length === 0">
-                <td colspan="6" class="px-5 py-12 text-center">
-                  <CreditCard class="mx-auto mb-3 size-8 text-slate-300" />
-                  <p class="font-medium text-[#263F60]">No payments found</p>
-                  <p class="mt-1 text-sm text-slate-500">No payment records are available for this client.</p>
+                <td colspan="6" class="px-6 py-12 text-center">
+                  <CreditCard class="mx-auto mb-2 h-8 w-8 text-slate-400" />
+                  <p class="font-medium text-slate-900 dark:text-white">No payments found</p>
+                  <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">No payment records are available for this client.</p>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <nav v-if="payments.links?.length > 3" class="flex flex-wrap gap-2 border-t border-slate-200 px-5 py-4">
+        <nav v-if="payments.links?.length > 3" class="flex flex-wrap gap-2 border-t border-black/5 dark:border-white/10 px-6 py-4">
           <Link
             v-for="(link, i) in payments.links"
             :key="i"
             :href="link.url || ''"
             :class="[
-              'rounded-lg px-3 py-2 text-sm transition-colors',
-              link.active ? 'bg-[#101D35] font-semibold text-white' : 'bg-[#F4F6FA] text-[#263F60] hover:bg-[#E9EEF5]',
+              'rounded-lg border px-3 py-1.5 text-xs font-medium transition',
+              link.active ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]' : 'border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10',
               !link.url && 'pointer-events-none opacity-40',
             ]"
           >
@@ -638,40 +638,40 @@ function badgeStyle(status: string) {
 
     <!-- Reject KYC Dialog -->
     <Dialog v-model:open="showRejectDialog">
-      <DialogContent class="sm:max-w-[480px]">
+      <DialogContent class="glass-card sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle class="flex items-center gap-2 text-[#101D35]">
-            <ShieldAlert class="size-5 text-rose-600" />
+          <DialogTitle class="flex items-center gap-2 text-slate-900 dark:text-white">
+            <ShieldAlert class="h-5 w-5 text-rose-600 dark:text-rose-400" />
             Reject Driver License
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription class="text-slate-600 dark:text-slate-400">
             Specify why {{ client.name }}'s driving license is being rejected. This note will be shown to them so they can upload correct documents.
           </DialogDescription>
         </DialogHeader>
 
         <div class="mt-3 space-y-2">
-          <label for="rejection_reason" class="text-xs font-semibold uppercase tracking-wider text-slate-600">
+          <label for="rejection_reason" class="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
             Rejection Feedback Note *
           </label>
           <textarea
             id="rejection_reason"
             v-model="rejectionReason"
             rows="3"
-            class="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+            class="apple-input w-full p-3 text-sm"
             placeholder="e.g. Front image is blurry and license number is unreadable. Please upload a clear photo."
           ></textarea>
-          <p v-if="rejectionError" class="text-xs font-medium text-rose-600">
+          <p v-if="rejectionError" class="text-xs font-medium text-rose-600 dark:text-rose-400">
             {{ rejectionError }}
           </p>
         </div>
 
-        <DialogFooter class="mt-4">
+        <DialogFooter class="mt-4 gap-2">
           <DialogClose as-child>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" class="rounded-xl border-black/10 dark:border-white/10">Cancel</Button>
           </DialogClose>
           <Button
             type="button"
-            class="bg-rose-600 text-white hover:bg-rose-700"
+            class="rounded-xl bg-rose-600 text-white hover:bg-rose-700"
             :disabled="processingKyc"
             @click="submitRejectKyc"
           >
@@ -683,13 +683,13 @@ function badgeStyle(status: string) {
 
     <!-- Image Lightbox Modal -->
     <Dialog :open="!!previewImage" @update:open="(val) => { if (!val) previewImage = null; }">
-      <DialogContent class="max-w-2xl p-4 sm:p-6">
+      <DialogContent class="glass-card max-w-2xl p-4 sm:p-6">
         <DialogHeader class="mb-2">
-          <DialogTitle class="text-base text-[#101D35]">
+          <DialogTitle class="text-base text-slate-900 dark:text-white">
             {{ previewImage?.title || 'Document Inspection' }}
           </DialogTitle>
         </DialogHeader>
-        <div class="overflow-hidden rounded-xl bg-slate-900">
+        <div class="overflow-hidden rounded-2xl bg-black/90">
           <img
             v-if="previewImage?.url"
             :src="previewImage.url"
@@ -702,29 +702,29 @@ function badgeStyle(status: string) {
 
     <!-- Suspend confirmation -->
     <Dialog v-model:open="showSuspendDialog">
-      <DialogContent class="sm:max-w-[440px]">
+      <DialogContent class="glass-card sm:max-w-[440px]">
         <DialogHeader>
-          <DialogTitle class="flex items-center gap-2 text-[#101D35]">
-            <AlertCircle class="size-5 text-red-600" />
+          <DialogTitle class="flex items-center gap-2 text-slate-900 dark:text-white">
+            <AlertCircle class="h-5 w-5 text-rose-600 dark:text-rose-400" />
             Suspend Client Account?
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription class="text-slate-600 dark:text-slate-400">
             Are you sure you want to suspend {{ client.name }}? They will not be able to log in until their account is reactivated.
           </DialogDescription>
         </DialogHeader>
         <Alert variant="destructive" class="mt-2">
-          <AlertCircle class="size-4" />
+          <AlertCircle class="h-4 w-4" />
           <AlertDescription>
             This action can be reversed later by an administrator.
           </AlertDescription>
         </Alert>
-        <DialogFooter class="mt-4">
+        <DialogFooter class="mt-4 gap-2">
           <DialogClose as-child>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" class="rounded-xl border-black/10 dark:border-white/10">Cancel</Button>
           </DialogClose>
           <Button
             type="button"
-            class="bg-red-600 text-white hover:bg-red-700"
+            class="rounded-xl bg-rose-600 text-white hover:bg-rose-700"
             :disabled="processingSuspend"
             @click="suspendClient"
           >
@@ -736,23 +736,23 @@ function badgeStyle(status: string) {
 
     <!-- Activate confirmation -->
     <Dialog v-model:open="showActivateDialog">
-      <DialogContent class="sm:max-w-[440px]">
+      <DialogContent class="glass-card sm:max-w-[440px]">
         <DialogHeader>
-          <DialogTitle class="flex items-center gap-2 text-[#101D35]">
-            <ShieldCheck class="size-5 text-emerald-600" />
+          <DialogTitle class="flex items-center gap-2 text-slate-900 dark:text-white">
+            <ShieldCheck class="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             Reactivate Client Account?
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription class="text-slate-600 dark:text-slate-400">
             Are you sure you want to reactivate {{ client.name }}? They will be able to log in again.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter class="mt-4">
+        <DialogFooter class="mt-4 gap-2">
           <DialogClose as-child>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" class="rounded-xl border-black/10 dark:border-white/10">Cancel</Button>
           </DialogClose>
           <Button
             type="button"
-            class="bg-emerald-600 text-white hover:bg-emerald-700"
+            class="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
             :disabled="processingActivate"
             @click="activateClient"
           >

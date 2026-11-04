@@ -3,11 +3,12 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
 </script>
 
 <template>
-    
-        <AppLogoIcon  />
-    <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate leading-tight font-semibold"
-            >Real <span class="text-orange-500">Rent</span> Car</span
-        >
+    <div class="flex items-center gap-2">
+        <AppLogoIcon />
+        <div class="grid flex-1 text-left text-sm">
+            <span class="truncate font-semibold tracking-tight text-slate-900 dark:text-white"
+                >Real <span class="text-[#58779D] dark:text-[#7094BF]">Rent</span> Car</span
+            >
+        </div>
     </div>
 </template>

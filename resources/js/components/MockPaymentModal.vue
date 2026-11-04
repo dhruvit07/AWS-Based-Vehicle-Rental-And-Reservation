@@ -112,23 +112,23 @@ watch(
     >
         <!-- Backdrop -->
         <div
-            class="fixed inset-0 bg-[#101D35]/70 backdrop-blur-xs transition-opacity"
+            class="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity"
             @click="!isSimulatingGateway && emit('close')"
         ></div>
 
         <!-- Modal Container -->
         <div
-            class="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all"
+            class="relative w-full max-w-lg overflow-hidden rounded-2xl border border-black/10 bg-white text-slate-900 shadow-2xl transition-all dark:border-white/10 dark:bg-[#0F1724] dark:text-white"
         >
             <!-- Header -->
-            <div class="flex items-center justify-between border-b border-slate-100 bg-[#101D35] px-6 py-5 text-white">
+            <div class="flex items-center justify-between border-b border-black/10 bg-[#101D35] px-6 py-5 text-white dark:border-white/10 dark:bg-[#070A0F]">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white">
                         <Lock class="h-5 w-5" />
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold">Secure Checkout</h3>
-                        <p class="text-xs text-slate-300">Simulated 256-Bit SSL Payment Gateway</p>
+                        <h3 class="text-base font-bold text-white">Secure Checkout</h3>
+                        <p class="text-xs text-slate-300">Simulated 256-Bit SSL Payment Console</p>
                     </div>
                 </div>
 
@@ -143,26 +143,26 @@ watch(
             </div>
 
             <!-- Total Banner -->
-            <div class="flex items-center justify-between border-b border-slate-100 bg-[#F4F6FA] px-6 py-3.5">
-                <span class="text-xs font-semibold uppercase tracking-wider text-[#58779D]">
+            <div class="flex items-center justify-between border-b border-slate-200/80 bg-slate-50 px-6 py-3.5 dark:border-white/10 dark:bg-white/5">
+                <span class="text-xs font-semibold uppercase tracking-wider text-[#58779D] dark:text-[#7094BF]">
                     Total payable now
                 </span>
-                <span class="font-mono text-xl font-bold text-[#101D35]">
+                <span class="font-mono text-lg font-bold text-slate-950 dark:text-white">
                     {{ formatPrice(amount) }}
                 </span>
             </div>
 
             <!-- Payment Method Tabs -->
-            <div class="flex border-b border-slate-200 bg-slate-50/70 p-2">
+            <div class="flex border-b border-slate-200/80 bg-slate-100/60 p-2 dark:border-white/10 dark:bg-black/20">
                 <button
                     type="button"
                     @click="activeTab = 'credit_card'"
                     :disabled="isSimulatingGateway"
-                    class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition sm:text-sm"
+                    class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold transition sm:text-xs"
                     :class="[
                         activeTab === 'credit_card'
-                            ? 'bg-white text-[#101D35] shadow-xs'
-                            : 'text-slate-600 hover:text-[#101D35]',
+                            ? 'bg-white text-slate-950 shadow-xs dark:bg-white/15 dark:text-white'
+                            : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white',
                     ]"
                 >
                     <CreditCard class="h-4 w-4" />
@@ -173,11 +173,11 @@ watch(
                     type="button"
                     @click="activeTab = 'upi'"
                     :disabled="isSimulatingGateway"
-                    class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition sm:text-sm"
+                    class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold transition sm:text-xs"
                     :class="[
                         activeTab === 'upi'
-                            ? 'bg-white text-[#101D35] shadow-xs'
-                            : 'text-slate-600 hover:text-[#101D35]',
+                            ? 'bg-white text-slate-950 shadow-xs dark:bg-white/15 dark:text-white'
+                            : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white',
                     ]"
                 >
                     <QrCode class="h-4 w-4" />
@@ -188,11 +188,11 @@ watch(
                     type="button"
                     @click="activeTab = 'cash'"
                     :disabled="isSimulatingGateway"
-                    class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition sm:text-sm"
+                    class="flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold transition sm:text-xs"
                     :class="[
                         activeTab === 'cash'
-                            ? 'bg-white text-[#101D35] shadow-xs'
-                            : 'text-slate-600 hover:text-[#101D35]',
+                            ? 'bg-white text-slate-950 shadow-xs dark:bg-white/15 dark:text-white'
+                            : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white',
                     ]"
                 >
                     <Banknote class="h-4 w-4" />
@@ -205,64 +205,63 @@ watch(
                 <!-- 1. Credit / Debit Card -->
                 <div v-if="activeTab === 'credit_card'" class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-medium text-slate-500">Demo sandbox mode active</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Sandbox environment active</span>
                         <button
                             type="button"
                             @click="autoFillTestCard"
-                            class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-[#58779D] transition hover:bg-slate-200 hover:text-[#101D35]"
+                            class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-[#58779D] transition hover:bg-slate-200 dark:bg-white/10 dark:text-[#7094BF] dark:hover:bg-white/15"
                         >
-                            <Sparkles class="h-3.5 w-3.5" />
+                            <Sparkles class="h-3 w-3" />
                             Auto-fill Test Card
                         </button>
                     </div>
 
                     <div class="space-y-3">
                         <div>
-                            <label class="mb-1 block text-xs font-semibold text-slate-700">Cardholder Name</label>
+                            <label class="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">Cardholder Name</label>
                             <input
                                 v-model="cardName"
                                 type="text"
                                 placeholder="Name on card"
-                                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#58779D] focus:outline-none focus:ring-2 focus:ring-[#58779D]/20"
+                                class="apple-input w-full px-3.5 py-2 text-xs"
                             />
                         </div>
 
                         <div>
-                            <label class="mb-1 block text-xs font-semibold text-slate-700">Card Number</label>
+                            <label class="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">Card Number</label>
                             <div class="relative">
                                 <input
                                     v-model="cardNumber"
                                     type="text"
                                     placeholder="4242 •••• •••• 4242"
-                                    class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#58779D] focus:outline-none focus:ring-2 focus:ring-[#58779D]/20"
+                                    class="apple-input w-full px-3.5 py-2 font-mono text-xs"
                                 />
-                                <div class="absolute right-3 top-2.5 flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                                <div class="absolute right-3 top-2 flex items-center gap-1 text-[10px] font-bold text-slate-400">
                                     <span>VISA</span>
                                     <span>MC</span>
-                                    <span>RuPay</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="mb-1 block text-xs font-semibold text-slate-700">Expires (MM/YY)</label>
+                                <label class="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">Expiry (MM/YY)</label>
                                 <input
                                     v-model="cardExpiry"
                                     type="text"
                                     placeholder="12/28"
-                                    class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#58779D] focus:outline-none focus:ring-2 focus:ring-[#58779D]/20"
+                                    class="apple-input w-full px-3.5 py-2 font-mono text-xs"
                                 />
                             </div>
 
                             <div>
-                                <label class="mb-1 block text-xs font-semibold text-slate-700">CVV / CVC</label>
+                                <label class="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">CVV</label>
                                 <input
                                     v-model="cardCvv"
                                     type="password"
                                     maxlength="4"
                                     placeholder="•••"
-                                    class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#58779D] focus:outline-none focus:ring-2 focus:ring-[#58779D]/20"
+                                    class="apple-input w-full px-3.5 py-2 font-mono text-xs"
                                 />
                             </div>
                         </div>
@@ -271,23 +270,18 @@ watch(
 
                 <!-- 2. UPI / QR Code -->
                 <div v-else-if="activeTab === 'upi'" class="space-y-4">
-                    <div class="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-[#F4F6FA] p-5 text-center">
-                        <!-- Simulated QR Code SVG -->
-                        <div class="relative flex h-36 w-36 items-center justify-center rounded-xl border-2 border-slate-800 bg-white p-2 shadow-xs">
+                    <div class="flex flex-col items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50 p-5 text-center dark:border-white/10 dark:bg-white/5">
+                        <div class="relative flex h-32 w-32 items-center justify-center rounded-xl border border-slate-300 bg-white p-2 shadow-xs dark:border-white/20">
                             <svg class="h-full w-full text-slate-900" viewBox="0 0 100 100" fill="currentColor">
-                                <!-- Top-left corner finder -->
                                 <rect x="5" y="5" width="30" height="30" rx="3" fill="#101D35" />
                                 <rect x="10" y="10" width="20" height="20" fill="white" />
                                 <rect x="15" y="15" width="10" height="10" fill="#101D35" />
-                                <!-- Top-right corner finder -->
                                 <rect x="65" y="5" width="30" height="30" rx="3" fill="#101D35" />
                                 <rect x="70" y="10" width="20" height="20" fill="white" />
                                 <rect x="75" y="15" width="10" height="10" fill="#101D35" />
-                                <!-- Bottom-left corner finder -->
                                 <rect x="5" y="65" width="30" height="30" rx="3" fill="#101D35" />
                                 <rect x="10" y="70" width="20" height="20" fill="white" />
                                 <rect x="15" y="75" width="10" height="10" fill="#101D35" />
-                                <!-- Simulated QR patterns -->
                                 <rect x="42" y="10" width="6" height="6" fill="#101D35" />
                                 <rect x="52" y="10" width="6" height="6" fill="#101D35" />
                                 <rect x="42" y="24" width="16" height="6" fill="#101D35" />
@@ -301,30 +295,23 @@ watch(
                                 <rect x="55" y="68" width="16" height="6" fill="#101D35" />
                                 <rect x="78" y="75" width="12" height="15" fill="#101D35" />
                             </svg>
-                            <!-- Mini brand badge in center -->
-                            <div class="absolute inset-0 m-auto flex h-7 w-7 items-center justify-center rounded-md bg-[#101D35] text-[10px] font-black tracking-tight text-white shadow-xs">
+                            <div class="absolute inset-0 m-auto flex h-6 w-6 items-center justify-center rounded-md bg-[#101D35] text-[10px] font-bold text-white shadow-xs">
                                 ₹
                             </div>
                         </div>
 
-                        <p class="mt-3 text-xs font-medium text-slate-700">
+                        <p class="mt-3 text-xs font-medium text-slate-700 dark:text-slate-300">
                             Scan with GPay, PhonePe, Paytm, or BHIM
                         </p>
-                        <div class="mt-2 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
-                            <span class="rounded bg-white px-2 py-0.5 border border-slate-200">GPay</span>
-                            <span class="rounded bg-white px-2 py-0.5 border border-slate-200">PhonePe</span>
-                            <span class="rounded bg-white px-2 py-0.5 border border-slate-200">Paytm</span>
-                            <span class="rounded bg-white px-2 py-0.5 border border-slate-200">BHIM</span>
-                        </div>
                     </div>
 
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <label class="text-xs font-semibold text-slate-700">Or enter UPI ID / VPA</label>
+                            <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">UPI ID / Virtual Address</label>
                             <button
                                 type="button"
                                 @click="autoFillTestUpi"
-                                class="text-xs font-semibold text-[#58779D] hover:text-[#101D35]"
+                                class="text-xs font-semibold text-[#58779D] hover:underline dark:text-[#7094BF]"
                             >
                                 Auto-fill Demo VPA
                             </button>
@@ -333,61 +320,58 @@ watch(
                             v-model="upiId"
                             type="text"
                             placeholder="username@okhdfcbank"
-                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#58779D] focus:outline-none focus:ring-2 focus:ring-[#58779D]/20"
+                            class="apple-input w-full px-3.5 py-2 font-mono text-xs"
                         />
                     </div>
                 </div>
 
                 <!-- 3. Cash on Pickup -->
                 <div v-else class="space-y-4">
-                    <div class="rounded-xl border border-slate-200 bg-[#F4F6FA] p-5">
+                    <div class="rounded-xl border border-slate-200/80 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5">
                         <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#101D35] text-white">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#101D35] text-white dark:bg-white dark:text-slate-950">
                                 <Banknote class="h-5 w-5" />
                             </div>
                             <div>
-                                <h4 class="text-sm font-bold text-[#101D35]">
+                                <h4 class="text-sm font-bold text-slate-950 dark:text-white">
                                     Pay at Vehicle Handover
                                 </h4>
-                                <p class="mt-1 text-xs leading-5 text-slate-600">
-                                    No upfront payment charged today. You can pay with Cash, Debit/Credit Card, or UPI POS when collecting the vehicle keys at our desk.
+                                <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                                    Zero upfront deduction today. Settle via cash, card, or UPI POS upon inspecting and receiving the keys.
                                 </p>
                             </div>
                         </div>
 
-                        <div class="mt-4 border-t border-slate-200 pt-3">
-                            <div class="flex items-center gap-2 text-xs font-medium text-emerald-800">
-                                <Check class="h-4 w-4 text-emerald-600" />
-                                <span>Immediate booking confirmation guaranteed</span>
+                        <div class="mt-4 border-t border-slate-200/80 pt-3 dark:border-white/10">
+                            <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                <Check class="h-4 w-4" />
+                                <span>Guaranteed reservation locking</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Simulation Gateway Overlay / Status -->
+                <!-- Gateway Simulation Status -->
                 <div
                     v-if="isSimulatingGateway"
-                    class="mt-4 flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-900 p-6 text-center text-white"
+                    class="mt-4 flex flex-col items-center justify-center rounded-xl border border-white/10 bg-slate-950 p-6 text-center text-white"
                 >
-                    <svg class="h-8 w-8 animate-spin text-[#C5D0DE]" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    <p class="mt-3 text-sm font-bold text-white">
+                    <span class="h-7 w-7 animate-spin rounded-full border-2 border-white/20 border-t-white"></span>
+                    <p class="mt-3 text-xs font-bold text-white">
                         {{ gatewayStepMessage }}
                     </p>
-                    <p class="mt-1 text-xs text-slate-400">
-                        Please do not refresh or close this browser window.
+                    <p class="mt-1 text-[11px] text-slate-400">
+                        Please do not refresh or navigate away.
                     </p>
                 </div>
 
-                <!-- Pay Button -->
+                <!-- Action Button -->
                 <div v-else class="mt-6 space-y-3">
                     <button
                         type="button"
                         :disabled="!canSubmit"
                         @click="handlePayment"
-                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#101D35] px-6 py-3.5 font-bold text-white transition hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                        class="apple-btn-primary flex w-full items-center justify-center gap-2 py-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <Shield class="h-4 w-4" />
                         <span>
@@ -395,9 +379,9 @@ watch(
                         </span>
                     </button>
 
-                    <div class="flex items-center justify-center gap-2 text-center text-xs text-slate-500">
-                        <Lock class="h-3.5 w-3.5 text-[#58779D]" />
-                        <span>End-to-end encrypted • Instant booking receipt</span>
+                    <div class="flex items-center justify-center gap-1.5 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <Lock class="h-3 w-3 text-[#58779D] dark:text-[#7094BF]" />
+                        <span>Encrypted • Instant reservation voucher issued</span>
                     </div>
                 </div>
             </div>

@@ -6,22 +6,22 @@ import RentalExtras from '@/components/RentalExtras.vue';
 import ReviewModal from '@/components/ReviewModal.vue';
 import StarRating from '@/components/StarRating.vue';
 import HomeLayout from '@/layouts/HomeLayout.vue';
-import { login } from '@/routes';
+import { login, fleet } from '@/routes';
 import { book } from '@/routes/fleet';
-import { router, useForm, usePage } from '@inertiajs/vue3';
-import { Clock, Lock, MessageSquare, ShieldAlert, ShieldCheck, Star, ThumbsUp } from 'lucide-vue-next';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { Clock, Lock, MessageSquare, ShieldAlert, ShieldCheck, Star, ThumbsUp, ArrowLeft, Fuel, Gauge, Calendar } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface Car {
     id: number;
     make: string;
     model: string;
-    price_per_day: string;
+    price_per_day: string | number;
     image_url: string;
     images: { url: string; alt: string }[];
     fuel_type: string;
     transmission: string;
-    year: string;
+    year: string | number;
     description: string;
     status: string;
 }
@@ -282,67 +282,68 @@ const commonLocations = [
 </script>
 
 <template>
+    <Head :title="`Reserve ${car.make} ${car.model} | Real Rent Car`" />
+
     <HomeLayout>
-        <div class="min-h-screen bg-[#F4F6FA] pb-16">
-            <!-- Page heading -->
-            <section class="bg-[#101D35] px-4 py-10 text-white sm:py-14">
+        <div class="min-h-screen bg-[#FBFBFD] pb-20 text-slate-900 transition-colors duration-200 dark:bg-[#070A0F] dark:text-slate-100">
+
+            <!-- Checkout Hero Staging -->
+            <section class="relative isolate overflow-hidden bg-[#101D35] px-5 py-12 text-white dark:bg-[#070A0F] sm:py-16">
+                <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(120,160,210,0.25),rgba(255,255,255,0))]"></div>
+                <div class="pointer-events-none absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full bg-[#58779D]/20 blur-3xl"></div>
+
                 <div class="mx-auto max-w-7xl">
-                    <nav class="mb-5 flex items-center gap-2 text-sm text-slate-300">
-                        <a href="/fleet" class="transition hover:text-white">
-                            Fleet
-                        </a>
+                    <nav class="mb-4 flex items-center gap-2 text-xs text-slate-300">
+                        <Link :href="fleet()" class="inline-flex items-center gap-1 transition hover:text-white">
+                            <ArrowLeft class="h-3 w-3" />
+                            <span>Fleet Directory</span>
+                        </Link>
                         <span>/</span>
-                        <span class="text-white">Book your car</span>
+                        <span class="text-white">{{ car.make }} {{ car.model }}</span>
                     </nav>
 
-                    <p class="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#C5D0DE]">
-                        Complete Checkout
-                    </p>
-
-                    <h1 class="text-3xl font-bold sm:text-4xl">
-                        Reserve your vehicle
+                    <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                        Reserve {{ car.make }} {{ car.model }}
                     </h1>
 
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-                        Customize your journey with flexible add-ons, apply exclusive coupons, and finalize your booking securely.
+                    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
+                        Select your rental duration, customize protection, and complete your reservation with instant vehicle locking.
                     </p>
                 </div>
             </section>
 
-            <div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-                <div class="grid items-start gap-8 lg:grid-cols-3">
-                    <!-- Main column -->
-                    <div class="space-y-7 lg:col-span-2">
-                        <!-- Vehicle details -->
-                        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
-                            <div class="relative h-64 bg-slate-200 sm:h-96">
+            <div class="mx-auto max-w-7xl px-5 pt-10 sm:px-8">
+                <!-- 2-Column Checkout Layout -->
+                <div class="grid items-start gap-8 lg:grid-cols-12">
+
+                    <!-- Left Main Column (Details, Calendar, Options, Reviews) -->
+                    <div class="space-y-8 lg:col-span-8">
+
+                        <!-- Vehicle Overview Showcase Card -->
+                        <section class="glass-card overflow-hidden">
+                            <div class="relative aspect-16/9 overflow-hidden bg-slate-950 sm:aspect-21/9">
                                 <img
                                     v-if="images[0]?.url"
                                     :src="images[0].url"
                                     :alt="images[0].alt"
                                     class="h-full w-full object-cover"
                                 />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
 
-                                <div
-                                    v-else
-                                    class="flex h-full items-center justify-center text-slate-500"
-                                >
-                                    Vehicle image unavailable
-                                </div>
-
-                                <div class="absolute bottom-4 left-4 rounded-lg bg-[#101D35]/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xs">
-                                    {{ car.year }} model
+                                <div class="absolute bottom-4 left-4 flex items-center gap-2">
+                                    <span class="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                                        {{ car.year }} Model
+                                    </span>
+                                    <span class="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                                        {{ car.transmission }}
+                                    </span>
                                 </div>
                             </div>
 
-                            <div class="p-5 sm:p-8">
-                                <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+                            <div class="p-6 sm:p-8">
+                                <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                                     <div>
-                                        <p class="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#58779D]">
-                                            Selected vehicle
-                                        </p>
-
-                                        <h2 class="text-2xl font-bold text-[#101D35] sm:text-3xl">
+                                        <h2 class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
                                             {{ car.make }} {{ car.model }}
                                         </h2>
 
@@ -354,128 +355,107 @@ const commonLocations = [
                                                 :compact="true"
                                                 :reviews-count="reviewsList.length"
                                             />
-                                            <span v-if="reviewsList.length > 0" class="text-xs text-slate-500">
+                                            <span v-if="reviewsList.length > 0" class="text-xs text-slate-500 dark:text-slate-400">
                                                 • {{ reviewsList.length }} verified {{ reviewsList.length === 1 ? 'renter review' : 'renter reviews' }}
                                             </span>
                                         </div>
 
-                                        <div class="mt-4 flex flex-wrap gap-2">
-                                            <span class="rounded-lg bg-slate-100 px-3 py-2 text-sm capitalize text-slate-700">
+                                        <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                                            <span class="inline-flex items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-100/70 px-3 py-1.5 font-medium capitalize text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                                                <Fuel class="h-3.5 w-3.5 text-[#58779D] dark:text-[#7094BF]" />
                                                 {{ car.fuel_type }}
                                             </span>
 
-                                            <span class="rounded-lg bg-slate-100 px-3 py-2 text-sm capitalize text-slate-700">
+                                            <span class="inline-flex items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-100/70 px-3 py-1.5 font-medium capitalize text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                                                <Gauge class="h-3.5 w-3.5 text-[#58779D] dark:text-[#7094BF]" />
                                                 {{ car.transmission }}
                                             </span>
 
-                                            <span class="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700">
+                                            <span class="inline-flex items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-100/70 px-3 py-1.5 font-medium text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                                                <Calendar class="h-3.5 w-3.5 text-[#58779D] dark:text-[#7094BF]" />
                                                 {{ car.year }}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div class="shrink-0 rounded-xl bg-[#101D35] px-5 py-4 text-white sm:text-right">
-                                        <p class="text-2xl font-bold">
+                                    <div class="shrink-0 rounded-2xl border border-black/5 bg-[#101D35] px-5 py-4 text-white shadow-xs dark:border-white/10 dark:bg-white/5 sm:text-right">
+                                        <p class="text-2xl font-bold tracking-tight">
                                             {{ formatPrice(dailyRate) }}
                                         </p>
-                                        <p class="mt-1 text-sm text-slate-300">
-                                            per day
+                                        <p class="text-xs text-slate-300 dark:text-slate-400">
+                                            daily rate
                                         </p>
                                     </div>
                                 </div>
 
-                                <p class="mt-6 leading-7 text-slate-600">
-                                    {{ car.description || 'Enjoy a comfortable and convenient journey with this rental vehicle.' }}
+                                <p class="mt-6 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                                    {{ car.description || 'Pristine condition, verified mechanics, and sanitized cabin ready for dispatch.' }}
                                 </p>
                             </div>
                         </section>
 
-                        <!-- Booking form -->
-                        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-8">
-                            <div class="mb-8 flex items-center gap-4">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#101D35] text-white">
-                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-
-                                <div>
-                                    <h2 class="text-xl font-bold text-[#101D35] sm:text-2xl">
-                                        Reservation Details
-                                    </h2>
-                                    <p class="mt-1 text-sm text-slate-500">
-                                        Select your schedule, pickup stations, and optional vehicle upgrades.
-                                    </p>
-                                </div>
+                        <!-- Reservation Configuration Console -->
+                        <section class="glass-card p-6 sm:p-8">
+                            <div class="mb-6">
+                                <h3 class="text-xl font-bold tracking-tight text-slate-950 dark:text-white">
+                                    Schedule & Itinerary
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    Select dates using the 2-month tactile range picker below.
+                                </p>
                             </div>
 
                             <!-- Driver Verification Banner -->
                             <div
                                 v-if="authUser && isKycVerified"
-                                class="mb-8 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3.5 text-emerald-900"
+                                class="mb-6 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-900 dark:text-emerald-100"
                             >
                                 <div class="flex items-center gap-3">
-                                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                                    <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
                                         <ShieldCheck class="h-4 w-4" />
                                     </div>
                                     <div>
-                                        <div class="flex items-center gap-2">
-                                            <p class="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                                                Verified Driver
-                                            </p>
-                                            <span class="rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-                                                Fast-Track Pickup
-                                            </span>
-                                        </div>
-                                        <p class="mt-0.5 text-xs text-emerald-700">
-                                            Your driving credentials are authenticated. Keys will be ready for immediate handover.
-                                        </p>
+                                        <p class="font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">Verified Driver</p>
+                                        <p class="text-emerald-700 dark:text-emerald-400">Your documents are authenticated. Rapid key pickup enabled.</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div
                                 v-else-if="authUser"
-                                class="mb-8 flex flex-col justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-amber-900 sm:flex-row sm:items-center"
+                                class="mb-6 flex flex-col justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-900 dark:text-amber-100 sm:flex-row sm:items-center"
                             >
                                 <div class="flex items-start gap-3">
-                                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
+                                    <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
                                         <Clock v-if="authUser?.kyc_status === 'pending'" class="h-4 w-4" />
                                         <ShieldAlert v-else-if="authUser?.kyc_status === 'rejected'" class="h-4 w-4" />
                                         <ShieldCheck v-else class="h-4 w-4" />
                                     </div>
                                     <div>
-                                        <p class="text-xs font-bold text-amber-950">
+                                        <p class="font-bold text-amber-950 dark:text-amber-200">
                                             {{ authUser?.kyc_status === 'pending'
-                                                ? 'KYC Verification In Progress'
-                                                : (authUser?.kyc_status === 'rejected' ? 'KYC Action Required' : 'Driver License Verification Advisory') }}
+                                                ? 'License Review In Progress'
+                                                : (authUser?.kyc_status === 'rejected' ? 'KYC Action Required' : 'Driver License Advisory') }}
                                         </p>
-                                        <p class="mt-0.5 text-xs text-amber-800">
+                                        <p class="text-amber-800 dark:text-amber-300">
                                             {{ authUser?.kyc_status === 'pending'
-                                                ? 'Your documents are currently under review. You can complete this reservation now and drive once verified.'
-                                                : 'Verify your driving license online for contactless key pickup, or present physical documents at the counter.' }}
+                                                ? 'You can complete reservation now; drive once verification is completed.'
+                                                : 'Verify driving license online for contactless key pickup, or present physical license at desk.' }}
                                         </p>
                                     </div>
                                 </div>
-                                <a
+                                <Link
                                     href="/settings/kyc"
-                                    class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 shadow-2xs transition hover:bg-amber-100"
+                                    class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-amber-400/40 bg-white/80 px-3 py-1.5 text-xs font-semibold text-amber-950 transition hover:bg-white dark:bg-white/10 dark:text-white"
                                 >
-                                    <span>{{ authUser?.kyc_status === 'pending' ? 'View Review Status' : 'Verify License' }}</span>
-                                    <span aria-hidden="true">&rarr;</span>
-                                </a>
+                                    <span>{{ authUser?.kyc_status === 'pending' ? 'Status' : 'Verify License' }}</span>
+                                    <span>&rarr;</span>
+                                </Link>
                             </div>
 
                             <form class="space-y-8" @submit.prevent="openPaymentModal">
-                                <!-- 1. Rental period -->
-                                <div class="space-y-5">
-                                    <h3 class="flex items-center gap-2 font-semibold text-[#101D35]">
-                                        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-[#58779D]">
-                                            1
-                                        </span>
-                                        Rental period *
-                                    </h3>
-
+                                <!-- Calendar Section -->
+                                <div class="space-y-4">
                                     <BookingCalendar
                                         v-model:start-date="form.start_date"
                                         v-model:end-date="form.end_date"
@@ -483,29 +463,29 @@ const commonLocations = [
                                         :min-date="minBookingDate"
                                     />
 
-                                    <!-- Quick selection summary -->
-                                    <div class="grid gap-4 sm:grid-cols-2">
-                                        <div class="rounded-xl border border-slate-200 bg-[#F4F6FA] p-4">
-                                            <p class="text-xs font-semibold uppercase tracking-wider text-[#58779D]">
-                                                Pickup date
+                                    <!-- Date summary pills -->
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 dark:border-white/10 dark:bg-white/5">
+                                            <p class="text-[11px] font-semibold uppercase tracking-wider text-[#58779D] dark:text-[#7094BF]">
+                                                Pickup Date
                                             </p>
-                                            <p class="mt-1.5 text-base font-bold text-[#101D35]">
+                                            <p class="mt-1 text-sm font-bold text-slate-950 dark:text-white">
                                                 {{ formatDisplayDate(form.start_date) || 'Select on calendar' }}
                                             </p>
                                         </div>
 
-                                        <div class="rounded-xl border border-slate-200 bg-[#F4F6FA] p-4">
-                                            <p class="text-xs font-semibold uppercase tracking-wider text-[#58779D]">
-                                                Return date
+                                        <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 dark:border-white/10 dark:bg-white/5">
+                                            <p class="text-[11px] font-semibold uppercase tracking-wider text-[#58779D] dark:text-[#7094BF]">
+                                                Return Date
                                             </p>
-                                            <p class="mt-1.5 text-base font-bold text-[#101D35]">
+                                            <p class="mt-1 text-sm font-bold text-slate-950 dark:text-white">
                                                 {{ formatDisplayDate(form.end_date) || 'Select on calendar' }}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <!-- Error / validation notices -->
-                                    <div v-if="form.errors.start_date || form.errors.end_date || dateRangeHasConflict" class="rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-sm text-rose-800">
+                                    <!-- Conflict or error notices -->
+                                    <div v-if="form.errors.start_date || form.errors.end_date || dateRangeHasConflict" class="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-600 dark:text-rose-400">
                                         <p v-if="form.errors.start_date" class="font-medium">
                                             {{ form.errors.start_date }}
                                         </p>
@@ -513,120 +493,103 @@ const commonLocations = [
                                             {{ form.errors.end_date }}
                                         </p>
                                         <p v-if="dateRangeHasConflict" class="font-medium">
-                                            The selected rental period overlaps with an existing reservation. Please select available dates.
+                                            The selected rental window conflicts with an existing reservation. Please choose alternate dates.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div class="border-t border-slate-200"></div>
+                                <div class="border-t border-slate-200/80 dark:border-white/10"></div>
 
-                                <!-- 2. Locations -->
+                                <!-- Locations -->
                                 <div>
-                                    <h3 class="mb-4 flex items-center gap-2 font-semibold text-[#101D35]">
-                                        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-[#58779D]">
-                                            2
-                                        </span>
-                                        Pickup and return locations
-                                    </h3>
+                                    <h4 class="mb-3 text-sm font-bold text-slate-950 dark:text-white">
+                                        Pickup & Return Stations
+                                    </h4>
 
-                                    <div class="grid gap-5 sm:grid-cols-2">
+                                    <div class="grid gap-4 sm:grid-cols-2">
                                         <div>
-                                            <label for="pickup_location" class="mb-2 block text-sm font-semibold text-slate-700">
-                                                Pickup location *
+                                            <label for="pickup_location" class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                Pickup Station *
                                             </label>
 
                                             <select
                                                 id="pickup_location"
                                                 v-model="form.pickup_location"
                                                 required
-                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-slate-800 outline-none transition focus:border-[#58779D] focus:ring-2 focus:ring-[#58779D]/20"
-                                                :class="{ 'border-red-500': form.errors.pickup_location }"
+                                                class="apple-input w-full px-3.5 py-2.5 text-xs"
+                                                :class="{ 'border-rose-500': form.errors.pickup_location }"
                                             >
-                                                <option value="">Select pickup location</option>
+                                                <option value="">Select pickup station</option>
                                                 <option v-for="location in commonLocations" :key="location" :value="location">
                                                     {{ location }}
                                                 </option>
                                             </select>
 
-                                            <p v-if="form.errors.pickup_location" class="mt-2 text-sm text-red-600">
+                                            <p v-if="form.errors.pickup_location" class="mt-1 text-xs text-rose-500">
                                                 {{ form.errors.pickup_location }}
                                             </p>
                                         </div>
 
                                         <div>
-                                            <label for="return_location" class="mb-2 block text-sm font-semibold text-slate-700">
-                                                Return location *
+                                            <label for="return_location" class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                Return Station *
                                             </label>
 
                                             <select
                                                 id="return_location"
                                                 v-model="form.return_location"
                                                 required
-                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-slate-800 outline-none transition focus:border-[#58779D] focus:ring-2 focus:ring-[#58779D]/20"
-                                                :class="{ 'border-red-500': form.errors.return_location }"
+                                                class="apple-input w-full px-3.5 py-2.5 text-xs"
+                                                :class="{ 'border-rose-500': form.errors.return_location }"
                                             >
-                                                <option value="">Select return location</option>
+                                                <option value="">Select return station</option>
                                                 <option v-for="location in commonLocations" :key="location" :value="location">
                                                     {{ location }}
                                                 </option>
                                             </select>
 
-                                            <p v-if="form.errors.return_location" class="mt-2 text-sm text-red-600">
+                                            <p v-if="form.errors.return_location" class="mt-1 text-xs text-rose-500">
                                                 {{ form.errors.return_location }}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="border-t border-slate-200"></div>
+                                <div class="border-t border-slate-200/80 dark:border-white/10"></div>
 
-                                <!-- 3. Rental Add-ons -->
+                                <!-- Rental Add-ons -->
                                 <RentalExtras
                                     v-model="form.extras"
                                     :rental-days="rentalDays"
                                 />
 
-                                <div class="border-t border-slate-200"></div>
+                                <div class="border-t border-slate-200/80 dark:border-white/10"></div>
 
-                                <!-- Submit CTA -->
-                                <div>
+                                <!-- Mobile/Inline Submit Button -->
+                                <div class="lg:hidden">
                                     <button
                                         type="submit"
                                         :disabled="!canSubmit || form.processing"
-                                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#101D35] px-6 py-4 font-bold text-white transition hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                                        class="apple-btn-primary flex w-full items-center justify-center gap-2 py-3.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <Lock class="h-4 w-4" />
                                         <span>
                                             {{ form.processing ? 'Finalizing booking...' : (!page.props.auth?.user ? 'Log in to continue' : `Proceed to Payment • ${formatPrice(total)}`) }}
                                         </span>
                                     </button>
-
-                                    <div class="mt-3 flex items-center justify-center gap-4 text-xs text-slate-500">
-                                        <span class="inline-flex items-center gap-1">
-                                            <ShieldCheck class="h-3.5 w-3.5 text-emerald-600" />
-                                            Instant confirmation
-                                        </span>
-                                        <span>•</span>
-                                        <span>Free cancellation up to 24h</span>
-                                    </div>
                                 </div>
                             </form>
                         </section>
 
                         <!-- Customer Reviews Section -->
-                        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-8">
-                            <div class="mb-6 flex flex-col justify-between gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-center">
+                        <section class="glass-card p-6 sm:p-8">
+                            <div class="mb-6 flex flex-col justify-between gap-4 border-b border-slate-200/80 pb-6 dark:border-white/10 sm:flex-row sm:items-center">
                                 <div>
-                                    <div class="flex items-center gap-2">
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
-                                            <Star class="h-4 w-4 fill-amber-400" />
-                                        </div>
-                                        <h2 class="text-xl font-bold text-[#101D35] sm:text-2xl">
-                                            Customer Reviews & Ratings
-                                        </h2>
-                                    </div>
-                                    <p class="mt-1 text-sm text-slate-500">
-                                        Authentic feedback from verified renters who booked this car.
+                                    <h3 class="text-xl font-bold tracking-tight text-slate-950 dark:text-white">
+                                        Driver Reviews & Feedback
+                                    </h3>
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                        Feedback from verified renters who previously booked this model.
                                     </p>
                                 </div>
 
@@ -634,56 +597,29 @@ const commonLocations = [
                                     v-if="eligibleReservation"
                                     type="button"
                                     @click="isReviewModalOpen = true"
-                                    class="inline-flex items-center gap-2 rounded-xl bg-[#101D35] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#263F60]"
+                                    class="apple-btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
                                 >
-                                    <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                                    <Star class="h-3.5 w-3.5 fill-current" />
                                     <span>Rate Your Trip</span>
                                 </button>
                             </div>
 
-                            <!-- Eligible Reservation Prompt Banner -->
-                            <div
-                                v-if="eligibleReservation"
-                                class="mb-6 flex flex-col justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50/80 p-4 sm:flex-row sm:items-center"
-                            >
-                                <div class="flex items-start gap-3">
-                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
-                                        <Star class="h-5 w-5 fill-white text-white" />
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-bold uppercase tracking-wide text-amber-950">
-                                            Trip Completed • Share Your Feedback
-                                        </p>
-                                        <p class="mt-0.5 text-xs text-amber-800">
-                                            You completed reservation {{ eligibleReservation.reservation_number }}. Review your experience to help future renters!
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    @click="isReviewModalOpen = true"
-                                    class="shrink-0 rounded-xl bg-[#101D35] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#263F60]"
-                                >
-                                    Write a Review
-                                </button>
-                            </div>
-
                             <!-- Rating Summary Hero & Distribution -->
-                            <div v-if="reviewsList.length > 0" class="mb-8 grid gap-6 rounded-xl bg-[#F4F6FA] p-6 sm:grid-cols-12 sm:items-center">
+                            <div v-if="reviewsList.length > 0" class="mb-8 grid gap-6 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-6 dark:border-white/10 dark:bg-white/5 sm:grid-cols-12 sm:items-center">
                                 <!-- Score Hero -->
-                                <div class="text-center sm:col-span-5 sm:border-r sm:border-slate-200 sm:pr-6">
-                                    <div class="text-5xl font-black text-[#101D35]">
+                                <div class="text-center sm:col-span-5 sm:border-r sm:border-slate-200/80 sm:pr-6 dark:sm:border-white/10">
+                                    <div class="text-5xl font-black text-slate-950 dark:text-white">
                                         {{ averageRating.toFixed(1) }}
                                     </div>
                                     <div class="mt-2 flex justify-center">
                                         <StarRating :rating="averageRating" :readonly="true" size="md" />
                                     </div>
-                                    <p class="mt-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                                         Based on {{ reviewsList.length }} verified {{ reviewsList.length === 1 ? 'review' : 'reviews' }}
                                     </p>
-                                    <div v-if="recommendationPercentage > 0" class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-100/90 px-3 py-1 text-xs font-semibold text-emerald-800">
+                                    <div v-if="recommendationPercentage > 0" class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                         <ThumbsUp class="h-3.5 w-3.5" />
-                                        <span>{{ recommendationPercentage }}% of renters recommend</span>
+                                        <span>{{ recommendationPercentage }}% recommendation rate</span>
                                     </div>
                                 </div>
 
@@ -696,54 +632,54 @@ const commonLocations = [
                                     >
                                         <button
                                             type="button"
-                                            class="flex w-14 items-center gap-1 font-semibold text-slate-600 transition hover:text-[#101D35]"
+                                            class="flex w-12 items-center gap-1 font-semibold text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white"
                                             @click="selectedRatingFilter = selectedRatingFilter === star ? null : star"
                                         >
                                             <span>{{ star }}</span>
-                                            <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
+                                            <Star class="h-3 w-3 fill-amber-400 text-amber-400" />
                                         </button>
-                                        <div class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-slate-200">
+                                        <div class="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
                                             <div
                                                 class="h-full rounded-full transition-all duration-500"
                                                 :class="[
-                                                    selectedRatingFilter === star ? 'bg-[#101D35]' : 'bg-amber-400',
+                                                    selectedRatingFilter === star ? 'bg-[#101D35] dark:bg-white' : 'bg-amber-400',
                                                 ]"
                                                 :style="{ width: `${ratingDistribution[star]?.percentage || 0}%` }"
                                             ></div>
                                         </div>
-                                        <span class="w-10 text-right font-medium text-slate-500">
+                                        <span class="w-8 text-right font-medium text-slate-500 dark:text-slate-400">
                                             {{ ratingDistribution[star]?.count || 0 }}
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Rating filter chip -->
-                            <div v-if="selectedRatingFilter" class="mb-4 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 text-xs">
-                                <span class="text-slate-600">
-                                    Showing only <strong>{{ selectedRatingFilter }}★</strong> reviews
+                            <!-- Filter chip -->
+                            <div v-if="selectedRatingFilter" class="mb-4 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 text-xs dark:bg-white/5">
+                                <span class="text-slate-600 dark:text-slate-300">
+                                    Filtering by <strong>{{ selectedRatingFilter }}★</strong> ratings
                                 </span>
-                                <button type="button" @click="selectedRatingFilter = null" class="font-bold text-[#58779D] hover:underline">
-                                    Show All
+                                <button type="button" @click="selectedRatingFilter = null" class="font-bold text-[#58779D] hover:underline dark:text-[#7094BF]">
+                                    Clear filter
                                 </button>
                             </div>
 
                             <!-- Reviews List -->
-                            <div v-if="filteredReviews.length > 0" class="space-y-4">
+                            <div v-if="filteredReviews.length > 0" class="space-y-3.5">
                                 <div
                                     v-for="review in filteredReviews"
                                     :key="review.id"
-                                    class="rounded-xl border border-slate-100 bg-[#FAFBFD] p-4 transition hover:border-slate-200 hover:shadow-2xs sm:p-5"
+                                    class="rounded-xl border border-slate-200/80 bg-white/60 p-4 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/5 sm:p-5"
                                 >
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="flex items-center gap-3">
-                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#101D35] text-xs font-bold uppercase text-white">
+                                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#101D35] text-xs font-bold text-white dark:bg-white dark:text-slate-950">
                                                 {{ review.user.initials }}
                                             </div>
                                             <div>
                                                 <div class="flex items-center gap-2">
-                                                    <span class="text-sm font-bold text-[#101D35]">{{ review.user.name }}</span>
-                                                    <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200/60">
+                                                    <span class="text-xs font-bold text-slate-950 dark:text-white">{{ review.user.name }}</span>
+                                                    <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
                                                         <ShieldCheck class="h-3 w-3" />
                                                         Verified Renter
                                                     </span>
@@ -756,72 +692,69 @@ const commonLocations = [
                                     </div>
 
                                     <div class="mt-3">
-                                        <h4 v-if="review.title" class="mb-1 text-sm font-bold text-[#101D35]">
+                                        <h4 v-if="review.title" class="mb-1 text-xs font-bold text-slate-950 dark:text-white">
                                             {{ review.title }}
                                         </h4>
-                                        <p class="text-xs leading-relaxed text-slate-600 sm:text-sm">
+                                        <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                                             {{ review.comment }}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Empty state -->
-                            <div v-else class="rounded-xl border border-dashed border-slate-200 p-8 text-center">
-                                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                                    <MessageSquare class="h-6 w-6" />
+                            <div v-else class="rounded-xl border border-dashed border-slate-300 p-8 text-center dark:border-white/10">
+                                <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-400 dark:bg-white/5">
+                                    <MessageSquare class="h-5 w-5" />
                                 </div>
-                                <p class="mt-3 text-sm font-bold text-[#101D35]">No reviews yet</p>
-                                <p class="mt-1 text-xs text-slate-500">
-                                    No reviews yet — be the first to review after your completed trip!
+                                <p class="mt-2 text-xs font-bold text-slate-950 dark:text-white">No reviews recorded yet</p>
+                                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                    Complete your booking to leave the inaugural review for this vehicle.
                                 </p>
                             </div>
                         </section>
                     </div>
 
-                    <!-- Price summary sidebar -->
-                    <aside class="space-y-6 lg:sticky lg:top-6">
-                        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
-                            <div class="bg-[#101D35] p-6 text-white">
-                                <p class="text-sm font-medium text-slate-300">
-                                    Your reservation
-                                </p>
-                                <h2 class="mt-1 text-2xl font-bold">
-                                    Order summary
-                                </h2>
-                                <p class="mt-2 text-sm text-slate-300">
+                    <!-- Right Sticky Summary Invoice Card -->
+                    <aside class="space-y-6 lg:sticky lg:top-24 lg:col-span-4">
+                        <section class="glass-card overflow-hidden">
+                            <!-- Invoice Header -->
+                            <div class="border-b border-black/10 bg-[#101D35] p-6 text-white dark:border-white/10 dark:bg-[#070A0F]">
+                                <h3 class="text-lg font-bold tracking-tight">
+                                    Order Summary
+                                </h3>
+                                <p class="text-xs text-slate-300">
                                     {{ car.make }} {{ car.model }}
                                 </p>
                             </div>
 
                             <div class="space-y-5 p-6">
-                                <!-- Vehicle duration breakdown -->
-                                <div class="rounded-xl bg-[#F4F6FA] p-4 text-sm">
+                                <!-- Vehicle Duration Breakdown -->
+                                <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 text-xs dark:border-white/10 dark:bg-white/5">
                                     <div class="flex items-center justify-between gap-3">
-                                        <span class="text-slate-600">Rental duration</span>
-                                        <span class="font-bold text-[#101D35]">
+                                        <span class="text-slate-600 dark:text-slate-400">Rental duration</span>
+                                        <span class="font-bold text-slate-950 dark:text-white">
                                             {{ rentalDays > 0 ? `${rentalDays} day${rentalDays === 1 ? '' : 's'}` : '—' }}
                                         </span>
                                     </div>
 
-                                    <div class="mt-3 flex items-center justify-between gap-3">
-                                        <span class="text-slate-600">Daily vehicle rate</span>
-                                        <span class="font-semibold text-[#101D35]">
+                                    <div class="mt-2.5 flex items-center justify-between gap-3">
+                                        <span class="text-slate-600 dark:text-slate-400">Daily vehicle rate</span>
+                                        <span class="font-semibold text-slate-950 dark:text-white">
                                             {{ formatPrice(dailyRate) }}
                                         </span>
                                     </div>
 
-                                    <div class="mt-3 flex items-center justify-between gap-3 border-t border-slate-200 pt-3">
-                                        <span class="font-medium text-slate-700">Vehicle rental cost</span>
-                                        <span class="font-bold text-[#101D35]">
+                                    <div class="mt-3 flex items-center justify-between gap-3 border-t border-slate-200/80 pt-3 dark:border-white/10">
+                                        <span class="font-medium text-slate-800 dark:text-slate-200">Vehicle rental cost</span>
+                                        <span class="font-bold text-slate-950 dark:text-white">
                                             {{ formatPrice(carBaseCost) }}
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Add-ons Breakdown -->
-                                <div v-if="selectedExtrasBreakdown.length > 0" class="space-y-2 border-t border-slate-100 pt-4">
-                                    <p class="text-xs font-semibold uppercase tracking-wider text-[#58779D]">
+                                <div v-if="selectedExtrasBreakdown.length > 0" class="space-y-2 border-t border-slate-200/80 pt-4 dark:border-white/10">
+                                    <p class="text-[11px] font-semibold uppercase tracking-wider text-[#58779D] dark:text-[#7094BF]">
                                         Selected Add-ons ({{ selectedExtrasBreakdown.length }})
                                     </p>
                                     <div
@@ -829,23 +762,23 @@ const commonLocations = [
                                         :key="extra.id"
                                         class="flex items-center justify-between gap-3 text-xs"
                                     >
-                                        <span class="text-slate-600">{{ extra.name }}</span>
-                                        <span class="font-semibold text-[#101D35]">
+                                        <span class="text-slate-600 dark:text-slate-400">{{ extra.name }}</span>
+                                        <span class="font-semibold text-slate-950 dark:text-white">
                                             +{{ formatPrice(extra.cost) }}
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Subtotal -->
-                                <div class="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
-                                    <span class="text-sm font-medium text-slate-700">Subtotal</span>
-                                    <span class="text-sm font-bold text-[#101D35]">
+                                <div class="flex items-center justify-between gap-3 border-t border-slate-200/80 pt-4 text-xs dark:border-white/10">
+                                    <span class="font-medium text-slate-700 dark:text-slate-300">Subtotal</span>
+                                    <span class="font-bold text-slate-950 dark:text-white">
                                         {{ formatPrice(subtotal) }}
                                     </span>
                                 </div>
 
                                 <!-- Promo Code Input -->
-                                <div class="border-t border-slate-100 pt-4">
+                                <div class="border-t border-slate-200/80 pt-4 dark:border-white/10">
                                     <PromoCodeInput
                                         :subtotal="subtotal"
                                         :applied-coupon="appliedCoupon"
@@ -857,46 +790,46 @@ const commonLocations = [
                                 <!-- Discount Row (if applied) -->
                                 <div
                                     v-if="appliedCoupon && discountAmount > 0"
-                                    class="flex items-center justify-between gap-3 text-sm text-emerald-700"
+                                    class="flex items-center justify-between gap-3 text-xs text-emerald-600 dark:text-emerald-400"
                                 >
-                                    <span class="font-medium">Promo Discount ({{ appliedCoupon.code }})</span>
+                                    <span class="font-medium">Discount ({{ appliedCoupon.code }})</span>
                                     <span class="font-bold">
                                         -{{ formatPrice(discountAmount) }}
                                     </span>
                                 </div>
 
                                 <!-- Taxes -->
-                                <div class="flex items-center justify-between gap-3 text-sm">
-                                    <span class="text-slate-600">Goods & Service Tax (7%)</span>
-                                    <span class="font-semibold text-[#101D35]">
+                                <div class="flex items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400">
+                                    <span>GST (7%)</span>
+                                    <span class="font-semibold text-slate-950 dark:text-white">
                                         {{ formatPrice(tax) }}
                                     </span>
                                 </div>
 
                                 <!-- Grand Total -->
-                                <div class="border-t border-dashed border-slate-300 pt-5">
+                                <div class="border-t border-dashed border-slate-300 pt-4 dark:border-white/20">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <p class="text-base font-bold text-[#101D35]">
-                                                Grand Total
+                                            <p class="text-sm font-bold text-slate-950 dark:text-white">
+                                                Total Due
                                             </p>
-                                            <p class="mt-1 text-xs text-slate-500">
-                                                All taxes and add-ons included
+                                            <p class="text-[10px] text-slate-500 dark:text-slate-400">
+                                                All taxes and selected options included
                                             </p>
                                         </div>
 
-                                        <p class="font-mono text-2xl font-bold text-[#101D35]">
+                                        <p class="font-mono text-xl font-bold text-slate-950 dark:text-white">
                                             {{ formatPrice(total) }}
                                         </p>
                                     </div>
                                 </div>
 
-                                <!-- Action button in sidebar -->
+                                <!-- Primary Submit Action -->
                                 <button
                                     type="button"
                                     :disabled="!canSubmit || form.processing"
                                     @click="openPaymentModal"
-                                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#101D35] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                                    class="apple-btn-primary flex w-full items-center justify-center gap-2 py-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <Lock class="h-4 w-4" />
                                     <span>
@@ -904,9 +837,9 @@ const commonLocations = [
                                     </span>
                                 </button>
 
-                                <a href="/fleet" class="block text-center text-sm font-semibold text-[#58779D] transition hover:text-[#101D35]">
-                                    ← Back to fleet
-                                </a>
+                                <Link :href="fleet()" class="block text-center text-xs font-semibold text-[#58779D] transition hover:underline dark:text-[#7094BF]">
+                                    ← Return to fleet
+                                </Link>
                             </div>
                         </section>
                     </aside>

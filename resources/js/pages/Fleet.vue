@@ -1,17 +1,58 @@
-
 <script setup lang="ts">
 import CarCard from '@/components/CarCard.vue';
 import HomeLayout from '@/layouts/HomeLayout.vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
+import { Search, Filter, RotateCcw, Car as CarIcon, ArrowUpDown } from 'lucide-vue-next';
+
+interface Car {
+    id: number;
+    make: string;
+    model: string;
+    year: number;
+    price_per_day: string | number;
+    description: string;
+    fuel_type: string;
+    image_url: string;
+    average_rating?: number;
+    reviews_count?: number;
+}
+
+interface PaginatedCars {
+    data: Car[];
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+    total: number;
+    links: Array<{ url: string | null; label: string; active: boolean }>;
+}
+
+interface PageProps {
+    cars: PaginatedCars;
+    filters: {
+        search?: string;
+        make?: string;
+        fuel_type?: string;
+        min_price?: string;
+        max_price?: string;
+        year?: string;
+        min_rating?: string;
+        sort?: string;
+    };
+    makes: string[];
+    fuelTypes: string[];
+    years: number[];
+    [key: string]: any;
+}
 
 const page = usePage<PageProps>();
 
 const cars = computed(() => page.props.cars);
-const filters = computed(() => page.props.filters);
-const makes = computed(() => page.props.makes);
-const fuelTypes = computed(() => page.props.fuelTypes);
-const years = computed(() => page.props.years);
+const filters = computed(() => page.props.filters || {});
+const makes = computed(() => page.props.makes || []);
+const fuelTypes = computed(() => page.props.fuelTypes || []);
+const years = computed(() => page.props.years || []);
 
 const searchQuery = ref(filters.value.search || '');
 const selectedMake = ref(filters.value.make || '');
@@ -112,112 +153,106 @@ const goToPage = (url: string | null) => {
 </script>
 
 <template>
+    <Head title="Fleet Directory | Real Rent Car" />
+
     <HomeLayout>
-        <div class="min-h-screen bg-[#F4F6FA] text-[#101D35]">
+        <div class="min-h-screen bg-[#FBFBFD] text-slate-900 transition-colors duration-200 dark:bg-[#070A0F] dark:text-slate-100">
 
-            <!-- Fleet hero -->
-            <section class="relative overflow-hidden bg-[#101D35] text-white">
-                <div class="absolute -right-20 -top-24 h-80 w-80 rounded-full bg-white/5 blur-3xl"></div>
-                <div class="absolute -bottom-28 left-1/4 h-72 w-72 rounded-full bg-[#A8BED8]/10 blur-3xl"></div>
+            <!-- Fleet Header Staging -->
+            <section class="relative isolate overflow-hidden bg-[#101D35] text-white dark:bg-[#070A0F]">
+                <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(120,160,210,0.2),rgba(255,255,255,0))]"></div>
+                <div class="pointer-events-none absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full bg-[#58779D]/20 blur-3xl"></div>
 
-                <div class="relative mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20 lg:px-8">
+                <div class="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-8">
                     <div class="max-w-3xl">
-                        <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#C5D0DE]">
-                            <span class="h-2 w-2 rounded-full bg-[#C5D0DE]"></span>
-                            Find your perfect ride
-                        </div>
-
-                        <h1 class="mt-6 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-                            Explore our
-                            <span class="text-[#C5D0DE]">fleet.</span>
+                        <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                            Curated automotive fleet.
                         </h1>
 
-                        <p class="mt-5 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-                            Discover a vehicle that fits your plans. Explore our
-                            available cars, compare rental prices, and find your
-                            next ride.
+                        <p class="mt-4 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
+                            Compare models, fuel efficiency, verified driver ratings, and daily rates with instant reservation confirmation.
                         </p>
 
-                        <div class="mt-8 flex flex-wrap gap-3 text-sm font-semibold text-slate-200">
-                            <span class="rounded-xl border border-white/15 bg-white/5 px-4 py-3">Browse vehicles</span>
-                            <span class="rounded-xl border border-white/15 bg-white/5 px-4 py-3">Compare prices</span>
-                            <span class="rounded-xl border border-white/15 bg-white/5 px-4 py-3">Choose your journey</span>
+                        <div class="mt-8 flex flex-wrap gap-2.5 text-xs font-semibold text-slate-200">
+                            <span class="rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 backdrop-blur-md">Full Insurance Included</span>
+                            <span class="rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 backdrop-blur-md">Live Conflict Checking</span>
+                            <span class="rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 backdrop-blur-md">Transparent Rates</span>
                         </div>
                     </div>
                 </div>
-
-                <div class="h-1 bg-gradient-to-r from-[#101D35] via-[#C5D0DE] to-[#101D35]"></div>
             </section>
 
             <div class="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-8 lg:py-12">
 
-                <!-- Mobile filters button -->
+                <!-- Mobile Filters Button -->
                 <button
                     type="button"
                     @click="showFilters = !showFilters"
-                    class="mb-5 flex w-full items-center justify-between rounded-2xl border border-[#DCE3ED] bg-white p-4 font-bold shadow-sm lg:hidden"
+                    class="glass-card mb-6 flex w-full items-center justify-between p-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:text-white dark:hover:bg-white/5 lg:hidden"
                 >
                     <span class="flex items-center gap-3">
-                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8EDF5] text-lg">☰</span>
-                        Search & Filters
-                        <span v-if="activeFilterCount" class="rounded-full bg-[#101D35] px-2.5 py-1 text-xs text-white">
+                        <Filter class="h-4 w-4 text-[#58779D] dark:text-[#7094BF]" />
+                        <span>Filter & Search</span>
+                        <span v-if="activeFilterCount" class="rounded-full bg-[#101D35] px-2 py-0.5 text-xs text-white dark:bg-white dark:text-slate-950">
                             {{ activeFilterCount }}
                         </span>
                     </span>
-                    <span>{{ showFilters ? '−' : '+' }}</span>
+                    <span class="text-xs text-slate-500">{{ showFilters ? 'Hide' : 'Show' }}</span>
                 </button>
 
                 <div class="grid items-start gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
 
-                    <!-- Filter sidebar -->
+                    <!-- Sticky Frosted Filter Sidebar -->
                     <aside
                         :class="{ 'hidden': !showFilters }"
-                        class="rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm lg:sticky lg:top-28 lg:block lg:p-6"
+                        class="glass-card p-5 lg:sticky lg:top-24 lg:block lg:p-6"
                     >
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-5">
+                        <div class="flex items-center justify-between border-b border-slate-200/80 pb-4 dark:border-white/10">
                             <div>
-                                <h2 class="text-xl font-black">Find a car</h2>
-                                <p class="mt-1 text-sm text-slate-500">Refine your search</p>
+                                <h2 class="text-base font-bold tracking-tight text-slate-950 dark:text-white">Filter Fleet</h2>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Refine selection</p>
                             </div>
-                            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#101D35] text-xl text-white">⌕</span>
+                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-white">
+                                <Search class="h-4 w-4" />
+                            </div>
                         </div>
 
-                        <form @submit="handleSearch" class="mt-5 space-y-5">
+                        <form @submit="handleSearch" class="mt-5 space-y-4">
 
                             <!-- Search -->
                             <div>
-                                <label for="fleet-search" class="mb-2 block text-sm font-bold">Search vehicles</label>
+                                <label for="fleet-search" class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">Keyword</label>
                                 <input
                                     id="fleet-search"
                                     v-model="searchQuery"
                                     type="search"
-                                    placeholder="Make, model, features..."
-                                    class="w-full rounded-xl border border-[#DCE3ED] bg-[#F8FAFC] px-4 py-3 text-sm text-[#101D35] outline-none transition placeholder:text-slate-400 focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
+                                    placeholder="Make, model, color..."
+                                    class="apple-input w-full px-3.5 py-2.5 text-xs"
                                 />
                             </div>
 
                             <!-- Make -->
                             <div>
-                                <label for="fleet-make" class="mb-2 block text-sm font-bold">Vehicle make</label>
+                                <label for="fleet-make" class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">Manufacturer</label>
                                 <select
                                     id="fleet-make"
                                     v-model="selectedMake"
-                                    class="w-full rounded-xl border border-[#DCE3ED] bg-white px-4 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
+                                    class="apple-input w-full px-3.5 py-2.5 text-xs"
                                 >
-                                    <option value="">All makes</option>
+                                    <option value="">All manufacturers</option>
                                     <option v-for="make in makes" :key="make" :value="make">{{ make }}</option>
                                 </select>
                             </div>
 
                             <!-- Fuel -->
                             <div>
-                                <label for="fleet-fuel" class="mb-2 block text-sm font-bold">Fuel type</label>
+                                <label for="fleet-fuel" class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">Powertrain</label>
                                 <select
                                     id="fleet-fuel"
                                     v-model="selectedFuelType"
-                                    class="w-full rounded-xl border border-[#DCE3ED] bg-white px-4 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
+                                    class="apple-input w-full px-3.5 py-2.5 text-xs"
                                 >
-                                    <option value="">All fuel types</option>
+                                    <option value="">All powertrains</option>
                                     <option v-for="fuelType in fuelTypes" :key="fuelType" :value="fuelType">
                                         {{ String(fuelType).charAt(0).toUpperCase() + String(fuelType).slice(1) }}
                                     </option>
@@ -226,71 +261,65 @@ const goToPage = (url: string | null) => {
 
                             <!-- Year -->
                             <div>
-                                <label for="fleet-year" class="mb-2 block text-sm font-bold">Model year</label>
+                                <label for="fleet-year" class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">Model Year</label>
                                 <select
                                     id="fleet-year"
                                     v-model="selectedYear"
-                                    class="w-full rounded-xl border border-[#DCE3ED] bg-white px-4 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
+                                    class="apple-input w-full px-3.5 py-2.5 text-xs"
                                 >
-                                    <option value="">All years</option>
+                                    <option value="">All model years</option>
                                     <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
                                 </select>
                             </div>
 
-                            <!-- Price -->
+                            <!-- Price Range -->
                             <div>
-                                <label class="mb-2 block text-sm font-bold">Daily price range (₹)</label>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label for="fleet-min-price" class="mb-1 block text-xs text-slate-500">Minimum</label>
-                                        <input
-                                            id="fleet-min-price"
-                                            v-model="minPrice"
-                                            type="number"
-                                            min="0"
-                                            placeholder="₹ Min"
-                                            class="w-full min-w-0 rounded-xl border border-[#DCE3ED] bg-[#F8FAFC] px-3 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label for="fleet-max-price" class="mb-1 block text-xs text-slate-500">Maximum</label>
-                                        <input
-                                            id="fleet-max-price"
-                                            v-model="maxPrice"
-                                            type="number"
-                                            min="0"
-                                            placeholder="₹ Max"
-                                            class="w-full min-w-0 rounded-xl border border-[#DCE3ED] bg-[#F8FAFC] px-3 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
-                                        />
-                                    </div>
+                                <label class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">Daily Rate (₹)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input
+                                        id="fleet-min-price"
+                                        v-model="minPrice"
+                                        type="number"
+                                        min="0"
+                                        placeholder="Min ₹"
+                                        class="apple-input w-full px-3 py-2 text-xs"
+                                    />
+                                    <input
+                                        id="fleet-max-price"
+                                        v-model="maxPrice"
+                                        type="number"
+                                        min="0"
+                                        placeholder="Max ₹"
+                                        class="apple-input w-full px-3 py-2 text-xs"
+                                    />
                                 </div>
                             </div>
 
                             <!-- Rating -->
                             <div>
-                                <label for="fleet-rating" class="mb-2 block text-sm font-bold">Minimum rating</label>
+                                <label for="fleet-rating" class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">Driver Rating</label>
                                 <select
                                     id="fleet-rating"
                                     v-model="selectedMinRating"
-                                    class="w-full rounded-xl border border-[#DCE3ED] bg-white px-4 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
+                                    class="apple-input w-full px-3.5 py-2.5 text-xs"
                                 >
                                     <option value="">Any rating</option>
-                                    <option value="4.5">4.5+ Stars (Exceptional)</option>
-                                    <option value="4.0">4.0+ Stars (Great)</option>
+                                    <option value="4.5">4.5+ Stars (Top Rated)</option>
+                                    <option value="4.0">4.0+ Stars (Excellent)</option>
                                     <option value="3.0">3.0+ Stars (Good)</option>
                                 </select>
                             </div>
 
                             <!-- Sort -->
                             <div>
-                                <label for="fleet-sort" class="mb-2 block text-sm font-bold">Sort vehicles</label>
+                                <label for="fleet-sort" class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">Sort By</label>
                                 <select
                                     id="fleet-sort"
                                     v-model="sortBy"
-                                    class="w-full rounded-xl border border-[#DCE3ED] bg-white px-4 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
+                                    class="apple-input w-full px-3.5 py-2.5 text-xs"
                                 >
                                     <option value="make_asc">Make: A to Z</option>
-                                    <option value="rating_desc">Highest Rated First</option>
+                                    <option value="rating_desc">Highest Rated</option>
                                     <option value="price_asc">Price: Low to High</option>
                                     <option value="price_desc">Price: High to Low</option>
                                     <option value="year_desc">Newest First</option>
@@ -300,7 +329,7 @@ const goToPage = (url: string | null) => {
 
                             <button
                                 type="submit"
-                                class="w-full rounded-xl bg-[#101D35] px-5 py-3.5 font-bold text-white shadow-md transition hover:bg-[#263F60] focus:ring-4 focus:ring-[#58779D]/20"
+                                class="apple-btn-primary w-full py-2.5 text-xs font-semibold"
                             >
                                 Apply Filters
                             </button>
@@ -309,51 +338,43 @@ const goToPage = (url: string | null) => {
                                 v-if="hasActiveFilters"
                                 type="button"
                                 @click="clearFilters"
-                                class="w-full rounded-xl border border-[#DCE3ED] bg-white px-5 py-3 font-semibold text-slate-600 transition hover:bg-[#F4F6FA] hover:text-[#101D35]"
+                                class="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-4 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
                             >
-                                Clear All Filters
+                                <RotateCcw class="h-3 w-3" />
+                                <span>Reset Filters</span>
                             </button>
                         </form>
-
-                        <div class="mt-6 rounded-xl bg-[#F4F6FA] p-4">
-                            <p class="text-sm font-bold">Need help choosing?</p>
-                            <p class="mt-1 text-xs leading-5 text-slate-500">
-                                Browse the available vehicles and compare their
-                                details before making your choice.
-                            </p>
-                        </div>
                     </aside>
 
-                    <!-- Results -->
+                    <!-- Results Column -->
                     <section class="min-w-0">
 
-                        <!-- Results header -->
-                        <div class="mb-6 rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm sm:p-6">
+                        <!-- Results Header Bar -->
+                        <div class="glass-card mb-6 p-5">
                             <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                                 <div>
-                                    <p class="text-xs font-black uppercase tracking-[0.18em] text-[#58779D]">Available selection</p>
-                                    <h2 class="mt-2 text-2xl font-black tracking-tight">
-                                        Our vehicles
+                                    <h2 class="text-xl font-bold tracking-tight text-slate-950 dark:text-white">
+                                        Available Vehicles
                                     </h2>
-                                    <p class="mt-2 text-sm text-slate-500">
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                         <template v-if="cars.total">
-                                            Showing {{ cars.from }}–{{ cars.to }} of {{ cars.total }} vehicles
+                                            Showing {{ cars.from }}–{{ cars.to }} of {{ cars.total }} vehicles matching your criteria
                                         </template>
                                         <template v-else>
-                                            No vehicles match your current search
+                                            No vehicles currently match your filters
                                         </template>
                                     </p>
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="rounded-xl bg-[#E8EDF5] px-4 py-2.5 text-sm font-bold text-[#101D35]">
-                                        {{ cars.total }} vehicles
+                                <div class="flex items-center gap-2">
+                                    <span class="rounded-xl border border-slate-200/80 bg-slate-100/70 px-3.5 py-1.5 text-xs font-semibold text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+                                        {{ cars.total }} in fleet
                                     </span>
                                     <button
                                         v-if="hasActiveFilters"
                                         type="button"
                                         @click="clearFilters"
-                                        class="rounded-xl border border-[#DCE3ED] px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                                        class="rounded-xl border border-slate-200/80 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                                     >
                                         Reset
                                     </button>
@@ -361,14 +382,14 @@ const goToPage = (url: string | null) => {
                             </div>
                         </div>
 
-                        <!-- Loading state -->
-                        <div v-if="isLoading" class="mb-6 flex items-center justify-center gap-3 rounded-2xl border border-[#DCE3ED] bg-white p-6">
-                            <span class="h-6 w-6 animate-spin rounded-full border-4 border-[#C5D0DE] border-t-[#101D35]"></span>
-                            <span class="font-semibold text-slate-600">Updating your results...</span>
+                        <!-- Loading State -->
+                        <div v-if="isLoading" class="glass-card mb-6 flex items-center justify-center gap-3 p-8">
+                            <span class="h-5 w-5 animate-spin rounded-full border-2 border-[#58779D] border-t-transparent"></span>
+                            <span class="text-xs font-medium text-slate-600 dark:text-slate-300">Updating results...</span>
                         </div>
 
-                        <!-- Vehicle cards -->
-                        <div v-if="cars.data.length > 0" class="grid gap-6 md:grid-cols-2">
+                        <!-- Vehicle Grid -->
+                        <div v-if="cars.data.length > 0" class="grid gap-6 sm:grid-cols-2">
                             <CarCard
                                 v-for="car in cars.data"
                                 :key="car.id"
@@ -376,34 +397,35 @@ const goToPage = (url: string | null) => {
                             />
                         </div>
 
-                        <!-- Empty state -->
-                        <div v-else class="rounded-2xl border border-dashed border-[#C5D0DE] bg-white px-6 py-16 text-center">
-                            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#E8EDF5] text-3xl">🚘</div>
-                            <h3 class="mt-5 text-2xl font-black">No vehicles found</h3>
-                            <p class="mx-auto mt-3 max-w-md leading-7 text-slate-500">
-                                Try changing your search terms or filters to
-                                discover other vehicles in our fleet.
+                        <!-- Empty State -->
+                        <div v-else class="glass-card p-12 text-center">
+                            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300">
+                                <CarIcon class="h-6 w-6" />
+                            </div>
+                            <h3 class="mt-4 text-lg font-bold text-slate-950 dark:text-white">No vehicles match filters</h3>
+                            <p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                                Try widening your price range, clearing manufacturer selections, or browsing all models.
                             </p>
                             <button
                                 type="button"
                                 @click="clearFilters"
-                                class="mt-6 rounded-xl bg-[#101D35] px-6 py-3 font-bold text-white transition hover:bg-[#263F60]"
+                                class="apple-btn-primary mt-6 inline-flex px-5 py-2.5 text-xs font-semibold"
                             >
-                                Show All Vehicles
+                                Clear All Filters
                             </button>
                         </div>
 
                         <!-- Pagination -->
                         <div
                             v-if="cars.data.length > 0 && cars.last_page > 1"
-                            class="mt-8 flex flex-col gap-5 rounded-2xl border border-[#DCE3ED] bg-white p-5 sm:flex-row sm:items-center sm:justify-between"
+                            class="glass-card mt-8 flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between"
                         >
-                            <p class="text-sm text-slate-500">
-                                Page <span class="font-bold text-[#101D35]">{{ cars.current_page }}</span>
-                                of <span class="font-bold text-[#101D35]">{{ cars.last_page }}</span>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Page <span class="font-semibold text-slate-900 dark:text-white">{{ cars.current_page }}</span>
+                                of <span class="font-semibold text-slate-900 dark:text-white">{{ cars.last_page }}</span>
                             </p>
 
-                            <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-1.5">
                                 <button
                                     v-for="(link, index) in cars.links"
                                     :key="index"
@@ -411,12 +433,12 @@ const goToPage = (url: string | null) => {
                                     :disabled="!link.url || isLoading"
                                     @click="goToPage(link.url)"
                                     :class="[
-                                        'rounded-xl border px-3 py-2 text-sm font-semibold transition',
+                                        'rounded-lg px-3 py-1.5 text-xs font-medium transition',
                                         link.active
-                                            ? 'border-[#101D35] bg-[#101D35] text-white'
+                                            ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold'
                                             : link.url
-                                                ? 'border-[#DCE3ED] bg-white text-[#101D35] hover:bg-[#E8EDF5]'
-                                                : 'cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300'
+                                                ? 'border border-slate-200/80 bg-white text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10'
+                                                : 'cursor-not-allowed text-slate-300 dark:text-slate-600'
                                     ]"
                                     v-html="link.label"
                                 ></button>

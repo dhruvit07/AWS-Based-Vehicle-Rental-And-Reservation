@@ -30,28 +30,28 @@ const extrasCatalog: ExtraOption[] = [
         name: 'Zero-Deductible Insurance',
         rate: 499,
         type: 'per_day',
-        description: 'Complete peace of mind with zero customer liability on accidental damage and glass.',
+        description: 'Comprehensive damage waiver covering glass, tyres, and accidental chassis damage with zero liability.',
     },
     {
         id: 'gps',
         name: 'GPS Navigation System',
         rate: 149,
         type: 'per_day',
-        description: 'High-precision standalone satellite navigation with offline route guidance.',
+        description: 'Dedicated in-car satellite navigation with pre-loaded offline maps and live traffic alerts.',
     },
     {
         id: 'child_seat',
         name: 'Child Safety Seat',
         rate: 199,
         type: 'per_day',
-        description: 'Certified multi-age child restraint booster seat, sanitized and inspected.',
+        description: 'Multi-stage certified infant and child booster seat, sanitized prior to dispatch.',
     },
     {
         id: 'additional_driver',
         name: 'Additional Driver',
         rate: 499,
         type: 'fixed',
-        description: 'Authorize a second verified driver for the entire rental journey.',
+        description: 'Register a second verified driver on the insurance policy for the entire rental duration.',
     },
 ];
 
@@ -85,15 +85,12 @@ const calculateCost = (extra: ExtraOption): number => {
 </script>
 
 <template>
-    <div class="space-y-3">
+    <div class="space-y-3.5">
         <div class="flex items-center justify-between">
-            <h3 class="flex items-center gap-2 font-semibold text-[#101D35]">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-[#58779D]">
-                    3
-                </span>
-                Rental add-ons & protection
+            <h3 class="text-sm font-bold tracking-tight text-slate-950 dark:text-white">
+                Optional Upgrades & Protection
             </h3>
-            <span class="text-xs font-medium text-slate-500">Optional upgrades</span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Select any add-ons</span>
         </div>
 
         <div class="grid gap-3 sm:grid-cols-2">
@@ -106,38 +103,35 @@ const calculateCost = (extra: ExtraOption): number => {
                 @click="toggleExtra(extra.id)"
                 @keydown.space.prevent="toggleExtra(extra.id)"
                 @keydown.enter.prevent="toggleExtra(extra.id)"
-                class="group relative flex cursor-pointer flex-col justify-between rounded-xl border p-4 transition focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-1"
+                class="group relative flex cursor-pointer flex-col justify-between rounded-xl border p-4 transition focus:outline-none focus:ring-2 focus:ring-[#58779D]"
                 :class="[
                     isSelected(extra.id)
-                        ? 'border-[#101D35] bg-slate-50/70 shadow-xs'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/40',
+                        ? 'border-[#101D35] bg-slate-100/90 shadow-xs dark:border-white dark:bg-white/10'
+                        : 'border-slate-200/80 bg-white/70 hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20',
                 ]"
             >
                 <div>
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-center gap-3">
                             <div
-                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition"
+                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition"
                                 :class="[
                                     isSelected(extra.id)
-                                        ? 'bg-[#101D35] text-white'
-                                        : 'bg-slate-100 text-[#58779D] group-hover:bg-slate-200',
+                                        ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950'
+                                        : 'bg-slate-100 text-[#58779D] dark:bg-white/10 dark:text-[#7094BF]',
                                 ]"
                             >
-                                <ShieldCheck v-if="extra.id === 'insurance'" class="h-5 w-5" />
-                                <Navigation v-else-if="extra.id === 'gps'" class="h-5 w-5" />
-                                <Baby v-else-if="extra.id === 'child_seat'" class="h-5 w-5" />
-                                <UserCheck v-else class="h-5 w-5" />
+                                <ShieldCheck v-if="extra.id === 'insurance'" class="h-4 w-4" />
+                                <Navigation v-else-if="extra.id === 'gps'" class="h-4 w-4" />
+                                <Baby v-else-if="extra.id === 'child_seat'" class="h-4 w-4" />
+                                <UserCheck v-else class="h-4 w-4" />
                             </div>
 
                             <div>
-                                <h4 class="text-sm font-bold text-[#101D35]">
+                                <h4 class="text-xs font-bold text-slate-950 dark:text-white">
                                     {{ extra.name }}
                                 </h4>
-                                <span
-                                    class="inline-block text-xs font-semibold"
-                                    :class="isSelected(extra.id) ? 'text-[#101D35]' : 'text-[#58779D]'"
-                                >
+                                <span class="text-[11px] font-semibold text-[#58779D] dark:text-[#7094BF]">
                                     {{ extra.type === 'per_day' ? `+${formatPrice(extra.rate)} / day` : `Flat ${formatPrice(extra.rate)}` }}
                                 </span>
                             </div>
@@ -148,24 +142,24 @@ const calculateCost = (extra: ExtraOption): number => {
                             class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition"
                             :class="[
                                 isSelected(extra.id)
-                                    ? 'border-[#101D35] bg-[#101D35] text-white'
-                                    : 'border-slate-300 bg-white group-hover:border-slate-400',
+                                    ? 'border-[#101D35] bg-[#101D35] text-white dark:border-white dark:bg-white dark:text-slate-950'
+                                    : 'border-slate-300 bg-white dark:border-white/20 dark:bg-white/5',
                             ]"
                         >
                             <Check v-if="isSelected(extra.id)" class="h-3.5 w-3.5 stroke-[3]" />
                         </div>
                     </div>
 
-                    <p class="mt-2.5 text-xs leading-5 text-slate-600">
+                    <p class="mt-2.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                         {{ extra.description }}
                     </p>
                 </div>
 
-                <div class="mt-3.5 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs">
-                    <span class="text-slate-500">
+                <div class="mt-3.5 flex items-center justify-between border-t border-slate-200/80 pt-2.5 text-xs dark:border-white/10">
+                    <span class="text-slate-500 dark:text-slate-400">
                         {{ extra.type === 'per_day' ? `${props.rentalDays} day${props.rentalDays === 1 ? '' : 's'}` : 'Single charge' }}
                     </span>
-                    <span class="font-bold" :class="isSelected(extra.id) ? 'text-[#101D35]' : 'text-slate-700'">
+                    <span class="font-bold text-slate-950 dark:text-white">
                         {{ formatPrice(calculateCost(extra)) }}
                     </span>
                 </div>

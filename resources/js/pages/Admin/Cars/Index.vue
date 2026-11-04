@@ -1,4 +1,3 @@
-```vue
 <script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -67,8 +66,8 @@ const statusColors = computed(() => {
 
 const getStatusColor = (status: string) =>
     statusColors.value[status] || {
-        bg: '#F1F5F9',
-        text: '#475569',
+        bg: 'rgba(148, 163, 184, 0.12)',
+        text: '#64748B',
         dot: '#64748B',
     };
 
@@ -100,7 +99,7 @@ const openDeleteDialog = (id: number) => {
 const destroyCar = () => {
     if (!carToDelete.value) return;
 
-    router.delete(destroy(carToDelete.value).url, {
+    router.delete(destroy(carToDelete.value), {
         preserveScroll: true,
         onSuccess: () => {
             showDeleteDialog.value = false;
@@ -114,24 +113,20 @@ const destroyCar = () => {
     <Head title="Manage Cars" />
 
     <AdminLayout>
-        <main class="min-w-0 flex-1 space-y-7 bg-[#F4F6FA] p-4 sm:p-6 lg:p-8">
-            <!-- Page heading -->
-            <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <main class="min-h-full space-y-7 px-4 py-6 sm:px-6 lg:px-8">
+            <!-- Header console -->
+            <section class="glass-card flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
                 <div>
-                    <div class="mb-2 flex items-center gap-2 text-sm text-[#58779D]">
-                        <CarFront class="h-4 w-4" />
-                        <span>Fleet management</span>
-                    </div>
-                    <h1 class="text-3xl font-bold tracking-tight text-[#101D35]">
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
                         Manage Cars
                     </h1>
-                    <p class="mt-2 text-sm text-slate-500">
-                        View, search and manage your vehicle inventory.
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        View, search and manage your vehicle fleet inventory.
                     </p>
                 </div>
 
                 <Link :href="create()" class="shrink-0">
-                    <Button class="h-11 rounded-xl bg-[#101D35] px-5 font-semibold text-white hover:bg-[#263F60]">
+                    <Button class="apple-btn-primary h-11 px-5 text-sm font-medium">
                         <Plus class="mr-2 h-4 w-4" />
                         Add New Car
                     </Button>
@@ -140,70 +135,70 @@ const destroyCar = () => {
 
             <!-- Summary cards -->
             <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div class="rounded-2xl border border-[#C5D0DE] bg-white p-5 shadow-sm">
+                <div class="glass-card p-5">
                     <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-slate-500">Total vehicles</p>
-                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8EDF4] text-[#263F60]">
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total vehicles</p>
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
                             <CarFront class="h-5 w-5" />
                         </span>
                     </div>
-                    <p class="mt-3 text-3xl font-bold text-[#101D35]">
+                    <p class="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                         {{ Object.values(statuses).reduce((total, item) => total + item.count, 0) }}
                     </p>
-                    <p class="mt-1 text-xs text-slate-500">Vehicles across all statuses</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Vehicles across all operational statuses</p>
                 </div>
 
-                <div class="rounded-2xl border border-[#C5D0DE] bg-white p-5 shadow-sm">
+                <div class="glass-card p-5">
                     <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-slate-500">Current results</p>
-                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8EDF4] text-[#263F60]">
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Current results</p>
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
                             <SlidersHorizontal class="h-5 w-5" />
                         </span>
                     </div>
-                    <p class="mt-3 text-3xl font-bold text-[#101D35]">
+                    <p class="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                         {{ cars.data.length }}
                     </p>
-                    <p class="mt-1 text-xs text-slate-500">Vehicles on this page</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Vehicles displayed on this page</p>
                 </div>
             </section>
 
             <!-- Search and filters -->
-            <section class="rounded-2xl border border-[#C5D0DE] bg-white p-5 shadow-sm sm:p-6">
+            <section class="glass-card p-5 sm:p-6">
                 <div class="mb-4 flex items-center gap-2">
-                    <Search class="h-5 w-5 text-[#58779D]" />
-                    <h2 class="font-semibold text-[#101D35]">Find a vehicle</h2>
+                    <Search class="h-4 w-4 text-[#58779D] dark:text-[#7094BF]" />
+                    <h2 class="font-semibold text-slate-900 dark:text-white">Find a vehicle</h2>
                 </div>
 
                 <div class="flex flex-col gap-3 sm:flex-row">
                     <div class="relative flex-1">
-                        <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <Input
                             v-model="search"
                             placeholder="Search make, model or license plate..."
-                            class="h-11 rounded-xl border-[#C5D0DE] pl-10 focus-visible:ring-[#58779D]"
+                            class="apple-input pl-10"
                             @keyup.enter="doSearch"
                         />
                     </div>
                     <Button
                         @click="doSearch"
-                        class="h-11 rounded-xl bg-[#263F60] px-6 text-white hover:bg-[#101D35]"
+                        class="apple-btn-primary h-11 px-6 text-sm font-medium"
                     >
                         Search
                     </Button>
                 </div>
 
                 <div class="mt-5">
-                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         Filter by status
                     </p>
                     <div class="flex flex-wrap gap-2">
                         <button
                             type="button"
                             @click="statusFilter = 'all'; doSearch()"
-                            class="rounded-xl border px-4 py-2 text-sm font-medium transition"
+                            class="rounded-xl border px-3.5 py-2 text-xs font-medium transition cursor-pointer"
                             :class="statusFilter === 'all'
-                                ? 'border-[#101D35] bg-[#101D35] text-white'
-                                : 'border-[#C5D0DE] bg-white text-[#263F60] hover:bg-[#F4F6FA]'"
+                                ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]'
+                                : 'border-black/5 dark:border-white/10 bg-slate-100/70 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-white/10'"
                         >
                             All ({{ Object.values(statuses).reduce((total, item) => total + item.count, 0) }})
                         </button>
@@ -213,10 +208,10 @@ const destroyCar = () => {
                             :key="key"
                             type="button"
                             @click="statusFilter = key; doSearch()"
-                            class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition"
+                            class="inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-medium transition cursor-pointer"
                             :class="statusFilter === key
-                                ? 'border-[#101D35] bg-[#101D35] text-white'
-                                : 'border-[#C5D0DE] bg-white text-[#263F60] hover:bg-[#F4F6FA]'"
+                                ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]'
+                                : 'border-black/5 dark:border-white/10 bg-slate-100/70 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-white/10'"
                         >
                             <span
                                 class="h-2 w-2 rounded-full"
@@ -229,102 +224,102 @@ const destroyCar = () => {
             </section>
 
             <!-- Vehicle table -->
-            <section class="overflow-hidden rounded-2xl border border-[#C5D0DE] bg-white shadow-sm">
-                <div class="flex flex-col justify-between gap-2 border-b border-[#E2E8F0] px-5 py-4 sm:flex-row sm:items-center">
+            <section class="glass-card overflow-hidden">
+                <div class="flex flex-col justify-between gap-2 border-b border-black/5 dark:border-white/10 px-6 py-4 sm:flex-row sm:items-center">
                     <div>
-                        <h2 class="font-bold text-[#101D35]">Vehicle inventory</h2>
-                        <p class="mt-1 text-xs text-slate-500">
+                        <h2 class="font-bold text-slate-900 dark:text-white">Vehicle Inventory</h2>
+                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                             Showing {{ cars.data.length }} vehicles on this page
                         </p>
                     </div>
-                    <span class="inline-flex w-fit items-center gap-2 rounded-lg bg-[#F4F6FA] px-3 py-2 text-xs font-medium text-[#263F60]">
-                        <CalendarDays class="h-4 w-4" />
+                    <span class="inline-flex w-fit items-center gap-2 rounded-lg border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                        <CalendarDays class="h-3.5 w-3.5" />
                         Latest vehicles first
                     </span>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="min-w-[850px] w-full text-left">
-                        <thead class="bg-[#F4F6FA]">
+                        <thead class="border-b border-black/5 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] text-xs font-semibold text-slate-600 dark:text-slate-400">
                             <tr>
-                                <th class="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Vehicle</th>
-                                <th class="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">License plate</th>
-                                <th class="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Price per day</th>
-                                <th class="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
-                                <th class="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Actions</th>
+                                <th class="px-6 py-3.5">Vehicle</th>
+                                <th class="px-6 py-3.5">License plate</th>
+                                <th class="px-6 py-3.5">Price per day</th>
+                                <th class="px-6 py-3.5">Status</th>
+                                <th class="px-6 py-3.5 text-right">Actions</th>
                             </tr>
                         </thead>
 
-                        <tbody class="divide-y divide-[#E8EDF4]">
+                        <tbody class="divide-y divide-black/5 dark:divide-white/5 text-sm">
                             <tr
                                 v-for="car in cars.data"
                                 :key="car.id"
-                                class="transition hover:bg-[#F8FAFC]"
+                                class="transition hover:bg-slate-50/50 dark:hover:bg-white/[0.02]"
                             >
-                                <td class="px-5 py-4">
+                                <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-14 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#E2E8F0] bg-[#F4F6FA]">
+                                        <div class="flex h-14 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5">
                                             <img
                                                 v-if="car.image_url"
                                                 :src="car.image_url"
                                                 :alt="`${car.make} ${car.model}`"
                                                 class="h-full w-full object-cover"
                                             />
-                                            <CarFront v-else class="h-7 w-7 text-[#58779D]" />
+                                            <CarFront v-else class="h-6 w-6 text-[#58779D] dark:text-[#7094BF]" />
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-[#101D35]">
+                                            <p class="font-semibold text-slate-900 dark:text-white">
                                                 {{ car.make }} {{ car.model }}
                                             </p>
-                                            <p class="mt-1 text-xs text-slate-500">{{ car.year }}</p>
+                                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ car.year }}</p>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td class="px-5 py-4">
-                                    <span class="rounded-lg bg-[#F4F6FA] px-3 py-2 font-mono text-xs font-medium text-[#263F60]">
+                                <td class="px-6 py-4">
+                                    <span class="rounded-lg border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-2.5 py-1 font-mono text-xs font-medium text-slate-700 dark:text-slate-300">
                                         {{ car.license_plate }}
                                     </span>
                                 </td>
 
-                                <td class="px-5 py-4">
-                                    <p class="font-semibold text-[#101D35]">
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-slate-900 dark:text-white">
                                         {{ currency.symbol }}{{ Number(car.price_per_day).toFixed(2) }}
                                     </p>
-                                    <p class="mt-1 text-xs text-slate-500">{{ currency.code }} / day</p>
+                                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ currency.code }} / day</p>
                                 </td>
 
-                                <td class="px-5 py-4">
+                                <td class="px-6 py-4">
                                     <span
-                                        class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold"
+                                        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
                                         :style="{
                                             backgroundColor: getStatusColor(car.status).bg,
                                             color: getStatusColor(car.status).text,
                                         }"
                                     >
                                         <span
-                                            class="h-2 w-2 rounded-full"
+                                            class="h-1.5 w-1.5 rounded-full"
                                             :style="{ backgroundColor: getStatusColor(car.status).dot }"
                                         ></span>
                                         {{ car.status_label || statuses[car.status]?.label || car.status }}
                                     </span>
                                 </td>
 
-                                <td class="px-5 py-4">
+                                <td class="px-6 py-4">
                                     <div class="flex items-center justify-end gap-2">
                                         <Link :href="`/admin/cars/${car.id}/edit`">
-                                            <Button variant="outline" size="sm" class="rounded-lg border-[#C5D0DE] text-[#263F60] hover:bg-[#E8EDF4]">
-                                                <Pencil class="mr-1.5 h-3.5 w-3.5" />
+                                            <Button variant="outline" size="sm" class="h-8 rounded-lg border-black/10 dark:border-white/10 text-xs font-medium hover:bg-slate-100 dark:hover:bg-white/10">
+                                                <Pencil class="mr-1 h-3 w-3" />
                                                 Edit
                                             </Button>
                                         </Link>
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            class="rounded-lg border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                                            class="h-8 rounded-lg border-rose-500/20 text-xs font-medium text-rose-600 hover:bg-rose-500/10 dark:text-rose-400"
                                             @click="openDeleteDialog(car.id)"
                                         >
-                                            <Trash2 class="mr-1.5 h-3.5 w-3.5" />
+                                            <Trash2 class="mr-1 h-3 w-3" />
                                             Delete
                                         </Button>
                                     </div>
@@ -332,10 +327,10 @@ const destroyCar = () => {
                             </tr>
 
                             <tr v-if="cars.data.length === 0">
-                                <td colspan="5" class="px-5 py-16 text-center">
-                                    <CarFront class="mx-auto h-10 w-10 text-[#9AAAC0]" />
-                                    <p class="mt-3 font-semibold text-[#101D35]">No vehicles found</p>
-                                    <p class="mt-1 text-sm text-slate-500">Try another search or status filter.</p>
+                                <td colspan="5" class="px-6 py-16 text-center">
+                                    <CarFront class="mx-auto h-10 w-10 text-slate-400" />
+                                    <p class="mt-3 font-semibold text-slate-900 dark:text-white">No vehicles found</p>
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Try another search or status filter.</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -346,23 +341,23 @@ const destroyCar = () => {
                 <nav
                     v-if="cars.links?.length"
                     aria-label="Pagination"
-                    class="flex flex-wrap items-center justify-center gap-2 border-t border-[#E2E8F0] px-4 py-5"
+                    class="flex flex-wrap items-center justify-center gap-2 border-t border-black/5 dark:border-white/10 px-4 py-4"
                 >
                     <template v-for="(link, i) in cars.links" :key="i">
                         <Link
                             v-if="link.url"
                             :href="link.url"
                             preserve-scroll
-                            class="rounded-lg border px-3 py-2 text-sm transition"
+                            class="rounded-lg border px-3 py-1.5 text-xs font-medium transition"
                             :class="link.active
-                                ? 'border-[#101D35] bg-[#101D35] font-semibold text-white'
-                                : 'border-[#C5D0DE] bg-white text-[#263F60] hover:bg-[#F4F6FA]'"
+                                ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]'
+                                : 'border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10'"
                         >
                             <span v-html="link.label"></span>
                         </Link>
                         <span
                             v-else
-                            class="pointer-events-none rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm text-slate-400 opacity-60"
+                            class="pointer-events-none rounded-lg border border-black/5 dark:border-white/5 px-3 py-1.5 text-xs text-slate-400 opacity-60"
                         >
                             <span v-html="link.label"></span>
                         </span>
@@ -373,13 +368,13 @@ const destroyCar = () => {
 
         <!-- Delete confirmation -->
         <Dialog v-model:open="showDeleteDialog">
-            <DialogContent class="rounded-2xl sm:max-w-[425px]">
+            <DialogContent class="glass-card rounded-2xl sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle class="flex items-center gap-2 text-[#101D35]">
-                        <AlertCircle class="h-5 w-5 text-red-600" />
+                    <DialogTitle class="flex items-center gap-2 text-slate-900 dark:text-white">
+                        <AlertCircle class="h-5 w-5 text-rose-600 dark:text-rose-400" />
                         Delete vehicle?
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription class="text-slate-600 dark:text-slate-400">
                         Are you sure you want to delete this vehicle? This action cannot be undone.
                     </DialogDescription>
                 </DialogHeader>
@@ -393,14 +388,14 @@ const destroyCar = () => {
 
                 <DialogFooter class="mt-4 gap-2">
                     <DialogClose as-child>
-                        <Button variant="outline" class="rounded-lg">Cancel</Button>
+                        <Button variant="outline" class="rounded-xl border-black/10 dark:border-white/10">Cancel</Button>
                     </DialogClose>
                     <Button
                         type="button"
                         variant="destructive"
                         @click="destroyCar"
                         :disabled="!carToDelete"
-                        class="rounded-lg"
+                        class="rounded-xl"
                     >
                         Confirm delete
                     </Button>
@@ -409,4 +404,3 @@ const destroyCar = () => {
         </Dialog>
     </AdminLayout>
 </template>
-```

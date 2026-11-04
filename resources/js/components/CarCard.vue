@@ -1,15 +1,14 @@
-
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { show } from '@/routes/fleet';
-import { Star } from 'lucide-vue-next';
+import { Star, Fuel, ArrowRight, ShieldCheck, Navigation } from 'lucide-vue-next';
 
 interface Car {
     id: number;
     make: string;
     model: string;
     year: number;
-    price_per_day: string;
+    price_per_day: string | number;
     description: string;
     fuel_type: string;
     image_url: string;
@@ -40,10 +39,10 @@ const formatPrice = (price: string | number) => {
 
 <template>
     <article
-        class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl"
+        class="glass-card group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:border-white/20"
     >
-        <!-- Car image -->
-        <div class="relative h-56 overflow-hidden bg-slate-100">
+        <!-- 16:9 Staged Vehicle Visual -->
+        <div class="relative aspect-16/10 overflow-hidden bg-slate-100 dark:bg-slate-900">
             <img
                 :src="car.image_url"
                 :alt="`${car.make} ${car.model}`"
@@ -52,136 +51,103 @@ const formatPrice = (price: string | number) => {
             />
 
             <div
-                class="absolute inset-0 bg-gradient-to-t from-[#101D35]/50 via-transparent to-transparent"
+                class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
             ></div>
 
-            <div class="absolute left-4 top-4 flex items-center gap-2">
-                <div
-                    class="rounded-lg border border-white/30 bg-[#101D35]/90 px-3 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-sm"
+            <!-- Top Specs Badges -->
+            <div class="absolute left-3 top-3 flex items-center gap-1.5">
+                <span
+                    class="rounded-full border border-white/20 bg-black/45 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md"
                 >
-                    {{ car.year }} MODEL
-                </div>
+                    {{ car.year }}
+                </span>
 
                 <div
                     v-if="car.average_rating && Number(car.average_rating) > 0"
-                    class="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-black/60 px-2.5 py-1.5 text-xs font-bold text-white shadow-xs backdrop-blur-sm"
+                    class="inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/45 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md"
                 >
-                    <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                    <Star class="h-3 w-3 fill-amber-400 text-amber-400" />
                     <span>{{ Number(car.average_rating).toFixed(1) }}</span>
-                    <span v-if="car.reviews_count" class="font-normal text-white/75">
+                    <span v-if="car.reviews_count" class="font-normal text-white/70">
                         ({{ car.reviews_count }})
                     </span>
                 </div>
 
                 <div
                     v-else
-                    class="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-black/60 px-2.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm"
+                    class="inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white/80 backdrop-blur-md"
                 >
-                    <Star class="h-3.5 w-3.5 text-amber-300" />
+                    <Star class="h-3 w-3 text-amber-300" />
                     <span>New</span>
                 </div>
             </div>
 
+            <!-- Frosted Price Tag -->
             <div
-                class="absolute bottom-4 right-4 rounded-xl bg-white px-4 py-2.5 shadow-lg"
+                class="absolute bottom-3 right-3 rounded-xl border border-black/5 bg-white/95 px-3 py-1.5 shadow-md backdrop-blur-md dark:border-white/10 dark:bg-[#070A0F]/90"
             >
-                <p class="text-lg font-bold text-[#101D35]">
+                <p class="text-base font-bold tracking-tight text-slate-950 dark:text-white">
                     {{ formatPrice(car.price_per_day) }}
                 </p>
-                <p class="text-right text-xs font-medium text-slate-500">
+                <p class="text-right text-[10px] font-medium text-slate-500 dark:text-slate-400">
                     per day
                 </p>
             </div>
         </div>
 
-        <!-- Car details -->
+        <!-- Vehicle Details -->
         <div class="flex flex-1 flex-col p-5">
-            <div class="mb-3">
+            <div>
                 <p
-                    class="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#58779D]"
+                    class="text-xs font-semibold uppercase tracking-wider text-[#58779D] dark:text-[#7094BF]"
                 >
-                    Premium rental
+                    {{ car.make }}
                 </p>
 
                 <h3
-                    class="text-xl font-bold text-[#101D35] transition-colors group-hover:text-[#58779D]"
+                    class="mt-1 text-lg font-bold tracking-tight text-slate-950 transition-colors group-hover:text-[#58779D] dark:text-white dark:group-hover:text-[#7094BF]"
                 >
-                    {{ car.make }} {{ car.model }}
+                    {{ car.model }}
                 </h3>
             </div>
 
-            <!-- Fuel type -->
-            <div class="mb-4 flex flex-wrap items-center gap-2">
+            <!-- Features Pills -->
+            <div class="my-3.5 flex flex-wrap items-center gap-1.5">
                 <span
-                    class="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium capitalize text-slate-700"
+                    class="inline-flex items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-100/70 px-2.5 py-1 text-xs font-medium capitalize text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                 >
-                    <svg
-                        class="h-4 w-4 text-[#58779D]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z"
-                        />
-                    </svg>
+                    <Fuel class="h-3 w-3 text-[#58779D] dark:text-[#7094BF]" />
                     {{ car.fuel_type }}
                 </span>
 
                 <span
-                    class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600"
+                    class="inline-flex items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-100/70 px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                 >
-                    GPS included
+                    <Navigation class="h-3 w-3 text-[#58779D] dark:text-[#7094BF]" />
+                    GPS
                 </span>
 
                 <span
-                    class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600"
+                    class="inline-flex items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-100/70 px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                 >
-                    Insurance included
+                    <ShieldCheck class="h-3 w-3 text-[#58779D] dark:text-[#7094BF]" />
+                    Insured
                 </span>
             </div>
 
             <!-- Description -->
-            <p class="mb-5 line-clamp-2 flex-1 text-sm leading-6 text-slate-600">
-                {{ car.description || 'Enjoy a comfortable and convenient journey with this rental vehicle.' }}
+            <p class="mb-5 line-clamp-2 flex-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                {{ car.description || 'Pristine condition, verified mechanics, and sanitized cabin ready for dispatch.' }}
             </p>
 
-            <!-- Booking button -->
+            <!-- Reserve Action -->
             <button
                 type="button"
                 @click="bookCar(car.id)"
-                class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#101D35] px-5 py-3.5 font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-2"
+                class="apple-btn-primary flex w-full items-center justify-center gap-2 py-2.5 text-xs font-semibold"
             >
-                <svg
-                    class="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                </svg>
-                Book This Car
-                <svg
-                    class="h-4 w-4 transition-transform group-hover:translate-x-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5 12h14m-7-7 7 7-7 7"
-                    />
-                </svg>
+                <span>Reserve Vehicle</span>
+                <ArrowRight class="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </button>
         </div>
     </article>

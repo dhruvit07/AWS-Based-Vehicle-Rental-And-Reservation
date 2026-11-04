@@ -90,12 +90,14 @@ onBeforeUnmount(() => {
                 v-if="toast"
                 role="status"
                 aria-live="polite"
-                class="fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 rounded-xl border bg-[#101D35] p-4 text-white shadow-2xl sm:right-6 sm:top-6 sm:max-w-md"
-                :class="toast.type === 'error' ? 'border-rose-500/40 shadow-rose-950/20' : 'border-[#58779D]/40 shadow-slate-950/30'"
+                class="fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 rounded-2xl border backdrop-blur-2xl p-4 shadow-xl sm:right-6 sm:top-6 sm:max-w-md"
+                :class="toast.type === 'error'
+                    ? 'border-rose-500/30 bg-white/95 text-slate-900 shadow-rose-950/10 dark:border-rose-500/30 dark:bg-[#0F1724]/95 dark:text-white'
+                    : 'border-emerald-500/30 bg-white/95 text-slate-900 shadow-slate-950/10 dark:border-emerald-500/30 dark:bg-[#0F1724]/95 dark:text-white'"
             >
                 <div
                     class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-                    :class="toast.type === 'error' ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'"
+                    :class="toast.type === 'error' ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'"
                 >
                     <CheckCircle2 v-if="toast.type === 'success'" class="h-4 w-4" />
                     <AlertCircle v-else class="h-4 w-4" />
@@ -104,18 +106,18 @@ onBeforeUnmount(() => {
                 <div class="min-w-0 flex-1 pt-0.5">
                     <p
                         class="text-xs font-semibold uppercase tracking-wider"
-                        :class="toast.type === 'error' ? 'text-rose-300' : 'text-[#C5D0DE]'"
+                        :class="toast.type === 'error' ? 'text-rose-600 dark:text-rose-400' : 'text-[#58779D] dark:text-[#7094BF]'"
                     >
-                        {{ toast.type === 'error' ? 'Error' : 'Success' }}
+                        {{ toast.type === 'error' ? 'Notice' : 'Success' }}
                     </p>
-                    <p class="mt-0.5 text-sm font-medium leading-snug text-white/95 break-words">
+                    <p class="mt-0.5 text-sm font-medium leading-snug text-slate-800 dark:text-slate-200 break-words">
                         {{ toast.text }}
                     </p>
                 </div>
 
                 <button
                     type="button"
-                    class="shrink-0 rounded-md p-1 text-[#C5D0DE] opacity-80 transition hover:bg-white/10 hover:text-white hover:opacity-100 focus:outline-none"
+                    class="shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white focus:outline-none"
                     aria-label="Dismiss notification"
                     @click="dismiss"
                 >

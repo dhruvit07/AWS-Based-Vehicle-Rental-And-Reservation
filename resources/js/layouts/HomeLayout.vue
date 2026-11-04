@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
@@ -6,6 +5,8 @@ import { login, register } from '@/routes';
 import { index as adminCarsIndex } from '@/routes/admin/cars/index';
 import { index as clientReservationsIndex } from '@/routes/client/reservations/index';
 import { home, fleet, about, contact } from '@/routes';
+import ThemeToggle from '@/components/ThemeToggle.vue';
+import { Car, LayoutDashboard, ArrowRight, Phone, Mail, Compass } from 'lucide-vue-next';
 
 const page = usePage();
 
@@ -24,209 +25,208 @@ const isActive = (path: string) => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#F4F6FA] text-[#101D35]">
+    <div class="min-h-screen bg-[#FBFBFD] text-slate-900 antialiased transition-colors duration-200 dark:bg-[#070A0F] dark:text-slate-100">
         <!-- Navigation -->
-        <header class="sticky top-0 z-50 border-b border-[#DCE3ED] bg-white/95 shadow-sm backdrop-blur-xl">
+        <header class="glass-nav">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <nav class="flex min-h-[76px] items-center justify-between gap-4">
+                <nav class="flex min-h-[72px] items-center justify-between gap-4">
 
                     <!-- Logo -->
-                    <Link :href="home()" class="flex shrink-0 items-center gap-3">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#101D35] shadow-lg shadow-blue-950/15">
-                            <svg class="h-7 w-7 text-[#C5D0DE]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5a2 2 0 012-1.4h10A2 2 0 0119 8l2 5v5h-2v-2H5v2H3v-5z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13h14M7 10h.01M17 10h.01"/>
-                            </svg>
+                    <Link :href="home()" class="group flex shrink-0 items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#101D35] text-white shadow-sm transition-transform duration-200 group-hover:scale-105 dark:bg-white dark:text-slate-950">
+                            <Car class="h-5 w-5" stroke-width="2" />
                         </div>
                         <div>
-                            <p class="text-lg font-black leading-tight tracking-tight text-[#101D35]">
-                                REAL<span class="text-[#657F9E]">RENT</span>
+                            <p class="text-base font-bold tracking-tight text-slate-950 dark:text-white">
+                                REAL<span class="text-[#58779D] dark:text-[#7094BF]">RENT</span>
                             </p>
-                            <p class="mt-1 text-[9px] font-bold tracking-[0.28em] text-slate-500">
+                            <p class="text-[9px] font-semibold tracking-[0.24em] text-slate-500 dark:text-slate-400">
                                 PREMIUM MOBILITY
                             </p>
                         </div>
                     </Link>
 
                     <!-- Desktop Navigation -->
-                    <div class="hidden items-center gap-1 lg:flex">
+                    <div class="hidden items-center gap-1.5 lg:flex">
                         <Link
                             :href="home()"
-                            :class="isActive('/') ? 'bg-[#101D35] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-[#101D35]'"
-                            class="rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+                            :class="isActive('/') ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 font-medium'"
+                            class="rounded-xl px-4 py-2 text-sm transition-all"
                         >
                             Home
                         </Link>
 
                         <Link
                             :href="fleet()"
-                            :class="isActive('/fleet') ? 'bg-[#101D35] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-[#101D35]'"
-                            class="rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+                            :class="isActive('/fleet') ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 font-medium'"
+                            class="rounded-xl px-4 py-2 text-sm transition-all"
                         >
                             Our Fleet
                         </Link>
 
                         <Link
                             :href="about()"
-                            :class="isActive('/about') ? 'bg-[#101D35] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-[#101D35]'"
-                            class="rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+                            :class="isActive('/about') ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 font-medium'"
+                            class="rounded-xl px-4 py-2 text-sm transition-all"
                         >
                             About Us
                         </Link>
 
                         <Link
                             :href="contact()"
-                            :class="isActive('/contact') ? 'bg-[#101D35] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-[#101D35]'"
-                            class="rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+                            :class="isActive('/contact') ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 font-medium'"
+                            class="rounded-xl px-4 py-2 text-sm transition-all"
                         >
                             Contact
                         </Link>
                     </div>
 
-                    <!-- Authentication -->
+                    <!-- Right Controls: Theme Toggle & Authentication -->
                     <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+                        <ThemeToggle />
+
                         <Link
                             v-if="page.props.auth?.user"
                             :href="dashboardLink"
-                            class="inline-flex items-center gap-2 rounded-xl border border-[#DCE3ED] bg-[#F4F6FA] px-3 py-2.5 text-sm font-bold text-[#101D35] transition hover:border-[#101D35] hover:bg-[#E9EEF5] sm:px-5"
+                            class="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-900 shadow-xs transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 sm:px-4 sm:text-sm"
                         >
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-                                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-                                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-                                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
-                            </svg>
+                            <LayoutDashboard class="h-4 w-4" />
                             <span class="hidden sm:inline">Dashboard</span>
                         </Link>
 
                         <template v-else>
                             <Link
                                 :href="login()"
-                                class="rounded-xl px-2 py-2.5 text-sm font-bold text-[#101D35] transition hover:bg-slate-100 sm:px-4"
+                                class="rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-black/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white sm:px-4 sm:text-sm"
                             >
                                 Sign In
                             </Link>
 
                             <Link
                                 :href="register()"
-                                class="rounded-xl bg-[#101D35] px-3 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-950/15 transition hover:bg-[#263F60] sm:px-5"
+                                class="apple-btn-primary px-3.5 py-2 text-xs font-semibold sm:px-4 sm:text-sm"
                             >
-                                <span class="hidden sm:inline">Get Started</span>
-                                <span class="sm:hidden">Join</span>
+                                <span>Get Started</span>
                             </Link>
                         </template>
                     </div>
                 </nav>
 
-                <!-- Mobile Navigation -->
-                <div class="flex gap-2 overflow-x-auto pb-3 lg:hidden">
-                    <Link :href="home()" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold" :class="isActive('/') ? 'bg-[#101D35] text-white' : 'bg-slate-100 text-slate-700'">
+                <!-- Mobile Navigation Bar -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-3 pt-1 lg:hidden">
+                    <Link
+                        :href="home()"
+                        class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition"
+                        :class="isActive('/') ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950' : 'bg-slate-100 text-slate-700 dark:bg-white/5 dark:text-slate-300'"
+                    >
                         Home
                     </Link>
-                    <Link :href="fleet()" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold" :class="isActive('/fleet') ? 'bg-[#101D35] text-white' : 'bg-slate-100 text-slate-700'">
+                    <Link
+                        :href="fleet()"
+                        class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition"
+                        :class="isActive('/fleet') ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950' : 'bg-slate-100 text-slate-700 dark:bg-white/5 dark:text-slate-300'"
+                    >
                         Our Fleet
                     </Link>
-                    <Link :href="about()" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold" :class="isActive('/about') ? 'bg-[#101D35] text-white' : 'bg-slate-100 text-slate-700'">
+                    <Link
+                        :href="about()"
+                        class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition"
+                        :class="isActive('/about') ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950' : 'bg-slate-100 text-slate-700 dark:bg-white/5 dark:text-slate-300'"
+                    >
                         About
                     </Link>
-                    <Link :href="contact()" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold" :class="isActive('/contact') ? 'bg-[#101D35] text-white' : 'bg-slate-100 text-slate-700'">
+                    <Link
+                        :href="contact()"
+                        class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition"
+                        :class="isActive('/contact') ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950' : 'bg-slate-100 text-slate-700 dark:bg-white/5 dark:text-slate-300'"
+                    >
                         Contact
                     </Link>
                 </div>
             </div>
         </header>
 
-        <!-- Current Page -->
+        <!-- Current Page Content -->
         <main class="min-h-[60vh]">
             <slot />
         </main>
 
-        <!-- Footer -->
-        <footer class="bg-[#101D35] text-white">
-            <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <!-- Obsidian Dark Footer -->
+        <footer class="border-t border-white/10 bg-[#070A0F] text-slate-300">
+            <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+                <div class="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
 
-                <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-
-                    <!-- Brand -->
-                    <div>
+                    <!-- Brand Column -->
+                    <div class="space-y-4">
                         <Link :href="home()" class="inline-flex items-center gap-3">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/10">
-                                <svg class="h-7 w-7 text-[#C5D0DE]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5a2 2 0 012-1.4h10A2 2 0 0119 8l2 5v5h-2v-2H5v2H3v-5z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13h14"/>
-                                </svg>
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white">
+                                <Car class="h-5 w-5" stroke-width="2" />
                             </div>
                             <div>
-                                <h2 class="text-xl font-black tracking-tight">
-                                    REAL<span class="text-[#A9BDD5]">RENT</span>
+                                <h2 class="text-lg font-bold tracking-tight text-white">
+                                    REAL<span class="text-[#7094BF]">RENT</span>
                                 </h2>
-                                <p class="text-[9px] font-bold tracking-[0.28em] text-slate-400">PREMIUM MOBILITY</p>
+                                <p class="text-[9px] font-semibold tracking-[0.24em] text-slate-400">PREMIUM MOBILITY</p>
                             </div>
                         </Link>
 
-                        <p class="mt-5 max-w-xs text-sm leading-7 text-slate-400">
-                            Discover the freedom of the road with a reliable fleet,
-                            transparent pricing, and a smoother rental experience.
+                        <p class="max-w-xs text-sm leading-relaxed text-slate-400">
+                            Pioneering luxury automotive rental with transparent terms, frictionless booking, and concierge-level service.
                         </p>
                     </div>
 
-                    <!-- Quick Links -->
+                    <!-- Navigation Links -->
                     <div>
-                        <h3 class="text-sm font-bold uppercase tracking-[0.18em] text-[#C5D0DE]">
+                        <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-200">
                             Explore
                         </h3>
-                        <ul class="mt-5 space-y-3 text-sm text-slate-400">
+                        <ul class="mt-4 space-y-3 text-sm text-slate-400">
                             <li><Link :href="home()" class="transition hover:text-white">Home</Link></li>
-                            <li><Link :href="fleet()" class="transition hover:text-white">Browse Our Fleet</Link></li>
+                            <li><Link :href="fleet()" class="transition hover:text-white">Browse Fleet</Link></li>
                             <li><Link :href="about()" class="transition hover:text-white">About Us</Link></li>
-                            <li><Link :href="contact()" class="transition hover:text-white">Contact Us</Link></li>
+                            <li><Link :href="contact()" class="transition hover:text-white">Contact & Support</Link></li>
                         </ul>
                     </div>
 
                     <!-- Services -->
                     <div>
-                        <h3 class="text-sm font-bold uppercase tracking-[0.18em] text-[#C5D0DE]">
-                            Our Services
+                        <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-200">
+                            Experience
                         </h3>
-                        <ul class="mt-5 space-y-3 text-sm text-slate-400">
-                            <li>Daily Car Rentals</li>
-                            <li>Premium Vehicles</li>
-                            <li>Flexible Reservations</li>
-                            <li>Customer Support</li>
+                        <ul class="mt-4 space-y-3 text-sm text-slate-400">
+                            <li>Pre-Inspected Fleet</li>
+                            <li>Zero Hidden Fees</li>
+                            <li>Instant Overlap Verification</li>
+                            <li>24/7 Roadside Concierge</li>
                         </ul>
                     </div>
 
-                    <!-- Contact -->
-                    <div>
-                        <h3 class="text-sm font-bold uppercase tracking-[0.18em] text-[#C5D0DE]">
-                            Get in Touch
+                    <!-- Direct Contact -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-200">
+                            Assistance
                         </h3>
-                        <div class="mt-5 space-y-4 text-sm text-slate-400">
-                            <p class="flex items-start gap-3">
-                                <svg class="mt-0.5 h-5 w-5 shrink-0 text-[#A9BDD5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.3a1 1 0 011.9 1.3l1.2 3.7a2 2 0 01-1 2.3l-2.2 1.1a11 11 0 005.5 5.5l1.1-2.2a2 2 0 012.3-1l3.7 1.2a2 2 0 011.3 1.9V19a2 2 0 01-2 2h-1C9.7 21 3 14.3 3 6V5z"/>
-                                </svg>
-                                <span>Contact our support team</span>
-                            </p>
-                            <p class="flex items-start gap-3">
-                                <svg class="mt-0.5 h-5 w-5 shrink-0 text-[#A9BDD5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                    <rect x="3" y="5" width="18" height="14" rx="2"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6"/>
-                                </svg>
-                                <span>Send us your questions through our contact page.</span>
-                            </p>
-                            <Link :href="contact()" class="inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2.5 font-semibold text-white transition hover:bg-white/10">
-                                Contact Us
-                                <span aria-hidden="true">→</span>
-                            </Link>
-                        </div>
+                        <p class="text-sm leading-relaxed text-slate-400">
+                            Have questions or need bespoke booking arrangements? Our team is available 24/7.
+                        </p>
+                        <Link
+                            :href="contact()"
+                            class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-white/10 hover:border-white/20"
+                        >
+                            <span>Speak to Concierge</span>
+                            <ArrowRight class="h-3.5 w-3.5" />
+                        </Link>
                     </div>
                 </div>
 
-                <!-- Copyright -->
-                <div class="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-center text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:text-left">
-                    <p>© {{ new Date().getFullYear() }} RealRent. All rights reserved.</p>
-                    <p>Designed for a smoother journey.</p>
+                <!-- Bottom Bar -->
+                <div class="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                    <p>© {{ new Date().getFullYear() }} Real Rent Car. Calibrated for effortless mobility.</p>
+                    <div class="flex items-center gap-6">
+                        <Link :href="fleet()" class="hover:text-slate-300">Fleet Terms</Link>
+                        <Link :href="about()" class="hover:text-slate-300">Security & Privacy</Link>
+                        <Link :href="contact()" class="hover:text-slate-300">Help Desk</Link>
+                    </div>
                 </div>
             </div>
         </footer>

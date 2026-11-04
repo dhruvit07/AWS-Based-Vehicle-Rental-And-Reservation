@@ -28,11 +28,11 @@ const emit = defineEmits<{
 }>();
 
 const ratingLabels: Record<number, { text: string; color: string }> = {
-    1: { text: 'Terrible', color: 'text-rose-600' },
-    2: { text: 'Poor', color: 'text-amber-700' },
-    3: { text: 'Average', color: 'text-amber-600' },
-    4: { text: 'Great', color: 'text-emerald-700' },
-    5: { text: 'Exceptional!', color: 'text-emerald-600' },
+    1: { text: 'Needs Improvement', color: 'text-rose-500' },
+    2: { text: 'Below Expectations', color: 'text-amber-500' },
+    3: { text: 'Standard Experience', color: 'text-amber-500' },
+    4: { text: 'Great Drive', color: 'text-emerald-500' },
+    5: { text: 'Exceptional Journey', color: 'text-emerald-500' },
 };
 
 const form = useForm({
@@ -53,18 +53,39 @@ const activeLabel = computed(() => {
 
 const quickTags = [
     'Pristine cleanliness',
-    'Whisper quiet drive',
-    'Contactless key handover',
-    'Great fuel efficiency',
-    'Spacious boot',
+    'Quiet cabin',
+    'Contactless handover',
+    'Superb fuel efficiency',
+    'Smooth acceleration',
 ];
 
-const addQuickTag = (tag: string) => {
-    if (!form.comment) {
-        form.comment = tag + '. ';
-    } else if (!form.comment.includes(tag)) {
-        form.comment = `${form.comment.trim()} ${tag}. `;
+const appendTag = (tag: string) => {
+    if (!form.comment.includes(tag)) {
+        form.comment = form.comment ? `${form.comment.trim()}. ${tag}` : tag;
     }
+};
+
+const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+};
+
+const submitReview = () => {
+    if (!props.reservation) return;
+
+    form.post(`/reservations/${props.reservation.id}/reviews`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            form.reset();
+            emit('submitted');
+            emit('close');
+        },
+    });
 };
 
 watch(
@@ -73,99 +94,64 @@ watch(
         if (open) {
             form.reset();
             form.rating = 5;
-            form.clearErrors();
             hoveredRating.value = 0;
         }
     }
 );
-
-const formatDate = (date?: string) => {
-    if (!date) return '';
-    const parsed = new Date(date.slice(0, 10) + 'T00:00:00');
-    return Number.isNaN(parsed.getTime())
-        ? date
-        : new Intl.DateTimeFormat('en-IN', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-          }).format(parsed);
-};
-
-const submitReview = () => {
-    if (!props.reservation) return;
-
-    form.post(`/client/reservations/${props.reservation.id}/reviews`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            emit('submitted');
-            emit('close');
-        },
-    });
-};
 </script>
 
 <template>
     <div
         v-if="isOpen && reservation"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        role="dialog"
+        aria-modal="true"
     >
         <!-- Backdrop -->
         <div
-            class="fixed inset-0 bg-[#101D35]/70 backdrop-blur-xs transition-opacity"
-            @click="emit('close')"
+            class="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity"
+            @click="!form.processing && emit('close')"
         ></div>
 
-        <!-- Modal Card -->
+        <!-- Modal Dialog -->
         <div
-            class="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="review-modal-title"
+            class="relative w-full max-w-lg overflow-hidden rounded-2xl border border-black/10 bg-white text-slate-900 shadow-2xl transition-all dark:border-white/10 dark:bg-[#0F1724] dark:text-white"
         >
             <!-- Header -->
-            <div class="flex items-center justify-between border-b border-slate-200 bg-[#101D35] px-6 py-4 text-white">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-amber-400">
-                        <Star class="h-5 w-5 fill-amber-400" />
-                    </div>
-                    <div>
-                        <h2 id="review-modal-title" class="text-base font-bold text-white sm:text-lg">
-                            Rate Your Trip Experience
-                        </h2>
-                        <p class="text-xs text-slate-300">
-                            Verified Renter Review • {{ reservation.reservation_number }}
-                        </p>
-                    </div>
+            <div class="flex items-center justify-between border-b border-black/10 bg-[#101D35] px-6 py-5 text-white dark:border-white/10 dark:bg-[#070A0F]">
+                <div>
+                    <h3 class="text-base font-bold text-white">Rate Your Journey</h3>
+                    <p class="text-xs text-slate-300">Share your impressions with future drivers</p>
                 </div>
 
                 <button
                     type="button"
-                    class="rounded-lg p-1.5 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none"
+                    :disabled="form.processing"
                     @click="emit('close')"
+                    class="rounded-lg p-1.5 text-slate-300 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
                 >
                     <X class="h-5 w-5" />
-                    <span class="sr-only">Close</span>
                 </button>
             </div>
 
             <!-- Vehicle & Trip Banner -->
-            <div class="flex items-center gap-4 border-b border-slate-100 bg-[#F4F6FA] p-4 sm:px-6">
+            <div class="flex items-center gap-4 border-b border-slate-200/80 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5 sm:px-6">
                 <img
                     v-if="reservation.car?.image_url"
                     :src="reservation.car.image_url"
                     :alt="reservation.car.make + ' ' + reservation.car.model"
-                    class="h-14 w-20 rounded-xl object-cover ring-1 ring-slate-200"
+                    class="h-12 w-16 rounded-xl object-cover ring-1 ring-black/5 dark:ring-white/10"
                 />
                 <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-bold text-[#101D35]">
+                    <p class="truncate text-xs font-bold text-slate-950 dark:text-white">
                         {{ reservation.car ? `${reservation.car.year || ''} ${reservation.car.make} ${reservation.car.model}` : 'Rental Vehicle' }}
                     </p>
-                    <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-600">
-                        <span class="inline-flex items-center gap-1 font-medium text-[#58779D]">
-                            <Calendar class="h-3.5 w-3.5" />
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                        <span class="inline-flex items-center gap-1 font-medium text-[#58779D] dark:text-[#7094BF]">
+                            <Calendar class="h-3 w-3" />
                             {{ formatDate(reservation.start_date) }} – {{ formatDate(reservation.end_date) }}
                         </span>
-                        <span class="inline-flex items-center gap-1 rounded-md bg-emerald-100/80 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
+                        <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
                             <ShieldCheck class="h-3 w-3" />
                             Completed
                         </span>
@@ -174,14 +160,14 @@ const submitReview = () => {
             </div>
 
             <!-- Form -->
-            <form class="space-y-5 p-6" @submit.prevent="submitReview">
+            <form class="space-y-4 p-6" @submit.prevent="submitReview">
                 <!-- Star Rating Selector -->
-                <div class="text-center sm:text-left">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-[#58779D]">
-                        Overall Rating *
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Rating *
                     </label>
 
-                    <div class="mt-2.5 flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+                    <div class="mt-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div
                             class="flex items-center gap-1.5"
                             role="radiogroup"
@@ -192,116 +178,103 @@ const submitReview = () => {
                                 v-for="star in 5"
                                 :key="star"
                                 type="button"
-                                class="rounded-sm p-1 transition-transform hover:scale-120 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                                class="rounded-sm p-1 transition-transform hover:scale-110 focus:outline-none"
                                 :aria-label="`${star} star${star > 1 ? 's' : ''}`"
                                 @mouseenter="hoveredRating = star"
                                 @click="form.rating = star"
                             >
                                 <Star
-                                    class="h-7 w-7 transition-colors duration-150"
+                                    class="h-6 w-6 transition-colors duration-150"
                                     :class="[
                                         star <= activeRating
-                                            ? 'fill-amber-400 text-amber-500'
-                                            : 'fill-transparent text-slate-200',
+                                            ? 'fill-amber-400 text-amber-400'
+                                            : 'fill-transparent text-slate-300 dark:text-slate-700',
                                     ]"
                                 />
                             </button>
                         </div>
 
                         <span
-                            class="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold transition-colors"
+                            class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold dark:bg-white/5"
                             :class="activeLabel.color"
                         >
                             {{ activeRating }} / 5 — {{ activeLabel.text }}
                         </span>
                     </div>
 
-                    <p v-if="form.errors.rating" class="mt-1 text-xs text-rose-600">
+                    <p v-if="form.errors.rating" class="mt-1 text-xs text-rose-500">
                         {{ form.errors.rating }}
                     </p>
                 </div>
 
                 <!-- Review Title -->
                 <div>
-                    <label for="review-title" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                        Review Title
-                        <span class="text-slate-400 font-normal lowercase">(optional)</span>
+                    <label for="review-title" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Title (Optional)
                     </label>
                     <input
                         id="review-title"
                         v-model="form.title"
                         type="text"
                         maxlength="100"
-                        placeholder="e.g. Exceptional weekend road trip!"
-                        class="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-[#101D35] placeholder:text-slate-400 focus:border-[#58779D] focus:outline-none focus:ring-2 focus:ring-[#58779D]/20"
-                        :class="{ 'border-rose-400': form.errors.title }"
+                        placeholder="e.g. Flawless weekend road trip"
+                        class="apple-input mt-1.5 w-full px-3.5 py-2 text-xs"
                     />
-                    <p v-if="form.errors.title" class="mt-1 text-xs text-rose-600">
-                        {{ form.errors.title }}
-                    </p>
                 </div>
 
                 <!-- Review Comment -->
                 <div>
-                    <div class="flex items-center justify-between">
-                        <label for="review-comment" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                            Your Experience *
-                        </label>
-                        <span class="text-xs text-slate-400">
-                            {{ form.comment.length }} / 1000
-                        </span>
-                    </div>
-
+                    <label for="review-comment" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Feedback *
+                    </label>
                     <textarea
                         id="review-comment"
                         v-model="form.comment"
-                        rows="4"
-                        maxlength="1000"
+                        rows="3"
                         required
-                        placeholder="Describe the vehicle cleanliness, handover, driving feel, and comfort..."
-                        class="mt-1.5 w-full rounded-xl border border-slate-300 bg-white p-3.5 text-sm text-[#101D35] placeholder:text-slate-400 focus:border-[#58779D] focus:outline-none focus:ring-2 focus:ring-[#58779D]/20"
-                        :class="{ 'border-rose-400': form.errors.comment }"
+                        minlength="5"
+                        maxlength="1000"
+                        placeholder="Detail the vehicle handover, cabin condition, ride comfort, and overall impressions..."
+                        class="apple-input mt-1.5 w-full px-3.5 py-2 text-xs leading-relaxed"
                     ></textarea>
-                    <p v-if="form.errors.comment" class="mt-1 text-xs text-rose-600">
+                    <p v-if="form.errors.comment" class="mt-1 text-xs text-rose-500">
                         {{ form.errors.comment }}
                     </p>
+                </div>
 
-                    <!-- Quick Suggestions -->
-                    <div class="mt-2.5 flex flex-wrap gap-1.5">
+                <!-- Quick Tags -->
+                <div>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Quick highlights:</span>
+                    <div class="mt-1.5 flex flex-wrap gap-1.5">
                         <button
                             v-for="tag in quickTags"
                             :key="tag"
                             type="button"
-                            class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-100"
-                            @click="addQuickTag(tag)"
+                            @click="appendTag(tag)"
+                            class="rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
                         >
                             + {{ tag }}
                         </button>
                     </div>
                 </div>
 
-                <!-- Error notice from backend -->
-                <div v-if="(form.errors as any).reservation" class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
-                    {{ (form.errors as any).reservation }}
-                </div>
-
-                <!-- Footer Actions -->
-                <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+                <!-- Actions -->
+                <div class="flex items-center justify-end gap-2 pt-2">
                     <button
                         type="button"
-                        class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                        :disabled="form.processing"
                         @click="emit('close')"
+                        class="rounded-xl px-4 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
                     >
                         Cancel
                     </button>
-
                     <button
                         type="submit"
                         :disabled="form.processing || form.comment.trim().length < 5"
-                        class="inline-flex items-center gap-2 rounded-xl bg-[#101D35] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300"
+                        class="apple-btn-primary px-5 py-2 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <CheckCircle2 v-if="!form.processing" class="h-4 w-4" />
-                        <span>{{ form.processing ? 'Submitting...' : 'Post Verified Review' }}</span>
+                        <span v-if="form.processing" class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                        <span v-else>Publish Review</span>
                     </button>
                 </div>
             </form>

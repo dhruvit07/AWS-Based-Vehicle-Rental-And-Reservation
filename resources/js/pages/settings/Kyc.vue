@@ -136,25 +136,25 @@ const formatDate = (val?: string | null) => {
                 <!-- State: Verified -->
                 <div
                     v-if="status === 'verified'"
-                    class="rounded-xl border border-emerald-200 bg-emerald-50/90 p-5 text-emerald-900"
+                    class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5 text-emerald-900 dark:text-emerald-200 backdrop-blur-md"
                 >
                     <div class="flex items-start gap-3.5">
-                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-xs">
                             <ShieldCheck class="h-5 w-5" />
                         </div>
                         <div class="flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <h3 class="text-base font-bold text-emerald-950">
+                                <h3 class="text-base font-bold text-emerald-950 dark:text-emerald-100">
                                     Verified Driver
                                 </h3>
-                                <span class="rounded-full bg-emerald-200/80 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                                <span class="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
                                     Approved
                                 </span>
                             </div>
-                            <p class="mt-1 text-sm text-emerald-800">
+                            <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-300/90 leading-relaxed">
                                 Your driving credentials are confirmed. You are fully eligible for priority vehicle pickup at any station.
                             </p>
-                            <p v-if="kyc.verified_at" class="mt-2 text-xs text-emerald-700">
+                            <p v-if="kyc.verified_at" class="mt-2 text-xs text-emerald-700 dark:text-emerald-400">
                                 Verified on {{ formatDate(kyc.verified_at) }}
                             </p>
                         </div>
@@ -164,25 +164,25 @@ const formatDate = (val?: string | null) => {
                 <!-- State: Pending Review -->
                 <div
                     v-else-if="status === 'pending'"
-                    class="rounded-xl border border-amber-200 bg-amber-50/90 p-5 text-amber-900"
+                    class="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5 text-amber-900 dark:text-amber-200 backdrop-blur-md"
                 >
                     <div class="flex items-start gap-3.5">
-                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
+                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
                             <Clock class="h-5 w-5" />
                         </div>
                         <div class="flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <h3 class="text-base font-bold text-amber-950">
+                                <h3 class="text-base font-bold text-amber-950 dark:text-amber-100">
                                     Documents Under Review
                                 </h3>
-                                <span class="rounded-full bg-amber-200/80 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
+                                <span class="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-900 dark:text-amber-300">
                                     Pending Inspection
                                 </span>
                             </div>
-                            <p class="mt-1 text-sm text-amber-800">
+                            <p class="mt-1 text-sm text-amber-800 dark:text-amber-300/90 leading-relaxed">
                                 Your submitted driving license is currently being reviewed by our verification team. Reviews are typically completed within 15–30 minutes.
                             </p>
-                            <p class="mt-2 text-xs text-amber-700">
+                            <p class="mt-2 text-xs text-amber-700 dark:text-amber-400">
                                 You can update your submission below at any time if you notice an error.
                             </p>
                         </div>
@@ -192,28 +192,28 @@ const formatDate = (val?: string | null) => {
                 <!-- State: Rejected -->
                 <div
                     v-else-if="status === 'rejected'"
-                    class="rounded-xl border border-rose-200 bg-rose-50/90 p-5 text-rose-900"
+                    class="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-5 text-rose-900 dark:text-rose-200 backdrop-blur-md"
                 >
                     <div class="flex items-start gap-3.5">
-                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-600 text-white">
+                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-600 text-white shadow-xs">
                             <ShieldAlert class="h-5 w-5" />
                         </div>
                         <div class="flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <h3 class="text-base font-bold text-rose-950">
+                                <h3 class="text-base font-bold text-rose-950 dark:text-rose-100">
                                     Verification Action Required
                                 </h3>
-                                <span class="rounded-full bg-rose-200/80 px-2.5 py-0.5 text-xs font-semibold text-rose-900">
+                                <span class="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-900 dark:text-rose-300">
                                     Needs Re-submission
                                 </span>
                             </div>
-                            <p class="mt-1 text-sm text-rose-800">
+                            <p class="mt-1 text-sm text-rose-800 dark:text-rose-300/90">
                                 Your documents could not be approved due to the following reason:
                             </p>
-                            <div class="mt-2.5 rounded-lg border border-rose-200 bg-white/70 p-3 text-sm font-medium text-rose-950">
+                            <div class="mt-2.5 rounded-xl border border-rose-500/20 bg-white/70 dark:bg-black/30 p-3.5 text-sm font-medium text-rose-950 dark:text-rose-200">
                                 "{{ kyc.rejection_reason || 'Document photo was unreadable or details did not match.' }}"
                             </div>
-                            <p class="mt-2 text-xs text-rose-700">
+                            <p class="mt-2 text-xs text-rose-700 dark:text-rose-400">
                                 Please check the feedback above, upload clearer photos, and re-submit for review.
                             </p>
                         </div>
@@ -223,17 +223,17 @@ const formatDate = (val?: string | null) => {
                 <!-- State: Unsubmitted -->
                 <div
                     v-else
-                    class="rounded-xl border border-slate-200 bg-[#F4F6FA] p-5 text-slate-800"
+                    class="rounded-2xl border border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] p-5 text-slate-800 dark:text-slate-200"
                 >
                     <div class="flex items-start gap-3.5">
-                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#101D35] text-white">
+                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#101D35] dark:bg-white/10 text-white">
                             <CreditCard class="h-5 w-5" />
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-base font-bold text-[#101D35]">
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">
                                 Driving License Required for Car Pickups
                             </h3>
-                            <p class="mt-1 text-sm text-slate-600">
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Upload a clear copy of your government-issued driver's license. Our team verifies your credentials in advance so you can walk straight to your car at pickup.
                             </p>
                         </div>
@@ -245,7 +245,7 @@ const formatDate = (val?: string | null) => {
                     <!-- License Number & Expiry Grid -->
                     <div class="grid gap-5 sm:grid-cols-2">
                         <div class="grid gap-2">
-                            <Label for="license_number" class="text-sm font-semibold text-[#101D35]">
+                            <Label for="license_number" class="text-sm font-medium text-slate-900 dark:text-slate-200">
                                 License Number *
                             </Label>
                             <Input
@@ -255,13 +255,13 @@ const formatDate = (val?: string | null) => {
                                 maxlength="50"
                                 required
                                 placeholder="e.g. DL-0420110023456"
-                                class="border-slate-300 font-mono tracking-wide focus:border-[#58779D]"
+                                class="apple-input font-mono tracking-wide"
                             />
                             <InputError :message="form.errors.license_number" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="license_expiry" class="text-sm font-semibold text-[#101D35]">
+                            <Label for="license_expiry" class="text-sm font-medium text-slate-900 dark:text-slate-200">
                                 Expiration Date *
                             </Label>
                             <Input
@@ -269,7 +269,7 @@ const formatDate = (val?: string | null) => {
                                 v-model="form.license_expiry"
                                 type="date"
                                 required
-                                class="border-slate-300 focus:border-[#58779D]"
+                                class="apple-input"
                             />
                             <InputError :message="form.errors.license_expiry" />
                         </div>
@@ -295,26 +295,26 @@ const formatDate = (val?: string | null) => {
                     <div class="grid gap-5 sm:grid-cols-2">
                         <!-- Front Card -->
                         <div class="flex flex-col">
-                            <Label class="mb-2 text-sm font-semibold text-[#101D35]">
+                            <Label class="mb-2 text-sm font-medium text-slate-900 dark:text-slate-200">
                                 License Front Photo *
                             </Label>
 
                             <!-- Preview mode -->
                             <div
                                 v-if="frontPreview"
-                                class="group relative flex h-48 w-full flex-col items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-2xs"
+                                class="group relative flex h-48 w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-slate-900 shadow-2xs"
                             >
                                 <img
                                     :src="frontPreview"
                                     alt="Front License Preview"
-                                    class="h-full w-full object-cover transition duration-200 group-hover:scale-102 group-hover:opacity-85"
+                                    class="h-full w-full object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-80"
                                 />
-                                <div class="absolute inset-0 flex items-center justify-center gap-2 bg-[#101D35]/40 opacity-0 transition group-hover:opacity-100">
+                                <div class="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 backdrop-blur-xs opacity-0 transition group-hover:opacity-100">
                                     <Button
                                         type="button"
                                         size="sm"
                                         variant="secondary"
-                                        class="h-8 gap-1.5 bg-white text-xs font-semibold text-[#101D35] hover:bg-slate-100"
+                                        class="h-8 gap-1.5 bg-white text-xs font-semibold text-slate-900 hover:bg-slate-100"
                                         @click="triggerFrontUpload"
                                     >
                                         <RefreshCw class="h-3.5 w-3.5" />
@@ -330,7 +330,7 @@ const formatDate = (val?: string | null) => {
                                         <X class="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <span class="absolute bottom-2 left-2 rounded-md bg-[#101D35]/80 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-xs">
+                                <span class="absolute bottom-2.5 left-2.5 rounded-md bg-black/70 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-md">
                                     Front Side
                                 </span>
                             </div>
@@ -338,16 +338,16 @@ const formatDate = (val?: string | null) => {
                             <!-- Dropzone mode -->
                             <div
                                 v-else
-                                class="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white p-5 text-center transition hover:border-[#58779D] hover:bg-[#F4F6FA]"
+                                class="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-black/15 dark:border-white/15 bg-slate-50/50 dark:bg-white/[0.02] p-5 text-center transition hover:border-[#58779D] dark:hover:border-[#7094BF] hover:bg-slate-100/60 dark:hover:bg-white/[0.05]"
                                 @click="triggerFrontUpload"
                             >
-                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#58779D]">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200/70 dark:bg-white/10 text-[#58779D] dark:text-[#7094BF]">
                                     <UploadCloud class="h-5 w-5" />
                                 </div>
-                                <p class="mt-2.5 text-sm font-semibold text-[#101D35]">
+                                <p class="mt-2.5 text-sm font-semibold text-slate-900 dark:text-white">
                                     Upload Front Side
                                 </p>
-                                <p class="mt-1 text-xs text-slate-500">
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     JPG, PNG, or WEBP up to 5MB
                                 </p>
                             </div>
@@ -357,26 +357,26 @@ const formatDate = (val?: string | null) => {
 
                         <!-- Back Card -->
                         <div class="flex flex-col">
-                            <Label class="mb-2 text-sm font-semibold text-[#101D35]">
+                            <Label class="mb-2 text-sm font-medium text-slate-900 dark:text-slate-200">
                                 License Back Photo *
                             </Label>
 
                             <!-- Preview mode -->
                             <div
                                 v-if="backPreview"
-                                class="group relative flex h-48 w-full flex-col items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-2xs"
+                                class="group relative flex h-48 w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-slate-900 shadow-2xs"
                             >
                                 <img
                                     :src="backPreview"
                                     alt="Back License Preview"
-                                    class="h-full w-full object-cover transition duration-200 group-hover:scale-102 group-hover:opacity-85"
+                                    class="h-full w-full object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-80"
                                 />
-                                <div class="absolute inset-0 flex items-center justify-center gap-2 bg-[#101D35]/40 opacity-0 transition group-hover:opacity-100">
+                                <div class="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 backdrop-blur-xs opacity-0 transition group-hover:opacity-100">
                                     <Button
                                         type="button"
                                         size="sm"
                                         variant="secondary"
-                                        class="h-8 gap-1.5 bg-white text-xs font-semibold text-[#101D35] hover:bg-slate-100"
+                                        class="h-8 gap-1.5 bg-white text-xs font-semibold text-slate-900 hover:bg-slate-100"
                                         @click="triggerBackUpload"
                                     >
                                         <RefreshCw class="h-3.5 w-3.5" />
@@ -392,7 +392,7 @@ const formatDate = (val?: string | null) => {
                                         <X class="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <span class="absolute bottom-2 left-2 rounded-md bg-[#101D35]/80 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-xs">
+                                <span class="absolute bottom-2.5 left-2.5 rounded-md bg-black/70 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-md">
                                     Back Side
                                 </span>
                             </div>
@@ -400,16 +400,16 @@ const formatDate = (val?: string | null) => {
                             <!-- Dropzone mode -->
                             <div
                                 v-else
-                                class="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white p-5 text-center transition hover:border-[#58779D] hover:bg-[#F4F6FA]"
+                                class="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-black/15 dark:border-white/15 bg-slate-50/50 dark:bg-white/[0.02] p-5 text-center transition hover:border-[#58779D] dark:hover:border-[#7094BF] hover:bg-slate-100/60 dark:hover:bg-white/[0.05]"
                                 @click="triggerBackUpload"
                             >
-                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#58779D]">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200/70 dark:bg-white/10 text-[#58779D] dark:text-[#7094BF]">
                                     <UploadCloud class="h-5 w-5" />
                                 </div>
-                                <p class="mt-2.5 text-sm font-semibold text-[#101D35]">
+                                <p class="mt-2.5 text-sm font-semibold text-slate-900 dark:text-white">
                                     Upload Back Side
                                 </p>
-                                <p class="mt-1 text-xs text-slate-500">
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     JPG, PNG, or WEBP up to 5MB
                                 </p>
                             </div>
@@ -419,12 +419,12 @@ const formatDate = (val?: string | null) => {
                     </div>
 
                     <!-- Guidelines note -->
-                    <div class="rounded-lg border border-slate-200 bg-slate-50/70 p-3.5 text-xs text-slate-600">
-                        <div class="flex items-center gap-2 font-semibold text-[#101D35]">
-                            <HelpCircle class="h-3.5 w-3.5 text-[#58779D]" />
+                    <div class="rounded-2xl border border-black/5 dark:border-white/10 bg-slate-50/80 dark:bg-white/[0.02] p-4 text-xs text-slate-600 dark:text-slate-400">
+                        <div class="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-200">
+                            <HelpCircle class="h-4 w-4 text-[#58779D] dark:text-[#7094BF]" />
                             <span>Verification Guidelines</span>
                         </div>
-                        <ul class="mt-2 list-inside list-disc space-y-1 text-slate-500">
+                        <ul class="mt-2 list-inside list-disc space-y-1 text-slate-500 dark:text-slate-400">
                             <li>Ensure all text, photo, and license expiration date are clearly legible.</li>
                             <li>Do not crop or conceal corners of the document. Avoid strong flash reflections.</li>
                             <li>All data is encrypted and used exclusively for rental identity verification.</li>
@@ -436,7 +436,7 @@ const formatDate = (val?: string | null) => {
                         <Button
                             type="submit"
                             :disabled="form.processing"
-                            class="bg-[#101D35] px-6 py-2.5 font-semibold text-white transition hover:bg-[#263F60]"
+                            class="apple-btn-primary h-11 px-6 text-sm font-medium"
                         >
                             {{ form.processing ? 'Submitting Documents...' : (status === 'rejected' ? 'Re-submit for Review' : 'Save & Submit Credentials') }}
                         </Button>
@@ -449,7 +449,7 @@ const formatDate = (val?: string | null) => {
                         >
                             <p
                                 v-show="form.recentlySuccessful"
-                                class="text-sm font-medium text-emerald-600"
+                                class="text-sm font-medium text-emerald-600 dark:text-emerald-400"
                             >
                                 Submitted successfully.
                             </p>

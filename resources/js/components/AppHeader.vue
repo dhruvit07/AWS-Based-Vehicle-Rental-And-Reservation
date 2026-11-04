@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/sheet';
 
 import UserMenuContent from '@/components/UserMenuContent.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 import { getInitials } from '@/composables/useInitials';
 import { toUrl, urlIsActive } from '@/lib/utils';
 import { index as reservationsIndex } from "@/routes/client/reservations/index";
@@ -159,7 +160,8 @@ const mainNavItems: NavItem[] = [
                     </NavigationMenu>
                 </div>
 
-                <div class="ml-auto flex items-center space-x-2">
+                <div class="ml-auto flex items-center space-x-3">
+                    <ThemeToggle />
                     <DropdownMenu>
                         <DropdownMenuTrigger :as-child="true">
                             <Button

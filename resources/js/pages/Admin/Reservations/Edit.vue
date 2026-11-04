@@ -1,4 +1,3 @@
-```vue
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ArrowLeft, Calendar, Car, CheckCircle2, User } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { index, update } from '@/routes/admin/reservations';
 
@@ -48,81 +48,82 @@ function submit() {
     <Head :title="`Edit Reservation ${reservation?.reservation_number || ''}`" />
 
     <AdminLayout>
-        <main class="min-h-screen space-y-7 bg-[#F4F6FA] p-4 sm:p-6 lg:p-8">
+        <main class="min-h-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
             <!-- Page Header -->
-            <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div class="glass-card flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
                 <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-[#58779D]">
-                        Reservation Management
-                    </p>
-                    <h1 class="mt-2 text-2xl font-bold tracking-tight text-[#101D35] sm:text-3xl">
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
                         Edit Reservation
                     </h1>
-                    <p class="mt-1 text-sm text-slate-500">
-                        Update booking details, rental dates, and reservation status.
+                    <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                        Update booking dates, pickup schedule, contract status, or applied concession discounts.
                     </p>
                 </div>
 
                 <Link
                     :href="index().url"
-                    class="inline-flex w-fit items-center justify-center rounded-xl border border-[#C5D0DE] bg-white px-5 py-2.5 text-sm font-semibold text-[#101D35] transition hover:bg-[#E8EDF4]"
+                    class="inline-flex w-fit items-center justify-center gap-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-slate-100/70 dark:bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-200/60 dark:hover:bg-white/10"
                 >
-                    ← Back to Reservations
+                    <ArrowLeft class="h-4 w-4" />
+                    Back to Reservations
                 </Link>
             </div>
 
-            <!-- Reservation Summary -->
+            <!-- Reservation Summary Cards -->
             <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div class="rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm">
+                <div class="glass-card p-5">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#E8EDF4] text-xl text-[#263F60]">
-                            #
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
+                            <Calendar class="h-5 w-5" />
                         </div>
                         <div class="min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Reservation Number
+                            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                Booking Code
                             </p>
-                            <p class="mt-1 break-words font-bold text-[#101D35]">
+                            <p class="mt-0.5 font-mono font-bold text-slate-900 dark:text-white truncate">
                                 {{ reservation.reservation_number || '—' }}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm">
+                <div class="glass-card p-5">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E8EDF4] text-xl">
-                            <span class="text-[#263F60]">👤</span>
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
+                            <User class="h-5 w-5" />
                         </div>
                         <div class="min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 Client
                             </p>
-                            <p class="mt-1 truncate font-bold text-[#101D35]">
-                                {{ reservation.user?.name || '—' }}
+                            <p class="mt-0.5 truncate font-bold text-slate-900 dark:text-white">
+                                {{ reservation.user?.name || 'Walk-in Guest' }}
                             </p>
-                            <p class="truncate text-sm text-slate-500">
-                                {{ reservation.user?.email || '' }}
+                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">
+                                {{ reservation.user?.email || '—' }}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm">
+                <div class="glass-card p-5">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E8EDF4] text-xl">
-                            🚘
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
+                            <Car class="h-5 w-5" />
                         </div>
                         <div class="min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 Reserved Vehicle
                             </p>
-                            <p class="mt-1 break-words font-bold text-[#101D35]">
+                            <p class="mt-0.5 truncate font-bold text-slate-900 dark:text-white">
                                 {{
                                     reservation.car
                                         ? `${reservation.car.year} ${reservation.car.make} ${reservation.car.model}`
-                                        : '—'
+                                        : 'Unassigned'
                                 }}
+                            </p>
+                            <p class="truncate text-xs font-mono text-slate-500 dark:text-slate-400">
+                                {{ reservation.car?.license_plate || '—' }}
                             </p>
                         </div>
                     </div>
@@ -131,29 +132,28 @@ function submit() {
 
             <!-- Edit Form -->
             <form
-                class="overflow-hidden rounded-2xl border border-[#DCE3ED] bg-white shadow-sm"
+                class="glass-card overflow-hidden"
                 @submit.prevent="submit"
             >
-                <div class="border-b border-[#DCE3ED] bg-[#101D35] px-5 py-5 sm:px-7">
-                    <h2 class="text-lg font-bold text-white">
-                        Reservation Details
+                <div class="border-b border-black/5 dark:border-white/10 px-6 py-4">
+                    <h2 class="font-bold text-slate-900 dark:text-white">
+                        Contract Parameters
                     </h2>
-                    <p class="mt-1 text-sm text-[#C5D0DE]">
-                        Make the necessary changes and save your updates.
+                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        Make schedule or rate adjustments and persist modifications to the reservation ledger.
                     </p>
                 </div>
 
-                <div class="space-y-8 p-5 sm:p-7">
+                <div class="space-y-8 p-6">
                     <!-- Rental Schedule -->
-                    <section>
-                        <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-[#101D35]">
-                            <span class="h-5 w-1 rounded-full bg-[#58779D]"></span>
+                    <section class="space-y-4">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
                             Rental Schedule
                         </h3>
 
                         <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div class="space-y-2">
-                                <Label for="start_date" class="font-semibold text-[#263F60]">
+                            <div class="space-y-1.5">
+                                <Label for="start_date" class="text-xs font-medium text-slate-700 dark:text-slate-300">
                                     Start Date
                                 </Label>
                                 <Input
@@ -161,13 +161,13 @@ function submit() {
                                     v-model="form.start_date"
                                     type="date"
                                     required
-                                    class="rounded-xl border-[#C5D0DE] focus-visible:ring-[#58779D]"
+                                    class="apple-input"
                                 />
                                 <InputError :message="form.errors.start_date" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="end_date" class="font-semibold text-[#263F60]">
+                            <div class="space-y-1.5">
+                                <Label for="end_date" class="text-xs font-medium text-slate-700 dark:text-slate-300">
                                     End Date
                                 </Label>
                                 <Input
@@ -175,13 +175,13 @@ function submit() {
                                     v-model="form.end_date"
                                     type="date"
                                     required
-                                    class="rounded-xl border-[#C5D0DE] focus-visible:ring-[#58779D]"
+                                    class="apple-input"
                                 />
                                 <InputError :message="form.errors.end_date" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="pickup_time" class="font-semibold text-[#263F60]">
+                            <div class="space-y-1.5">
+                                <Label for="pickup_time" class="text-xs font-medium text-slate-700 dark:text-slate-300">
                                     Pickup Time
                                 </Label>
                                 <Input
@@ -189,13 +189,13 @@ function submit() {
                                     v-model="form.pickup_time"
                                     type="time"
                                     required
-                                    class="rounded-xl border-[#C5D0DE] focus-visible:ring-[#58779D]"
+                                    class="apple-input"
                                 />
                                 <InputError :message="form.errors.pickup_time" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="return_time" class="font-semibold text-[#263F60]">
+                            <div class="space-y-1.5">
+                                <Label for="return_time" class="text-xs font-medium text-slate-700 dark:text-slate-300">
                                     Return Time
                                 </Label>
                                 <Input
@@ -203,52 +203,51 @@ function submit() {
                                     v-model="form.return_time"
                                     type="time"
                                     required
-                                    class="rounded-xl border-[#C5D0DE] focus-visible:ring-[#58779D]"
+                                    class="apple-input"
                                 />
                                 <InputError :message="form.errors.return_time" />
                             </div>
                         </div>
                     </section>
 
-                    <div class="border-t border-[#E5EAF1]"></div>
+                    <div class="border-t border-black/5 dark:border-white/10"></div>
 
                     <!-- Locations and Pricing -->
-                    <section>
-                        <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-[#101D35]">
-                            <span class="h-5 w-1 rounded-full bg-[#58779D]"></span>
-                            Locations & Pricing
+                    <section class="space-y-4">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
+                            Locations & Concessions
                         </h3>
 
                         <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            <div class="space-y-2">
-                                <Label for="pickup_location" class="font-semibold text-[#263F60]">
-                                    Pickup Location
+                            <div class="space-y-1.5">
+                                <Label for="pickup_location" class="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    Pickup Station
                                 </Label>
                                 <Input
                                     id="pickup_location"
                                     v-model="form.pickup_location"
-                                    placeholder="Main Office"
-                                    class="rounded-xl border-[#C5D0DE] focus-visible:ring-[#58779D]"
+                                    placeholder="Main City Station"
+                                    class="apple-input"
                                 />
                                 <InputError :message="form.errors.pickup_location" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="return_location" class="font-semibold text-[#263F60]">
-                                    Return Location
+                            <div class="space-y-1.5">
+                                <Label for="return_location" class="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    Return Station
                                 </Label>
                                 <Input
                                     id="return_location"
                                     v-model="form.return_location"
-                                    placeholder="Main Office"
-                                    class="rounded-xl border-[#C5D0DE] focus-visible:ring-[#58779D]"
+                                    placeholder="Airport Terminal 2"
+                                    class="apple-input"
                                 />
                                 <InputError :message="form.errors.return_location" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="discount_amount" class="font-semibold text-[#263F60]">
-                                    Discount Amount
+                            <div class="space-y-1.5">
+                                <Label for="discount_amount" class="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    Discount / Concession Amount
                                 </Label>
                                 <Input
                                     id="discount_amount"
@@ -256,20 +255,20 @@ function submit() {
                                     type="number"
                                     step="0.01"
                                     min="0"
-                                    class="rounded-xl border-[#C5D0DE] focus-visible:ring-[#58779D]"
+                                    class="apple-input"
                                 />
                                 <InputError :message="form.errors.discount_amount" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="status" class="font-semibold text-[#263F60]">
-                                    Reservation Status
+                            <div class="space-y-1.5">
+                                <Label for="status" class="text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    Booking Status
                                 </Label>
                                 <select
                                     id="status"
                                     v-model="form.status"
                                     required
-                                    class="block w-full rounded-xl border border-[#C5D0DE] bg-white px-3 py-2.5 text-sm text-[#101D35] outline-none transition focus:border-[#58779D] focus:ring-2 focus:ring-[#58779D]/20"
+                                    class="apple-input cursor-pointer py-2.5 text-sm"
                                 >
                                     <option
                                         v-for="s in statuses"
@@ -284,25 +283,21 @@ function submit() {
                         </div>
                     </section>
 
-                    <div class="border-t border-[#E5EAF1]"></div>
+                    <div class="border-t border-black/5 dark:border-white/10"></div>
 
                     <!-- Notes -->
-                    <section>
-                        <h3 class="mb-4 flex items-center gap-2 text-base font-bold text-[#101D35]">
-                            <span class="h-5 w-1 rounded-full bg-[#58779D]"></span>
-                            Internal Notes
+                    <section class="space-y-4">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
+                            Internal Operations Notes
                         </h3>
 
-                        <div class="space-y-2">
-                            <Label for="notes" class="font-semibold text-[#263F60]">
-                                Notes
-                            </Label>
+                        <div class="space-y-1.5">
                             <textarea
                                 id="notes"
                                 v-model="form.notes"
-                                rows="4"
-                                placeholder="Add any important information about this reservation..."
-                                class="w-full rounded-xl border border-[#C5D0DE] bg-white px-4 py-3 text-sm text-[#101D35] outline-none transition placeholder:text-slate-400 focus:border-[#58779D] focus:ring-2 focus:ring-[#58779D]/20"
+                                rows="3"
+                                placeholder="Add key instructions for handover concierge, luggage handling, or return inspection..."
+                                class="apple-input w-full p-3 text-sm"
                             ></textarea>
                             <InputError :message="form.errors.notes" />
                         </div>
@@ -311,22 +306,22 @@ function submit() {
                     <!-- Cancellation Reason -->
                     <section
                         v-if="form.status === 'cancelled'"
-                        class="rounded-xl border border-red-200 bg-red-50 p-5"
+                        class="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-5"
                     >
-                        <h3 class="mb-3 font-bold text-red-800">
+                        <h3 class="text-sm font-bold text-rose-950 dark:text-rose-200">
                             Cancellation Information
                         </h3>
 
-                        <div class="space-y-2">
-                            <Label for="cancellation_reason" class="font-semibold text-red-900">
-                                Cancellation Reason
+                        <div class="mt-3 space-y-1.5">
+                            <Label for="cancellation_reason" class="text-xs font-medium text-rose-900 dark:text-rose-300">
+                                Reason for Cancellation
                             </Label>
                             <textarea
                                 id="cancellation_reason"
                                 v-model="form.cancellation_reason"
                                 rows="3"
-                                placeholder="Explain why this reservation was cancelled..."
-                                class="w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-200"
+                                placeholder="State reason for customer or operational cancellation..."
+                                class="apple-input w-full p-3 text-sm"
                             ></textarea>
                             <InputError :message="form.errors.cancellation_reason" />
                         </div>
@@ -334,12 +329,12 @@ function submit() {
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex flex-col-reverse gap-3 border-t border-[#DCE3ED] bg-[#F8FAFC] px-5 py-5 sm:flex-row sm:justify-end sm:px-7">
+                <div class="flex flex-col-reverse justify-between gap-3 border-t border-black/5 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] p-4 sm:flex-row sm:items-center sm:px-6">
                     <Link :href="index().url">
                         <Button
                             type="button"
                             variant="outline"
-                            class="w-full rounded-xl border-[#C5D0DE] px-6 text-[#263F60] hover:bg-[#E8EDF4] sm:w-auto"
+                            class="w-full rounded-xl border-black/10 dark:border-white/10 text-xs font-medium hover:bg-slate-100 dark:hover:bg-white/10 sm:w-auto"
                         >
                             Cancel
                         </Button>
@@ -348,8 +343,9 @@ function submit() {
                     <Button
                         type="submit"
                         :disabled="form.processing"
-                        class="w-full rounded-xl bg-[#101D35] px-7 font-semibold text-white hover:bg-[#263F60] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                        class="apple-btn-primary h-11 px-6 text-sm font-medium w-full sm:w-auto"
                     >
+                        <CheckCircle2 class="h-4 w-4 mr-2" />
                         {{ form.processing ? 'Saving Changes...' : 'Save Changes' }}
                     </Button>
                 </div>
@@ -357,4 +353,3 @@ function submit() {
         </main>
     </AdminLayout>
 </template>
-```

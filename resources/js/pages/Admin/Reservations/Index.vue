@@ -1,9 +1,17 @@
-
 <script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import {
+    CalendarDays,
+    Car,
+    ChevronRight,
+    Clock,
+    DollarSign,
+    Search,
+    User,
+} from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import { show, index } from '@/routes/admin/reservations';
+import { index, show } from '@/routes/admin/reservations';
 
 const props = defineProps<{
     reservations: {
@@ -71,7 +79,7 @@ function formatDate(date: string) {
 
     return Number.isNaN(parsed.getTime())
         ? date
-        : new Intl.DateTimeFormat('en-IN', {
+        : new Intl.DateTimeFormat('en-US', {
               day: '2-digit',
               month: 'short',
               year: 'numeric',
@@ -82,21 +90,11 @@ function formatAmount(amount: number | string) {
     const value = Number(amount);
 
     return Number.isFinite(value)
-        ? value.toLocaleString('en-IN', {
+        ? value.toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
           })
         : '0.00';
-}
-
-function statusStyle(status: string) {
-    const color = props.statuses?.[status]?.color || '#64748B';
-
-    return {
-        backgroundColor: `${color}18`,
-        color,
-        borderColor: `${color}50`,
-    };
 }
 </script>
 
@@ -104,283 +102,239 @@ function statusStyle(status: string) {
     <Head title="Admin Reservations" />
 
     <AdminLayout>
-        <main class="min-h-screen flex-1 space-y-6 bg-[#F4F6FA] p-4 sm:p-6 lg:p-8">
-            <!-- Page heading -->
-            <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#101D35] via-[#1B3150] to-[#263F60] p-6 text-white shadow-lg sm:p-8">
-                <div class="relative z-10">
-                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[#C5D0DE]">
-                        Management / Bookings
-                    </p>
-                    <h1 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+        <main class="min-h-full space-y-7 px-4 py-6 sm:px-6 lg:px-8">
+            <!-- Header console -->
+            <section class="glass-card flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
                         Reservations
                     </h1>
-                    <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                        Manage customer bookings, rental periods, reservation
-                        statuses, and booking amounts from one place.
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        Manage customer bookings, rental schedules, and payment balances.
                     </p>
-
-                    <div class="mt-6 inline-flex items-center gap-3 rounded-xl border border-white/15 bg-white/10 px-4 py-3">
-                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-[#C5D0DE]">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-xs text-slate-300">Total reservations</p>
-                            <p class="text-xl font-bold">{{ totalReservations }}</p>
-                        </div>
-                    </div>
                 </div>
 
-                <div class="pointer-events-none absolute -right-12 -top-20 h-64 w-64 rounded-full border border-white/10"></div>
-                <div class="pointer-events-none absolute -right-2 -top-12 h-48 w-48 rounded-full border border-white/10"></div>
+                <div class="flex items-center gap-3 rounded-2xl border border-black/5 dark:border-white/10 bg-slate-100/70 dark:bg-white/5 px-4 py-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
+                        <CalendarDays class="h-5 w-5" />
+                    </span>
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Bookings</p>
+                        <p class="text-xl font-bold text-slate-900 dark:text-white">{{ totalReservations }}</p>
+                    </div>
+                </div>
             </section>
 
             <!-- Search and filters -->
-            <section class="rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm sm:p-6">
-                <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                    <div class="flex-1">
-                        <h2 class="text-lg font-bold text-[#101D35]">Find a reservation</h2>
-                        <p class="mt-1 text-sm text-slate-500">
-                            Search by booking number, client, vehicle, or registration plate.
-                        </p>
-
-                        <div class="mt-4 flex flex-col gap-3 sm:flex-row">
-                            <div class="relative w-full max-w-xl">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#58779D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-                                    <circle cx="11" cy="11" r="7" />
-                                    <path stroke-linecap="round" d="m16 16 4 4" />
-                                </svg>
-                                <input
-                                    v-model="search"
-                                    type="search"
-                                    placeholder="Search reservations..."
-                                    class="w-full rounded-xl border border-[#DCE3ED] bg-[#F8FAFD] py-3 pl-10 pr-4 text-sm text-[#101D35] outline-none transition placeholder:text-slate-400 focus:border-[#58779D] focus:ring-2 focus:ring-[#58779D]/15"
-                                    @keyup.enter="doSearch"
-                                />
-                            </div>
-                            <button
-                                type="button"
-                                class="rounded-xl bg-[#101D35] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#263F60]"
-                                @click="doSearch"
-                            >
-                                Search
-                            </button>
-                        </div>
+            <section class="glass-card p-5 sm:p-6">
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <div class="relative flex-1">
+                        <Search class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <input
+                            v-model="search"
+                            type="search"
+                            placeholder="Search by booking code, client name, or vehicle..."
+                            class="apple-input w-full pl-10"
+                            @keyup.enter="doSearch"
+                        />
                     </div>
+                    <button
+                        type="button"
+                        class="apple-btn-primary h-11 px-6 text-sm font-medium cursor-pointer"
+                        @click="doSearch"
+                    >
+                        Search
+                    </button>
                 </div>
 
-                <div class="mt-5 border-t border-[#E8EDF4] pt-5">
-                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Filter by status
+                <div class="mt-5 border-t border-black/5 dark:border-white/10 pt-4">
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Filter by Status
                     </p>
 
                     <div class="flex flex-wrap gap-2">
                         <button
                             type="button"
-                            class="rounded-full border px-4 py-2 text-sm font-semibold transition"
+                            class="rounded-xl border px-3.5 py-1.5 text-xs font-medium transition cursor-pointer"
                             :class="statusFilter === 'all'
-                                ? 'border-[#101D35] bg-[#101D35] text-white'
-                                : 'border-[#DCE3ED] bg-white text-[#263F60] hover:bg-[#F4F6FA]'"
+                                ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]'
+                                : 'border-black/5 dark:border-white/10 bg-slate-100/70 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-white/10'"
                             @click="statusFilter = 'all'; doSearch()"
                         >
-                            All <span class="ml-1 opacity-75">({{ totalReservations }})</span>
+                            All ({{ totalReservations }})
                         </button>
 
                         <button
                             v-for="(status, key) in props.statuses"
                             :key="key"
                             type="button"
-                            class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition"
-                            :style="statusFilter === key
-                                ? { backgroundColor: status.color, color: '#FFFFFF', borderColor: status.color }
-                                : { backgroundColor: '#FFFFFF', color: '#263F60', borderColor: '#DCE3ED' }"
+                            class="inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 text-xs font-medium transition cursor-pointer"
+                            :class="statusFilter === key
+                                ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]'
+                                : 'border-black/5 dark:border-white/10 bg-slate-100/70 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-white/10'"
                             @click="statusFilter = key; doSearch()"
                         >
                             <span
                                 class="h-2 w-2 rounded-full"
-                                :style="{ backgroundColor: statusFilter === key ? '#FFFFFF' : status.color }"
+                                :style="{ backgroundColor: status.color }"
                             ></span>
-                            {{ status.label }}
-                            <span class="opacity-75">({{ status.count }})</span>
+                            {{ status.label }} ({{ status.count }})
                         </button>
                     </div>
                 </div>
             </section>
 
             <!-- Reservation table -->
-            <section class="overflow-hidden rounded-2xl border border-[#DCE3ED] bg-white shadow-sm">
-                <div class="flex flex-col gap-2 border-b border-[#E5EAF1] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <section class="glass-card overflow-hidden">
+                <div class="flex flex-col gap-2 border-b border-black/5 dark:border-white/10 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 class="text-lg font-bold text-[#101D35]">All bookings</h2>
-                        <p class="mt-1 text-sm text-slate-500">
-                            Select a booking to inspect its full details.
+                        <h2 class="font-bold text-slate-900 dark:text-white">All Bookings</h2>
+                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                            Select any reservation row to inspect full contract statement and itinerary.
                         </p>
                     </div>
-                    <span class="w-fit rounded-full bg-[#F4F6FA] px-3 py-1.5 text-xs font-semibold text-[#263F60] ring-1 ring-[#DCE3ED]">
-                        {{ props.reservations.data.length }} shown
+                    <span class="w-fit rounded-lg border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                        {{ reservations.data.length }} bookings on page
                     </span>
                 </div>
 
-                <div v-if="props.reservations.data.length === 0" class="px-6 py-16 text-center">
-                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F4F6FA] text-[#58779D]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z" />
-                        </svg>
-                    </div>
-                    <h3 class="mt-5 text-lg font-bold text-[#101D35]">No reservations found</h3>
-                    <p class="mt-2 text-sm text-slate-500">
-                        Try another search term or select a different status.
-                    </p>
-                    <button
-                        type="button"
-                        class="mt-5 rounded-xl border border-[#DCE3ED] px-4 py-2.5 text-sm font-semibold text-[#263F60] hover:bg-[#F4F6FA]"
-                        @click="search = ''; statusFilter = 'all'; doSearch()"
-                    >
-                        Clear filters
-                    </button>
-                </div>
-
-                <!-- Desktop table -->
-                <div v-else class="hidden overflow-x-auto md:block">
-                    <table class="w-full min-w-[950px] text-left">
-                        <thead class="bg-[#F4F6FA]">
-                            <tr class="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                <th class="px-5 py-4">Reservation</th>
-                                <th class="px-5 py-4">Client</th>
-                                <th class="px-5 py-4">Vehicle</th>
-                                <th class="px-5 py-4">Rental period</th>
-                                <th class="px-5 py-4">Total</th>
-                                <th class="px-5 py-4">Status</th>
-                                <th class="px-5 py-4 text-right">Details</th>
+                <div class="overflow-x-auto">
+                    <table class="min-w-[950px] w-full text-left">
+                        <thead class="border-b border-black/5 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] text-xs font-semibold text-slate-600 dark:text-slate-400">
+                            <tr>
+                                <th class="px-6 py-3.5">Booking Code</th>
+                                <th class="px-6 py-3.5">Client</th>
+                                <th class="px-6 py-3.5">Vehicle</th>
+                                <th class="px-6 py-3.5">Schedule</th>
+                                <th class="px-6 py-3.5">Total Amount</th>
+                                <th class="px-6 py-3.5">Status</th>
+                                <th class="px-6 py-3.5 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-[#E8EDF4]">
+
+                        <tbody class="divide-y divide-black/5 dark:divide-white/5 text-sm">
                             <tr
-                                v-for="res in props.reservations.data"
+                                v-for="res in reservations.data"
                                 :key="res.id"
-                                class="cursor-pointer transition-colors hover:bg-[#F8FAFD]"
+                                class="cursor-pointer transition hover:bg-slate-50/50 dark:hover:bg-white/[0.02]"
                                 @click="navigateToReservation(res.id)"
                             >
-                                <td class="px-5 py-5">
-                                    <p class="font-bold text-[#101D35]">{{ res.reservation_number }}</p>
-                                    <p class="mt-1 text-xs text-slate-400">Booking #{{ res.id }}</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                    <p class="font-semibold text-[#263F60]">{{ res.user?.name || 'Unknown client' }}</p>
-                                    <p class="mt-1 text-xs text-slate-500">{{ res.user?.email || '—' }}</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                    <p class="font-semibold text-[#263F60]">
-                                        {{ res.car ? `${res.car.year} ${res.car.make} ${res.car.model}` : 'Vehicle unavailable' }}
-                                    </p>
-                                    <p class="mt-1 text-xs text-slate-500">{{ res.car?.license_plate || '—' }}</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                    <p class="text-sm font-medium text-[#101D35]">{{ formatDate(res.start_date) }}</p>
-                                    <p class="my-1 text-xs text-slate-400">to</p>
-                                    <p class="text-sm font-medium text-[#101D35]">{{ formatDate(res.end_date) }}</p>
-                                    <p class="mt-2 text-xs text-slate-500">{{ res.total_days }} rental days</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                    <p class="font-bold text-[#101D35]">
-                                        {{ props.currency.symbol }}{{ formatAmount(res.total_amount) }}
-                                    </p>
-                                    <p class="mt-1 text-xs text-slate-400">{{ props.currency.code }}</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                    <span
-                                        class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold"
-                                        :style="statusStyle(res.status)"
-                                    >
-                                        <span class="h-2 w-2 rounded-full" :style="{ backgroundColor: props.statuses[res.status]?.color || '#64748B' }"></span>
-                                        {{ props.statuses[res.status]?.label || res.status }}
+                                <td class="px-6 py-4">
+                                    <span class="rounded-lg border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-2.5 py-1 font-mono text-xs font-medium text-slate-800 dark:text-slate-200">
+                                        {{ res.reservation_number }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-5 text-right">
-                                    <button
-                                        type="button"
-                                        class="rounded-lg border border-[#DCE3ED] px-3 py-2 text-sm font-semibold text-[#263F60] transition hover:border-[#263F60] hover:bg-[#F4F6FA]"
-                                        @click.stop="navigateToReservation(res.id)"
+
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300">
+                                            <User class="h-4 w-4" />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="font-semibold text-slate-900 dark:text-white truncate">
+                                                {{ res.user?.name || 'Walk-in Guest' }}
+                                            </p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                                {{ res.user?.email || '—' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300">
+                                            <Car class="h-4 w-4" />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="font-semibold text-slate-900 dark:text-white">
+                                                {{ res.car ? `${res.car.year} ${res.car.make} ${res.car.model}` : 'Unassigned' }}
+                                            </p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                                {{ res.car?.license_plate || '—' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 text-xs">
+                                    <div class="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200">
+                                        <Clock class="h-3.5 w-3.5 text-slate-400" />
+                                        <span>{{ formatDate(res.start_date) }} – {{ formatDate(res.end_date) }}</span>
+                                    </div>
+                                    <p class="mt-0.5 text-slate-500 dark:text-slate-400">
+                                        {{ res.total_days }} {{ res.total_days === 1 ? 'day' : 'days' }}
+                                    </p>
+                                </td>
+
+                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
+                                    {{ currency.symbol }}{{ formatAmount(res.total_amount) }}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+                                        :style="{
+                                            backgroundColor: `${props.statuses?.[res.status]?.color || '#64748B'}18`,
+                                            color: props.statuses?.[res.status]?.color || '#64748B',
+                                        }"
                                     >
-                                        View →
-                                    </button>
+                                        <span
+                                            class="h-1.5 w-1.5 rounded-full"
+                                            :style="{ backgroundColor: props.statuses?.[res.status]?.color || '#64748B' }"
+                                        ></span>
+                                        {{ props.statuses?.[res.status]?.label || res.status }}
+                                    </span>
+                                </td>
+
+                                <td class="px-6 py-4 text-right">
+                                    <Link
+                                        :href="show(res.id).url"
+                                        class="inline-flex items-center gap-1 text-xs font-semibold text-[#58779D] dark:text-[#7094BF] hover:underline"
+                                        @click.stop
+                                    >
+                                        Inspect
+                                        <ChevronRight class="h-3.5 w-3.5" />
+                                    </Link>
+                                </td>
+                            </tr>
+
+                            <tr v-if="reservations.data.length === 0">
+                                <td colspan="7" class="px-6 py-16 text-center">
+                                    <CalendarDays class="mx-auto h-10 w-10 text-slate-400" />
+                                    <p class="mt-3 font-semibold text-slate-900 dark:text-white">No reservations found</p>
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Try adjusting your filters or search query.</p>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Mobile cards -->
-                <div v-if="props.reservations.data.length > 0" class="space-y-3 p-4 md:hidden">
-                    <button
-                        v-for="res in props.reservations.data"
-                        :key="res.id"
-                        type="button"
-                        class="block w-full rounded-xl border border-[#DCE3ED] bg-white p-4 text-left transition hover:border-[#58779D] hover:bg-[#F8FAFD]"
-                        @click="navigateToReservation(res.id)"
-                    >
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                                <p class="break-words text-sm font-bold text-[#101D35]">{{ res.reservation_number }}</p>
-                                <p class="mt-1 text-sm text-[#58779D]">{{ res.user?.name || 'Unknown client' }}</p>
-                                <p class="mt-1 break-all text-xs text-slate-500">{{ res.user?.email || '—' }}</p>
-                            </div>
-                            <span class="shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold" :style="statusStyle(res.status)">
-                                {{ props.statuses[res.status]?.label || res.status }}
-                            </span>
-                        </div>
-
-                        <div class="my-4 border-y border-[#E8EDF4] py-3">
-                            <p class="text-sm font-semibold text-[#263F60]">
-                                {{ res.car ? `${res.car.year} ${res.car.make} ${res.car.model}` : 'Vehicle unavailable' }}
-                            </p>
-                            <p class="mt-1 text-xs text-slate-500">{{ res.car?.license_plate || '—' }}</p>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-xs text-slate-500">Pickup</p>
-                                <p class="mt-1 text-sm font-medium text-[#101D35]">{{ formatDate(res.start_date) }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-slate-500">Return</p>
-                                <p class="mt-1 text-sm font-medium text-[#101D35]">{{ formatDate(res.end_date) }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-slate-500">Duration</p>
-                                <p class="mt-1 text-sm font-medium text-[#101D35]">{{ res.total_days }} days</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-slate-500">Total amount</p>
-                                <p class="mt-1 text-sm font-bold text-[#101D35]">{{ props.currency.symbol }}{{ formatAmount(res.total_amount) }}</p>
-                            </div>
-                        </div>
-                        <p class="mt-4 text-sm font-semibold text-[#263F60]">View reservation details →</p>
-                    </button>
-                </div>
-
                 <!-- Pagination -->
                 <nav
-                    v-if="props.reservations.links?.length && props.reservations.data.length > 0"
-                    aria-label="Reservation pages"
-                    class="flex flex-wrap items-center gap-2 border-t border-[#E5EAF1] px-4 py-4 sm:px-6"
+                    v-if="reservations.links?.length"
+                    aria-label="Pagination"
+                    class="flex flex-wrap items-center justify-center gap-2 border-t border-black/5 dark:border-white/10 px-4 py-4"
                 >
-                    <Link
-                        v-for="(link, i) in props.reservations.links"
-                        :key="i"
-                        :href="link.url || '#'"
-                        :preserve-scroll="true"
-                        :class="[
-                            'rounded-lg border px-3 py-2 text-sm font-medium transition',
-                            link.active
-                                ? 'border-[#101D35] bg-[#101D35] text-white'
-                                : 'border-[#DCE3ED] bg-white text-[#263F60] hover:bg-[#F4F6FA]',
-                            !link.url && 'pointer-events-none opacity-40',
-                        ]"
-                    >
-                        <span v-html="link.label" />
-                    </Link>
+                    <template v-for="(link, i) in reservations.links" :key="i">
+                        <Link
+                            v-if="link.url"
+                            :href="link.url"
+                            preserve-scroll
+                            class="rounded-lg border px-3 py-1.5 text-xs font-medium transition"
+                            :class="link.active
+                                ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]'
+                                : 'border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10'"
+                        >
+                            <span v-html="link.label"></span>
+                        </Link>
+                        <span
+                            v-else
+                            class="pointer-events-none rounded-lg border border-black/5 dark:border-white/5 px-3 py-1.5 text-xs text-slate-400 opacity-60"
+                        >
+                            <span v-html="link.label"></span>
+                        </span>
+                    </template>
                 </nav>
             </section>
         </main>

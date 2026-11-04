@@ -123,7 +123,7 @@ watch(
 
 <template>
     <div class="space-y-3">
-        <label class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#58779D]">
+        <label class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#58779D] dark:text-[#7094BF]">
             <Tag class="h-3.5 w-3.5" />
             Promo or referral code
         </label>
@@ -131,7 +131,7 @@ watch(
         <!-- If coupon is already applied -->
         <div
             v-if="appliedCoupon"
-            class="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/70 p-3.5 transition"
+            class="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 backdrop-blur-md transition dark:bg-emerald-500/15"
         >
             <div class="flex items-center gap-3">
                 <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
@@ -139,14 +139,14 @@ watch(
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="font-mono text-sm font-bold tracking-wide text-emerald-950">
+                        <span class="font-mono text-xs font-bold tracking-wider text-emerald-950 dark:text-emerald-100">
                             {{ appliedCoupon.code }}
                         </span>
-                        <span class="rounded bg-emerald-200/70 px-2 py-0.5 text-xs font-semibold text-emerald-900">
+                        <span class="rounded bg-emerald-600/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:text-emerald-200">
                             -{{ formatPrice(appliedCoupon.discount_amount) }}
                         </span>
                     </div>
-                    <p class="text-xs text-emerald-800">
+                    <p class="text-xs text-emerald-800 dark:text-emerald-300">
                         {{ appliedCoupon.message }}
                     </p>
                 </div>
@@ -155,7 +155,7 @@ watch(
             <button
                 type="button"
                 @click="handleRemove"
-                class="flex h-7 w-7 items-center justify-center rounded-lg text-emerald-800 transition hover:bg-emerald-100 hover:text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                class="flex h-7 w-7 items-center justify-center rounded-lg text-emerald-800 transition hover:bg-emerald-500/20 dark:text-emerald-300"
                 title="Remove promo code"
             >
                 <X class="h-4 w-4" />
@@ -170,7 +170,7 @@ watch(
                         v-model="inputCode"
                         type="text"
                         placeholder="Enter promo code (e.g. COLLEGE20)"
-                        class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 font-mono text-sm tracking-wide text-slate-800 uppercase placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:text-slate-400 focus:border-[#58779D] focus:outline-none focus:ring-2 focus:ring-[#58779D]/20"
+                        class="apple-input w-full px-3.5 py-2 font-mono text-xs tracking-wider uppercase placeholder:normal-case placeholder:font-sans placeholder:tracking-normal"
                         @keydown.enter.prevent="validateAndApply()"
                     />
                 </div>
@@ -179,27 +179,27 @@ watch(
                     type="button"
                     :disabled="isLoading || !inputCode.trim()"
                     @click="validateAndApply()"
-                    class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#101D35] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#263F60] focus:outline-none focus:ring-2 focus:ring-[#58779D] focus:ring-offset-1 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                    class="apple-btn-primary px-4 py-2 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    <Loader2 v-if="isLoading" class="h-4 w-4 animate-spin" />
-                    <span>Apply</span>
+                    <Loader2 v-if="isLoading" class="h-3.5 w-3.5 animate-spin" />
+                    <span v-else>Apply</span>
                 </button>
             </div>
 
             <!-- Error message -->
-            <p v-if="errorMessage" class="text-xs font-medium text-rose-600">
+            <p v-if="errorMessage" class="text-xs font-medium text-rose-500">
                 {{ errorMessage }}
             </p>
 
             <!-- Clickable demo suggestions -->
             <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                <span class="text-xs text-slate-500">Suggested:</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Available:</span>
                 <button
                     v-for="demo in demoCodes"
                     :key="demo.code"
                     type="button"
                     @click="validateAndApply(demo.code)"
-                    class="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-xs text-slate-700 transition hover:border-[#58779D] hover:bg-slate-100 hover:text-[#101D35] focus:outline-none focus:ring-1 focus:ring-[#58779D]"
+                    class="rounded-md border border-slate-200/80 bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700 transition hover:border-[#58779D] hover:bg-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
                 >
                     {{ demo.code }}
                 </button>

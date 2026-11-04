@@ -1,7 +1,12 @@
-```vue
 <script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import {
+    CheckCircle2,
+    CreditCard,
+    ExternalLink,
+    Wallet,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 
 type PaymentStatus = {
@@ -34,9 +39,9 @@ const props = defineProps<{
 function fmtMoney(amount?: number | string) {
     const value = Number(amount ?? 0);
 
-    return new Intl.NumberFormat('en-IN', {
+    return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'INR',
+        currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(value);
@@ -101,144 +106,156 @@ const totalAmount = computed(() =>
     <Head title="Payments" />
 
     <AdminLayout>
-        <main class="min-h-screen space-y-7 bg-[#F4F6FA] p-4 sm:p-6 lg:p-8">
-            <header>
-                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-[#58779D]">
-                    Financial Management
-                </p>
-                <h1 class="mt-2 text-2xl font-bold tracking-tight text-[#101D35] sm:text-3xl">
-                    Payments
-                </h1>
-                <p class="mt-2 text-sm text-slate-500">
-                    Review payment transactions and their associated reservations.
-                </p>
+        <main class="min-h-full space-y-7 px-4 py-6 sm:px-6 lg:px-8">
+            <!-- Header console -->
+            <header class="glass-card flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                        Payment Transactions
+                    </h1>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        Review customer payment receipts, gateway settlements, and booking balances.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3 rounded-2xl border border-black/5 dark:border-white/10 bg-slate-100/70 dark:bg-white/5 px-4 py-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#58779D]/10 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
+                        <Wallet class="h-5 w-5" />
+                    </span>
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Batch Value</p>
+                        <p class="text-xl font-bold text-slate-900 dark:text-white">{{ fmtMoney(totalAmount) }}</p>
+                    </div>
+                </div>
             </header>
 
+            <!-- Summary Cards -->
             <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <div class="rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm">
-                    <p class="text-sm font-medium text-slate-500">Payments on This Page</p>
-                    <p class="mt-2 text-3xl font-bold text-[#101D35]">
+                <div class="glass-card p-5">
+                    <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">On this page</p>
+                    <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                         {{ totalPayments }}
                     </p>
-                    <p class="mt-3 text-xs text-slate-400">Transactions in the current page</p>
+                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Transactions listed in current batch</p>
                 </div>
 
-                <div class="rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm">
-                    <p class="text-sm font-medium text-slate-500">Successful Payments</p>
-                    <p class="mt-2 text-3xl font-bold text-[#263F60]">
+                <div class="glass-card p-5">
+                    <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Successful Settlements</p>
+                    <p class="mt-2 text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
                         {{ successfulPayments }}
                     </p>
-                    <p class="mt-3 text-xs text-slate-400">
-                        Completed or paid transactions on this page
+                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        Completed and captured transactions
                     </p>
                 </div>
 
-                <div class="rounded-2xl border border-[#DCE3ED] bg-white p-5 shadow-sm">
-                    <p class="text-sm font-medium text-slate-500">Amount on This Page</p>
-                    <p class="mt-2 break-words text-2xl font-bold text-[#101D35] sm:text-3xl">
+                <div class="glass-card p-5 sm:col-span-2 xl:col-span-1">
+                    <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Page Gross Revenue</p>
+                    <p class="mt-2 break-words text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                         {{ fmtMoney(totalAmount) }}
                     </p>
-                    <p class="mt-3 text-xs text-slate-400">Sum of listed payment amounts</p>
+                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Sum of listed transactions</p>
                 </div>
             </section>
 
-            <section class="overflow-hidden rounded-2xl border border-[#DCE3ED] bg-white shadow-sm">
-                <div class="flex flex-col justify-between gap-2 border-b border-[#DCE3ED] px-5 py-5 sm:flex-row sm:items-center sm:px-6">
+            <!-- Transaction table -->
+            <section class="glass-card overflow-hidden">
+                <div class="flex flex-col justify-between gap-2 border-b border-black/5 dark:border-white/10 px-6 py-4 sm:flex-row sm:items-center">
                     <div>
-                        <h2 class="text-lg font-bold text-[#101D35]">Transaction History</h2>
-                        <p class="mt-1 text-sm text-slate-500">
-                            Payment details, clients, and reservation references.
+                        <h2 class="font-bold text-slate-900 dark:text-white">Transaction Ledger</h2>
+                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                            Payment references, customer identity, and reservation links.
                         </p>
                     </div>
-                    <span class="w-fit rounded-lg bg-[#E8EDF4] px-3 py-1.5 text-xs font-semibold text-[#263F60]">
-                        {{ totalPayments }} listed
+                    <span class="w-fit rounded-lg border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                        {{ totalPayments }} transactions
                     </span>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[950px] divide-y divide-[#E5EAF1]">
-                        <thead class="bg-[#101D35]">
+                    <table class="w-full min-w-[950px] text-left">
+                        <thead class="border-b border-black/5 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] text-xs font-semibold text-slate-600 dark:text-slate-400">
                             <tr>
-                                <th
-                                    v-for="heading in ['Payment #', 'Client', 'Reservation', 'Amount', 'Method', 'Status', 'Processed At']"
-                                    :key="heading"
-                                    class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[#C5D0DE]"
-                                >
-                                    {{ heading }}
-                                </th>
+                                <th class="px-6 py-3.5">Payment #</th>
+                                <th class="px-6 py-3.5">Client</th>
+                                <th class="px-6 py-3.5">Reservation</th>
+                                <th class="px-6 py-3.5">Amount</th>
+                                <th class="px-6 py-3.5">Method</th>
+                                <th class="px-6 py-3.5">Status</th>
+                                <th class="px-6 py-3.5">Processed At</th>
                             </tr>
                         </thead>
 
-                        <tbody class="divide-y divide-[#E5EAF1]">
+                        <tbody class="divide-y divide-black/5 dark:divide-white/5 text-sm">
                             <tr
                                 v-for="p in payments.data"
                                 :key="p.id"
-                                class="transition hover:bg-[#F4F6FA]"
+                                class="transition hover:bg-slate-50/50 dark:hover:bg-white/[0.02]"
                             >
-                                <td class="px-5 py-4 font-semibold text-[#263F60]">
+                                <td class="px-6 py-4 font-mono font-medium text-slate-900 dark:text-white text-xs">
                                     {{ p.payment_number }}
                                 </td>
 
-                                <td class="px-5 py-4">
-                                    <div class="font-semibold text-[#101D35]">
-                                        {{ p.user?.name || '—' }}
+                                <td class="px-6 py-4">
+                                    <div class="font-semibold text-slate-900 dark:text-white">
+                                        {{ p.user?.name || 'Walk-in Client' }}
                                     </div>
-                                    <div class="mt-1 text-xs text-slate-500">
-                                        {{ p.user?.email || '' }}
+                                    <div class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                        {{ p.user?.email || '—' }}
                                     </div>
                                 </td>
 
-                                <td class="px-5 py-4">
+                                <td class="px-6 py-4">
                                     <Link
                                         v-if="p.reservation"
                                         :href="`/admin/reservations/${p.reservation.id}`"
-                                        class="font-semibold text-[#58779D] hover:text-[#101D35] hover:underline"
+                                        class="inline-flex items-center gap-1 font-mono text-xs font-semibold text-[#58779D] dark:text-[#7094BF] hover:underline"
                                     >
-                                        {{ p.reservation.reservation_number }} ↗
+                                        {{ p.reservation.reservation_number }}
+                                        <ExternalLink class="h-3 w-3" />
                                     </Link>
                                     <span v-else class="text-slate-400">—</span>
                                 </td>
 
-                                <td class="px-5 py-4">
-                                    <span class="font-bold text-[#263F60]">
+                                <td class="px-6 py-4">
+                                    <span class="font-bold text-slate-900 dark:text-white">
                                         {{ fmtMoney(p.amount) }}
                                     </span>
-                                    <span class="mt-1 block text-xs text-slate-500">INR</span>
                                 </td>
 
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex rounded-lg border border-[#DCE3ED] bg-[#F4F6FA] px-2.5 py-1.5 text-xs font-medium capitalize text-[#263F60]">
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex rounded-lg border border-black/5 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-2.5 py-1 text-xs font-medium capitalize text-slate-700 dark:text-slate-300">
                                         {{ p.payment_method.replace(/_/g, ' ') }}
                                     </span>
                                 </td>
 
-                                <td class="px-5 py-4">
+                                <td class="px-6 py-4">
                                     <span
-                                        class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold capitalize"
+                                        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium capitalize"
                                         :style="{
                                             backgroundColor: getStatusColor(p.status).bg,
                                             color: getStatusColor(p.status).text,
                                         }"
                                     >
                                         <span
-                                            class="h-2 w-2 rounded-full"
+                                            class="h-1.5 w-1.5 rounded-full"
                                             :style="{ backgroundColor: getStatusColor(p.status).dot }"
                                         ></span>
                                         {{ p.status.replace(/_/g, ' ') }}
                                     </span>
                                 </td>
 
-                                <td class="px-5 py-4 text-sm text-slate-600">
+                                <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
                                     {{ p.processed_at ? new Date(p.processed_at).toLocaleString() : '—' }}
                                 </td>
                             </tr>
 
                             <tr v-if="payments.data.length === 0">
-                                <td colspan="7" class="px-5 py-16 text-center">
-                                    <div class="text-2xl text-[#263F60]">₹</div>
-                                    <h3 class="mt-4 font-bold text-[#101D35]">No payments found</h3>
-                                    <p class="mt-1 text-sm text-slate-500">
-                                        Payment transactions will appear here when available.
+                                <td colspan="7" class="px-6 py-16 text-center">
+                                    <CreditCard class="mx-auto h-10 w-10 text-slate-400" />
+                                    <h3 class="mt-3 font-semibold text-slate-900 dark:text-white">No payments found</h3>
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        Payment transactions will display here once recorded.
                                     </p>
                                 </td>
                             </tr>
@@ -247,27 +264,25 @@ const totalAmount = computed(() =>
                 </div>
 
                 <nav
-                    v-if="payments.links?.length"
+                    v-if="payments.links?.length > 3"
                     aria-label="Payment pagination"
-                    class="flex flex-wrap items-center justify-center gap-2 border-t border-[#DCE3ED] bg-[#F8FAFC] px-4 py-4"
+                    class="flex flex-wrap items-center justify-center gap-2 border-t border-black/5 dark:border-white/10 px-4 py-4"
                 >
                     <template v-for="(link, i) in payments.links" :key="i">
                         <Link
                             v-if="link.url"
                             :href="link.url"
                             preserve-scroll
-                            :class="[
-                                'inline-flex min-w-9 items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium transition',
-                                link.active
-                                    ? 'border-[#101D35] bg-[#101D35] text-white'
-                                    : 'border-[#DCE3ED] bg-white text-[#263F60] hover:bg-[#E8EDF4]',
-                            ]"
+                            class="inline-flex min-w-9 items-center justify-center rounded-lg border px-3 py-1.5 text-xs font-medium transition"
+                            :class="link.active
+                                ? 'border-[#58779D] bg-[#58779D] text-white dark:border-[#7094BF] dark:bg-[#7094BF]'
+                                : 'border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10'"
                         >
                             <span v-html="link.label"></span>
                         </Link>
                         <span
                             v-else
-                            class="inline-flex min-w-9 cursor-not-allowed items-center justify-center rounded-lg border border-[#E5EAF1] bg-[#F4F6FA] px-3 py-2 text-sm text-slate-400"
+                            class="inline-flex min-w-9 pointer-events-none items-center justify-center rounded-lg border border-black/5 dark:border-white/5 px-3 py-1.5 text-xs text-slate-400 opacity-40"
                         >
                             <span v-html="link.label"></span>
                         </span>

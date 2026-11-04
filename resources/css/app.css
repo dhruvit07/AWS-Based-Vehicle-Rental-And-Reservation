@@ -127,42 +127,98 @@
     --sidebar-border: hsl(0 0% 91%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(0 0% 98%);
+
+    /* Apple-Calibrated Semantic Design Tokens: Light Stage */
+    --color-canvas: #FBFBFD;
+    --color-surface: #FFFFFF;
+    --color-surface-subtle: #F5F5F7;
+    --color-border-token: rgba(0, 0, 0, 0.08);
+    --color-ink-primary: #0F172A;
+    --color-ink-secondary: #64748B;
+    --color-accent-navy: #101D35;
+    --color-accent-blue: #58779D;
+    --color-star: #F59E0B;
 }
 
 .dark {
-    --background: hsl(0 0% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(0 0% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(0 0% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
+    --background: hsl(220 35% 4%);
+    --foreground: hsl(210 40% 98%);
+    --card: hsl(220 30% 9%);
+    --card-foreground: hsl(210 40% 98%);
+    --popover: hsl(220 30% 9%);
+    --popover-foreground: hsl(210 40% 98%);
     --primary: hsl(0 0% 98%);
     --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
+    --secondary: hsl(220 25% 14%);
     --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 16.08%);
-    --muted-foreground: hsl(0 0% 63.9%);
-    --accent: hsl(0 0% 14.9%);
+    --muted: hsl(220 25% 14%);
+    --muted-foreground: hsl(215 20% 65%);
+    --accent: hsl(220 25% 14%);
     --accent-foreground: hsl(0 0% 98%);
     --destructive: hsl(0 84% 60%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
-    --ring: hsl(0 0% 83.1%);
+    --border: hsl(220 20% 18%);
+    --input: hsl(220 20% 18%);
+    --ring: hsl(215 20% 65%);
     --chart-1: hsl(220 70% 50%);
     --chart-2: hsl(160 60% 45%);
     --chart-3: hsl(30 80% 55%);
     --chart-4: hsl(280 65% 60%);
     --chart-5: hsl(340 75% 55%);
-    --sidebar-background: hsl(0 0% 7%);
+    --sidebar-background: #070A0F;
     --sidebar-foreground: hsl(0 0% 95.9%);
     --sidebar-primary: hsl(360, 100%, 100%);
     --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(0 0% 15.9%);
+    --sidebar-accent: #0F1724;
     --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-border: hsl(0 0% 15.9%);
+    --sidebar-border: rgba(255, 255, 255, 0.10);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(240 5.9% 10%);
+    --sidebar: #070A0F;
+
+    /* Apple-Calibrated Semantic Design Tokens: Dark Stage */
+    --color-canvas: #070A0F;
+    --color-surface: #0F1724;
+    --color-surface-subtle: #151F30;
+    --color-border-token: rgba(255, 255, 255, 0.10);
+    --color-ink-primary: #F8FAFC;
+    --color-ink-secondary: #94A3B8;
+    --color-accent-glow: #7094BF;
+    --color-star: #FBBF24;
+}
+
+@layer utilities {
+    .glass-nav {
+        @apply sticky top-0 z-50 backdrop-blur-2xl bg-white/80 dark:bg-[#070A0F]/80 border-b border-black/5 dark:border-white/10;
+    }
+    .glass-card {
+        @apply backdrop-blur-xl bg-white/90 dark:bg-[#0F1724]/80 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-sm dark:shadow-2xl;
+    }
+    .apple-btn-primary {
+        @apply bg-[#101D35] text-white hover:bg-[#1E293B] dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 font-semibold rounded-xl transition-all shadow-sm active:scale-[0.98];
+    }
+    .apple-input {
+        @apply bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-[#58779D]/30 transition-all outline-none;
+    }
+}
+
+::selection {
+    background-color: #58779D;
+    color: #ffffff;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
 }
 
 @layer base {

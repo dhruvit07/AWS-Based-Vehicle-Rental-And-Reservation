@@ -1,134 +1,170 @@
-```vue
 <script setup lang="ts">
 import HomeLayout from '@/layouts/HomeLayout.vue';
+import { Head, Link } from '@inertiajs/vue3';
 import { fleet, contact } from '@/routes';
+import {
+    ShieldCheck,
+    Clock,
+    Award,
+    Sparkles,
+    CheckCircle2,
+    Users,
+    ArrowRight,
+    MapPin,
+    Car,
+} from 'lucide-vue-next';
+
+const milestones = [
+    {
+        year: '2022',
+        title: 'Platform Foundation',
+        desc: 'Established with a focus on friction-free automotive mobility and 100% upfront pricing.',
+    },
+    {
+        year: '2023',
+        title: 'Fleet Expansion',
+        desc: 'Onboarded top-tier premium models with standardized multi-point safety verification.',
+    },
+    {
+        year: '2024',
+        title: 'Real-Time Conflict Prevention',
+        desc: 'Engineered server-enforced overlapping date validation to completely eliminate double bookings.',
+    },
+    {
+        year: '2025',
+        title: 'Concierge Desk & Instant Handover',
+        desc: 'Launched in-app direct messaging and rapid digital check-in across all major hubs.',
+    },
+];
+
+const team = [
+    {
+        name: 'Sarah Johnson',
+        role: 'Chief Executive Officer',
+        desc: 'Steering product vision and operational precision across our mobility network.',
+        image: '/images/team/sara.webp',
+    },
+    {
+        name: 'Michael Chen',
+        role: 'Head of Operations',
+        desc: 'Managing fleet readiness, strict maintenance schedules, and depot logistics.',
+        image: '/images/team/michael.webp',
+    },
+    {
+        name: 'Emily Rodriguez',
+        role: 'Head of Client Concierge',
+        desc: 'Dedicated to driver experience, transparent terms, and 24/7 journey support.',
+        image: '/images/team/emily.webp',
+    },
+];
 </script>
 
 <template>
+    <Head title="About Us | Real Rent Car" />
+
     <HomeLayout>
-        <div class="min-h-screen bg-[#F4F6FA] text-[#101D35]">
+        <div class="min-h-screen bg-[#FBFBFD] text-slate-900 transition-colors duration-200 dark:bg-[#070A0F] dark:text-slate-100">
 
-            <!-- Hero Section -->
-            <section class="relative overflow-hidden bg-[#101D35] py-20 text-white md:py-28">
-                <div class="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-[#263F60]/50 blur-3xl"></div>
-                <div class="absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-[#58779D]/30 blur-3xl"></div>
+            <!-- Editorial Hero -->
+            <section class="relative isolate overflow-hidden bg-[#101D35] py-20 text-white dark:bg-[#070A0F] md:py-28">
+                <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(120,160,210,0.25),rgba(255,255,255,0))]"></div>
+                <div class="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[#58779D]/20 blur-3xl"></div>
 
-                <div class="relative mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">
-                    <span class="mb-5 inline-block rounded-full border border-[#C5D0DE]/30 bg-white/5 px-5 py-2 text-sm font-semibold tracking-widest text-[#C5D0DE]">
-                        OUR STORY
-                    </span>
-
-                    <h1 class="mb-6 text-4xl font-extrabold tracking-tight md:text-6xl">
-                        About <span class="text-[#C5D0DE]">Real Rent Car</span>
+                <div class="relative mx-auto max-w-5xl px-5 text-center sm:px-8">
+                    <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                        Calibrated for the discerning driver.
                     </h1>
 
-                    <p class="mx-auto max-w-3xl text-lg leading-8 text-slate-300 md:text-xl">
-                        Your journey matters. Discover a more comfortable,
-                        convenient and reliable way to travel with our vehicle
-                        rental platform.
+                    <p class="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg sm:leading-8">
+                        Real Rent Car was built to strip friction, ambiguity, and surprise fees from premium car hire. We pair a meticulously maintained fleet with instant digital reservations.
                     </p>
 
-                    <div class="mt-9 flex flex-col justify-center gap-4 sm:flex-row">
-                        <a
-                            :href="fleet.url()"
-                            class="rounded-xl bg-[#C5D0DE] px-8 py-3.5 font-bold text-[#101D35] transition hover:bg-white"
+                    <div class="mt-8 flex flex-col justify-center gap-3.5 sm:flex-row">
+                        <Link
+                            :href="fleet()"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-slate-950 shadow-md transition hover:bg-slate-100 dark:bg-white dark:text-slate-950"
                         >
-                            Explore Our Fleet →
-                        </a>
-                        <a
-                            :href="contact.url()"
-                            class="rounded-xl border border-white/30 px-8 py-3.5 font-semibold text-white transition hover:bg-white/10"
+                            <span>Browse Available Fleet</span>
+                            <ArrowRight class="h-4 w-4" />
+                        </Link>
+                        <Link
+                            :href="contact()"
+                            class="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/10"
                         >
-                            Contact Our Team
-                        </a>
+                            Speak With Our Team
+                        </Link>
                     </div>
                 </div>
             </section>
 
-            <!-- Our Story -->
-            <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 md:py-20">
+            <!-- Brand Philosophy & Story Grid -->
+            <section class="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-8 lg:py-28">
                 <div class="grid items-center gap-12 lg:grid-cols-2">
-                    <div>
-                        <p class="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#58779D]">
-                            Who We Are
-                        </p>
-
-                        <h2 class="mb-6 text-3xl font-extrabold tracking-tight md:text-4xl">
-                            Making every journey
-                            <span class="text-[#58779D]">count.</span>
+                    <div class="space-y-6">
+                        <h2 class="text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                            A rental experience built on quiet confidence.
                         </h2>
 
-                        <div class="space-y-5 leading-8 text-slate-600">
-                            <p>
-                                Real Rent Car was created with a simple mission:
-                                to make vehicle rentals convenient, dependable
-                                and accessible for travellers and local
-                                customers alike.
-                            </p>
-                            <p>
-                                Whether you are planning a family holiday,
-                                travelling for business or need a vehicle for
-                                everyday use, our platform helps you explore
-                                available vehicles and arrange your reservation
-                                in one place.
-                            </p>
-                            <p>
-                                We focus on a straightforward booking
-                                experience, clear rental information and a
-                                customer-first approach throughout your journey.
-                            </p>
-                        </div>
+                        <p class="text-base leading-relaxed text-slate-600 dark:text-slate-400">
+                            Automotive rental should be an extension of your own lifestyle: seamless, reliable, and impeccably presented. We treat every handover with exacting attention to detail—from mechanical diagnostics to pristine interior detailing.
+                        </p>
 
-                        <div class="mt-8 flex items-center gap-4">
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#101D35] text-[#C5D0DE]">
-                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-bold">A journey you can plan with confidence</h3>
-                                <p class="mt-1 text-sm text-slate-500">
-                                    Vehicle information and reservation details in one place.
-                                </p>
+                        <p class="text-base leading-relaxed text-slate-600 dark:text-slate-400">
+                            Our proprietary reservation platform verifies availability in real-time, locking out conflicting dates instantly. When you arrive, your vehicle is fueled, detailed, and ready to drive within minutes.
+                        </p>
+
+                        <div class="pt-2">
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div class="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/60 p-3.5 dark:border-white/10 dark:bg-white/5">
+                                    <ShieldCheck class="h-5 w-5 text-[#58779D] dark:text-[#7094BF]" />
+                                    <span class="text-xs font-semibold text-slate-900 dark:text-white">Comprehensive Coverage</span>
+                                </div>
+                                <div class="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/60 p-3.5 dark:border-white/10 dark:bg-white/5">
+                                    <Clock class="h-5 w-5 text-[#58779D] dark:text-[#7094BF]" />
+                                    <span class="text-xs font-semibold text-slate-900 dark:text-white">Zero Conflict Booking</span>
+                                </div>
+                                <div class="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/60 p-3.5 dark:border-white/10 dark:bg-white/5">
+                                    <Sparkles class="h-5 w-5 text-[#58779D] dark:text-[#7094BF]" />
+                                    <span class="text-xs font-semibold text-slate-900 dark:text-white">Pristine Cabin Sanitization</span>
+                                </div>
+                                <div class="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/60 p-3.5 dark:border-white/10 dark:bg-white/5">
+                                    <Users class="h-5 w-5 text-[#58779D] dark:text-[#7094BF]" />
+                                    <span class="text-xs font-semibold text-slate-900 dark:text-white">Direct Concierge Chat</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="relative">
-                        <div class="absolute -inset-3 rounded-3xl bg-[#C5D0DE]/50"></div>
-
-                        <div class="relative overflow-hidden rounded-2xl bg-[#101D35] p-8 shadow-xl md:p-10">
-                            <div class="mb-8 flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-slate-400">THE REAL RENT CAR EXPERIENCE</p>
-                                    <h3 class="mt-2 text-2xl font-bold text-white">Travel on your terms.</h3>
-                                </div>
-                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-[#C5D0DE]">
-                                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5v5h-2v-2H5v2H3v-5z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13h14M7 16h.01M17 16h.01M8 7l1-3h6l1 3"/>
-                                    </svg>
-                                </div>
+                    <!-- Visual Accent Card -->
+                    <div class="glass-card relative overflow-hidden p-8 sm:p-10">
+                        <div class="space-y-6">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#101D35] text-white dark:bg-white dark:text-slate-950">
+                                <Car class="h-6 w-6" stroke-width="2" />
                             </div>
+
+                            <h3 class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
+                                The RealRent Standard
+                            </h3>
 
                             <div class="space-y-4">
-                                <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                                    <p class="font-semibold text-white">Explore vehicles</p>
-                                    <p class="mt-1 text-sm leading-6 text-slate-400">
-                                        Compare available vehicles and review their details.
+                                <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">Upfront Line-Item Transparency</p>
+                                    <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                                        Rates display all applicable taxes, insurances, and mileage allowances with zero surprises.
                                     </p>
                                 </div>
-                                <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                                    <p class="font-semibold text-white">Plan your rental</p>
-                                    <p class="mt-1 text-sm leading-6 text-slate-400">
-                                        Select your dates and preferred pickup and return locations.
+
+                                <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">Verified Identity & Swift Handoff</p>
+                                    <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                                        Upload driving credentials once through your client console for contactless key handoff.
                                     </p>
                                 </div>
-                                <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                                    <p class="font-semibold text-white">Manage reservations</p>
-                                    <p class="mt-1 text-sm leading-6 text-slate-400">
-                                        Access your booking information through your account.
+
+                                <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">24/7 Roadside Assistance</p>
+                                    <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                                        Round-the-clock priority dispatch team standing by for route changes or mechanical aid.
                                     </p>
                                 </div>
                             </div>
@@ -137,283 +173,76 @@ import { fleet, contact } from '@/routes';
                 </div>
             </section>
 
-            <!-- Mission and Values -->
-            <section class="border-y border-[#C5D0DE]/50 bg-white py-16 md:py-20">
-                <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                    <div class="mx-auto mb-12 max-w-2xl text-center">
-                        <p class="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#58779D]">
-                            What Guides Us
-                        </p>
-                        <h2 class="text-3xl font-extrabold md:text-4xl">
-                            Our Mission & Values
+            <!-- Milestones Timeline -->
+            <section class="border-y border-slate-200/80 bg-slate-100/50 py-20 transition-colors duration-200 dark:border-white/10 dark:bg-[#070A0F]/50 sm:py-24">
+                <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-8">
+                    <div class="max-w-2xl">
+                        <h2 class="text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                            Milestones in mobility.
                         </h2>
-                        <p class="mt-4 leading-7 text-slate-500">
-                            We aim to make renting a vehicle simpler through
-                            dependable service, clear information and a
-                            customer-focused experience.
+                        <p class="mt-2 text-base text-slate-600 dark:text-slate-400">
+                            Our trajectory from a focused boutique garage to an engineering-first car rental system.
                         </p>
                     </div>
 
-                    <div class="grid gap-6 md:grid-cols-3">
-                        <article class="rounded-2xl border border-[#C5D0DE]/60 bg-[#F4F6FA] p-7 transition hover:-translate-y-1 hover:shadow-lg">
-                            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-[#101D35] text-[#C5D0DE]">
-                                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"/>
-                                </svg>
-                            </div>
-                            <h3 class="mb-3 text-xl font-bold">Reliability</h3>
-                            <p class="leading-7 text-slate-600">
-                                We believe in dependable service and clear
-                                vehicle information so customers can plan
-                                their journeys with greater confidence.
-                            </p>
-                        </article>
-
-                        <article class="rounded-2xl border border-[#C5D0DE]/60 bg-[#F4F6FA] p-7 transition hover:-translate-y-1 hover:shadow-lg">
-                            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-[#101D35] text-[#C5D0DE]">
-                                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                    <circle cx="12" cy="12" r="9"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
-                                </svg>
-                            </div>
-                            <h3 class="mb-3 text-xl font-bold">Transparency</h3>
-                            <p class="leading-7 text-slate-600">
-                                Clear rental details and pricing information
-                                help customers understand their booking
-                                before they proceed.
-                            </p>
-                        </article>
-
-                        <article class="rounded-2xl border border-[#C5D0DE]/60 bg-[#F4F6FA] p-7 transition hover:-translate-y-1 hover:shadow-lg">
-                            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-[#101D35] text-[#C5D0DE]">
-                                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3z"/>
-                                </svg>
-                            </div>
-                            <h3 class="mb-3 text-xl font-bold">Excellence</h3>
-                            <p class="leading-7 text-slate-600">
-                                We continually aim to improve the booking
-                                experience and make vehicle reservations
-                                easier for our customers.
-                            </p>
-                        </article>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Why Choose Us -->
-            <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 md:py-20">
-                <div class="mb-12 text-center">
-                    <p class="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#58779D]">
-                        The Difference
-                    </p>
-                    <h2 class="text-3xl font-extrabold md:text-4xl">
-                        Why Choose Real Rent Car?
-                    </h2>
-                    <p class="mx-auto mt-4 max-w-2xl leading-7 text-slate-500">
-                        Designed to help you explore vehicles, plan a rental
-                        and keep track of your reservations.
-                    </p>
-                </div>
-
-                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    <div class="flex gap-4 rounded-2xl border border-[#C5D0DE]/60 bg-white p-6 shadow-sm">
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E6EBF2] text-[#263F60]">
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5v5h-2v-2H5v2H3v-5zM5 13h14"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-bold">Vehicle Selection</h3>
-                            <p class="mt-2 text-sm leading-6 text-slate-500">
-                                Explore vehicle details to find an option suited to your journey.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 rounded-2xl border border-[#C5D0DE]/60 bg-white p-6 shadow-sm">
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E6EBF2] text-[#263F60]">
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <rect x="3" y="5" width="18" height="16" rx="2"/>
-                                <path stroke-linecap="round" d="M16 3v4M8 3v4M3 10h18"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-bold">Convenient Booking</h3>
-                            <p class="mt-2 text-sm leading-6 text-slate-500">
-                                Enter rental dates and pickup details through the online booking flow.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 rounded-2xl border border-[#C5D0DE]/60 bg-white p-6 shadow-sm">
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E6EBF2] text-[#263F60]">
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 5h16v14H4zM8 9h8M8 13h5"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-bold">Booking History</h3>
-                            <p class="mt-2 text-sm leading-6 text-slate-500">
-                                Access your reservation details through your customer account.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 rounded-2xl border border-[#C5D0DE]/60 bg-white p-6 shadow-sm">
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E6EBF2] text-[#263F60]">
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M17 7H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H6"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-bold">Pricing Details</h3>
-                            <p class="mt-2 text-sm leading-6 text-slate-500">
-                                Review the displayed rental cost and booking summary before submitting.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 rounded-2xl border border-[#C5D0DE]/60 bg-white p-6 shadow-sm">
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E6EBF2] text-[#263F60]">
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.5 8.5 0 0 1-12.7 7.4L3 20l1.1-5.3A8.5 8.5 0 1 1 21 11.5z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-bold">Contact Support</h3>
-                            <p class="mt-2 text-sm leading-6 text-slate-500">
-                                Use our contact page to send questions or requests to the team.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 rounded-2xl border border-[#C5D0DE]/60 bg-white p-6 shadow-sm">
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E6EBF2] text-[#263F60]">
-                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-bold">Account Access</h3>
-                            <p class="mt-2 text-sm leading-6 text-slate-500">
-                                Sign in to use the account features available to your role.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Leadership -->
-            <section class="border-y border-[#C5D0DE]/50 bg-white py-16 md:py-20">
-                <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                    <div class="mb-12 text-center">
-                        <p class="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#58779D]">
-                            The People Behind the Platform
-                        </p>
-                        <h2 class="text-3xl font-extrabold md:text-4xl">
-                            Our Leadership Team
-                        </h2>
-                        <p class="mx-auto mt-4 max-w-2xl leading-7 text-slate-500">
-                            A successful rental experience depends on thoughtful
-                            planning, responsive service and attention to detail.
-                        </p>
-                    </div>
-
-                    <div class="grid gap-8 md:grid-cols-3">
-                        <article class="overflow-hidden rounded-2xl border border-[#C5D0DE]/60 bg-[#F4F6FA] text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-                            <img
-                                class="h-52 w-full bg-[#E6EBF2] object-cover"
-                                src="/images/team/sara.webp"
-                                alt="Sarah Johnson"
-                                loading="lazy"
-                                @error="($event.target as HTMLImageElement).style.display = 'none'"
-                            />
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold">Sarah Johnson</h3>
-                                <p class="mt-1 font-semibold text-[#58779D]">CEO & Founder</p>
-                                <p class="mt-3 text-sm leading-6 text-slate-500">
-                                    Focused on the company's direction and customer experience.
-                                </p>
-                            </div>
-                        </article>
-
-                        <article class="overflow-hidden rounded-2xl border border-[#C5D0DE]/60 bg-[#F4F6FA] text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-                            <img
-                                class="h-52 w-full bg-[#E6EBF2] object-cover"
-                                src="/images/team/michael.webp"
-                                alt="Michael Chen"
-                                loading="lazy"
-                                @error="($event.target as HTMLImageElement).style.display = 'none'"
-                            />
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold">Michael Chen</h3>
-                                <p class="mt-1 font-semibold text-[#58779D]">Operations Director</p>
-                                <p class="mt-3 text-sm leading-6 text-slate-500">
-                                    Focused on vehicle operations and a smooth rental process.
-                                </p>
-                            </div>
-                        </article>
-
-                        <article class="overflow-hidden rounded-2xl border border-[#C5D0DE]/60 bg-[#F4F6FA] text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-                            <img
-                                class="h-52 w-full bg-[#E6EBF2] object-cover"
-                                src="/images/team/emily.webp"
-                                alt="Emily Rodriguez"
-                                loading="lazy"
-                                @error="($event.target as HTMLImageElement).style.display = 'none'"
-                            />
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold">Emily Rodriguez</h3>
-                                <p class="mt-1 font-semibold text-[#58779D]">Customer Success Manager</p>
-                                <p class="mt-3 text-sm leading-6 text-slate-500">
-                                    Focused on helping customers with their rental experience.
-                                </p>
-                            </div>
-                        </article>
-                    </div>
-
-                    <p class="mx-auto mt-6 max-w-3xl text-center text-xs leading-5 text-slate-400">
-                        Update the sample team names, biographies and images to match
-                        your actual project information before presenting the website.
-                    </p>
-                </div>
-            </section>
-
-            <!-- Final Call To Action -->
-            <section class="bg-[#101D35] px-4 py-16 text-center text-white md:py-20">
-                <div class="mx-auto max-w-3xl">
-                    <p class="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[#C5D0DE]">
-                        YOUR NEXT JOURNEY STARTS HERE
-                    </p>
-                    <h2 class="text-3xl font-extrabold md:text-5xl">
-                        Ready to hit the road?
-                    </h2>
-                    <p class="mx-auto mt-5 max-w-2xl leading-7 text-slate-300">
-                        Explore our vehicle listings and start planning your
-                        next trip with Real Rent Car.
-                    </p>
-
-                    <div class="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-                        <a
-                            :href="fleet.url()"
-                            class="rounded-xl bg-[#C5D0DE] px-8 py-3.5 font-bold text-[#101D35] transition hover:bg-white"
+                    <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <div
+                            v-for="item in milestones"
+                            :key="item.year"
+                            class="glass-card flex flex-col justify-between p-6"
                         >
-                            Browse Our Fleet →
-                        </a>
-                        <a
-                            :href="contact.url()"
-                            class="rounded-xl border border-white/30 px-8 py-3.5 font-semibold text-white transition hover:bg-white/10"
-                        >
-                            Contact Us
-                        </a>
+                            <div>
+                                <span class="text-xs font-bold tracking-wider text-[#58779D] dark:text-[#7094BF]">
+                                    {{ item.year }}
+                                </span>
+                                <h3 class="mt-2 text-base font-bold text-slate-950 dark:text-white">
+                                    {{ item.title }}
+                                </h3>
+                                <p class="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                                    {{ item.desc }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Leadership Team -->
+            <section class="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-8 lg:py-28">
+                <div class="max-w-2xl">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                        Executive leadership.
+                    </h2>
+                    <p class="mt-2 text-base text-slate-600 dark:text-slate-400">
+                        Passionate automotive professionals and software engineers committed to seamless travel.
+                    </p>
+                </div>
+
+                <div class="mt-12 grid gap-8 md:grid-cols-3">
+                    <article
+                        v-for="person in team"
+                        :key="person.name"
+                        class="glass-card overflow-hidden transition hover:-translate-y-1 hover:shadow-lg"
+                    >
+                        <div class="aspect-4/3 overflow-hidden bg-slate-100 dark:bg-slate-900">
+                            <img
+                                :src="person.image"
+                                :alt="person.name"
+                                class="h-full w-full object-cover"
+                                loading="lazy"
+                            />
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ person.name }}</h3>
+                            <p class="text-xs font-semibold text-[#58779D] dark:text-[#7094BF]">{{ person.role }}</p>
+                            <p class="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                                {{ person.desc }}
+                            </p>
+                        </div>
+                    </article>
                 </div>
             </section>
 
         </div>
     </HomeLayout>
 </template>
-```

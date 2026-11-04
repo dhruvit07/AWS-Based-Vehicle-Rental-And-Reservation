@@ -1,4 +1,3 @@
-```vue
 <script setup lang="ts">
 import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/RegisteredUserController';
 import HomeLayout from '@/layouts/HomeLayout.vue';
@@ -16,206 +15,181 @@ import { LoaderCircle, UserPlus, ShieldCheck, CarFront } from 'lucide-vue-next';
     <HomeLayout>
         <Head title="Create Account" />
 
-        <div class="min-h-screen bg-[#F4F6FA] px-4 py-10 sm:px-6 lg:py-16">
-            <div class="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-[#C5D0DE] bg-white shadow-xl lg:grid-cols-2">
+        <div class="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
+            <!-- Background atmosphere -->
+            <div class="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#58779D]/10 blur-3xl dark:bg-[#7094BF]/10"></div>
+            <div class="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-[#101D35]/15 blur-3xl dark:bg-[#070A0F]/30"></div>
+
+            <div class="glass-card relative mx-auto grid w-full max-w-5xl overflow-hidden rounded-3xl lg:grid-cols-2">
 
                 <!-- Left brand panel -->
-                <div class="relative flex flex-col justify-between overflow-hidden bg-[#101D35] p-8 text-white sm:p-12 lg:min-h-[760px]">
-                    <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full border border-white/10"></div>
-                    <div class="absolute -right-10 -top-10 h-44 w-44 rounded-full border border-white/10"></div>
+                <div class="relative hidden flex-col justify-between overflow-hidden bg-[#070A0F] dark:bg-[#070A0F] p-10 text-white lg:flex xl:p-12 border-r border-white/10">
+                    <div class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full border border-white/5"></div>
+                    <div class="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full border border-white/5"></div>
+                    <div class="pointer-events-none absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-[#58779D]/15 blur-3xl"></div>
 
                     <div class="relative">
-                        <a href="/" class="inline-flex items-center gap-3">
-                            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C5D0DE] text-[#101D35]">
-                                <CarFront class="h-7 w-7" />
-                            </span>
-                            <span class="text-xl font-bold tracking-wide">REAL RENT CAR</span>
-                        </a>
-                    </div>
+                        <div class="mb-10 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md border border-white/10">
+                            <CarFront class="h-6 w-6" />
+                        </div>
 
-                    <div class="relative my-12">
-                        <span class="inline-flex items-center gap-2 rounded-full border border-[#C5D0DE]/30 bg-white/5 px-4 py-2 text-sm text-[#C5D0DE]">
-                            <UserPlus class="h-4 w-4" />
-                            Join our community
-                        </span>
-
-                        <h1 class="mt-6 text-4xl font-bold leading-tight sm:text-5xl">
-                            Your next journey
-                            <span class="block text-[#C5D0DE]">starts here.</span>
+                        <h1 class="text-3xl font-extrabold tracking-tight leading-tight sm:text-4xl">
+                            Unlock premier mobility,
+                            <span class="mt-1 block text-slate-400">across every destination.</span>
                         </h1>
 
-                        <p class="mt-5 max-w-md leading-7 text-slate-300">
-                            Create your account to explore our fleet, make reservations,
-                            and manage your car rental journeys in one place.
+                        <p class="mt-4 max-w-md text-sm leading-relaxed text-slate-400">
+                            Create your renter profile to browse the fleet, verify your license in advance, and complete vehicle pickup seamlessly.
                         </p>
-
-                        <div class="mt-10 space-y-5">
-                            <div class="flex items-start gap-4">
-                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[#C5D0DE]">
-                                    <CarFront class="h-5 w-5" />
-                                </span>
-                                <div>
-                                    <h3 class="font-semibold">Explore our fleet</h3>
-                                    <p class="mt-1 text-sm leading-6 text-slate-300">
-                                        Discover vehicles for your travel needs.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start gap-4">
-                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[#C5D0DE]">
-                                    <ShieldCheck class="h-5 w-5" />
-                                </span>
-                                <div>
-                                    <h3 class="font-semibold">Manage your bookings</h3>
-                                    <p class="mt-1 text-sm leading-6 text-slate-300">
-                                        Keep your reservations organised in one place.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
-                    <p class="relative text-xs text-slate-400">
-                        Drive your plans forward with Real Rent Car.
-                    </p>
+                    <div class="relative mt-12 space-y-4">
+                        <div class="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-xs">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-slate-200">
+                                <CarFront class="h-5 w-5" />
+                            </span>
+                            <div>
+                                <h3 class="text-sm font-semibold text-white">Curated Luxury Fleet</h3>
+                                <p class="mt-0.5 text-xs leading-relaxed text-slate-400">
+                                    Direct access to performance sedans, executive SUVs, and pure electric models.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-xs">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-slate-200">
+                                <ShieldCheck class="h-5 w-5" />
+                            </span>
+                            <div>
+                                <h3 class="text-sm font-semibold text-white">Priority Handover</h3>
+                                <p class="mt-0.5 text-xs leading-relaxed text-slate-400">
+                                    Verified drivers skip the desk lines and pick up keys directly.
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="pt-2 text-xs text-slate-500">
+                            Real Rent Car · Premium Fleet Logistics
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Registration form -->
                 <div class="flex items-center justify-center p-6 sm:p-10 lg:p-12">
                     <div class="w-full max-w-md">
                         <div class="mb-8">
-                            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E8EDF4] text-[#263F60]">
-                                <UserPlus class="h-7 w-7" />
-                            </div>
-
-                            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-[#58779D]">
-                                Get started
-                            </p>
-                            <h2 class="mt-2 text-3xl font-bold tracking-tight text-[#101D35]">
-                                Create your account
+                            <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                                Create Account
                             </h2>
-                            <p class="mt-3 text-sm leading-6 text-slate-600">
-                                Fill in your details below to get started.
+                            <p class="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                                Enter your credentials to configure your driver profile.
                             </p>
                         </div>
 
                         <Form
                             v-bind="RegisteredUserController.store.form()"
-                            :reset-on-success="[
-                                'password',
-                                'password_confirmation',
-                            ]"
+                            :reset-on-success="['password', 'password_confirmation']"
                             v-slot="{ errors, processing }"
-                            class="space-y-5"
+                            class="space-y-4"
                         >
                             <div>
-                                <Label for="name" class="mb-2 block text-sm font-semibold text-[#263F60]">
-                                    Full name
+                                <Label for="name" class="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    Full Name
                                 </Label>
                                 <Input
                                     id="name"
                                     type="text"
+                                    name="name"
                                     required
                                     autofocus
                                     :tabindex="1"
                                     autocomplete="name"
-                                    name="name"
-                                    placeholder="Enter your full name"
-                                    class="h-12 w-full rounded-xl border-[#C5D0DE] bg-[#F8FAFC] px-4 text-[#101D35] focus-visible:ring-[#58779D]"
+                                    placeholder="Alex Morgan"
+                                    class="apple-input h-11"
                                 />
-                                <InputError :message="errors.name" class="mt-2 text-sm" />
+                                <InputError :message="errors.name" class="mt-1" />
                             </div>
 
                             <div>
-                                <Label for="email" class="mb-2 block text-sm font-semibold text-[#263F60]">
-                                    Email address
+                                <Label for="email" class="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    Email Address
                                 </Label>
                                 <Input
                                     id="email"
                                     type="email"
+                                    name="email"
                                     required
                                     :tabindex="2"
                                     autocomplete="email"
-                                    name="email"
-                                    placeholder="you@example.com"
-                                    class="h-12 w-full rounded-xl border-[#C5D0DE] bg-[#F8FAFC] px-4 text-[#101D35] focus-visible:ring-[#58779D]"
+                                    placeholder="alex@example.com"
+                                    class="apple-input h-11"
                                 />
-                                <InputError :message="errors.email" class="mt-2 text-sm" />
+                                <InputError :message="errors.email" class="mt-1" />
                             </div>
 
                             <div>
-                                <Label for="password" class="mb-2 block text-sm font-semibold text-[#263F60]">
+                                <Label for="password" class="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">
                                     Password
                                 </Label>
                                 <Input
                                     id="password"
                                     type="password"
+                                    name="password"
                                     required
                                     :tabindex="3"
                                     autocomplete="new-password"
-                                    name="password"
-                                    placeholder="Create a password"
-                                    class="h-12 w-full rounded-xl border-[#C5D0DE] bg-[#F8FAFC] px-4 text-[#101D35] focus-visible:ring-[#58779D]"
+                                    placeholder="Minimum 8 characters"
+                                    class="apple-input h-11"
                                 />
-                                <InputError :message="errors.password" class="mt-2 text-sm" />
+                                <InputError :message="errors.password" class="mt-1" />
                             </div>
 
                             <div>
-                                <Label for="password_confirmation" class="mb-2 block text-sm font-semibold text-[#263F60]">
-                                    Confirm password
+                                <Label for="password_confirmation" class="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    Confirm Password
                                 </Label>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
+                                    name="password_confirmation"
                                     required
                                     :tabindex="4"
                                     autocomplete="new-password"
-                                    name="password_confirmation"
-                                    placeholder="Enter your password again"
-                                    class="h-12 w-full rounded-xl border-[#C5D0DE] bg-[#F8FAFC] px-4 text-[#101D35] focus-visible:ring-[#58779D]"
+                                    placeholder="Re-enter password"
+                                    class="apple-input h-11"
                                 />
-                                <InputError
-                                    :message="errors.password_confirmation"
-                                    class="mt-2 text-sm"
-                                />
+                                <InputError :message="errors.password_confirmation" class="mt-1" />
                             </div>
 
                             <Button
                                 type="submit"
-                                class="flex h-12 w-full items-center justify-center rounded-xl bg-[#101D35] px-4 font-semibold text-white transition duration-200 hover:bg-[#263F60]"
-                                tabindex="5"
+                                class="apple-btn-primary h-11 w-full text-sm font-medium mt-2"
+                                :tabindex="5"
                                 :disabled="processing"
-                                data-test="register-user-button"
                             >
                                 <LoaderCircle
                                     v-if="processing"
-                                    class="mr-2 h-5 w-5 animate-spin"
+                                    class="mr-2 h-4 w-4 animate-spin"
                                 />
-                                {{ processing ? 'Creating account...' : 'Create account' }}
+                                {{ processing ? 'Creating Account...' : 'Complete Registration' }}
                             </Button>
 
-                            <div class="border-t border-[#E2E8F0] pt-5 text-center">
-                                <p class="text-sm text-slate-600">
+                            <div class="border-t border-black/5 dark:border-white/10 pt-4 text-center">
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
                                     Already have an account?
                                     <TextLink
                                         :href="login()"
-                                        class="font-semibold text-[#263F60] underline-offset-4 hover:text-[#58779D] hover:underline"
                                         :tabindex="6"
+                                        class="ml-1 font-semibold text-[#58779D] dark:text-[#7094BF] hover:underline"
                                     >
                                         Sign in
                                     </TextLink>
                                 </p>
                             </div>
                         </Form>
-
-                        <p class="mt-6 text-center text-xs leading-5 text-slate-500">
-                            Please use an email address you can access.
-                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </HomeLayout>
 </template>
-```
