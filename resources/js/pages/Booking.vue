@@ -1,5 +1,6 @@
 
 <script setup lang="ts">
+import BookingCalendar, { type BookedRange } from '@/components/BookingCalendar.vue';
 import HomeLayout from '@/layouts/HomeLayout.vue';
 import { book } from '@/routes/fleet';
 import { login } from '@/routes';
@@ -22,6 +23,15 @@ interface Car {
 
 const page = usePage();
 const car = computed(() => page.props.car as Car);
+const bookedRanges = computed(() => (page.props.bookedRanges || []) as BookedRange[]);
+
+const minBookingDate = computed(() => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+});
 
 const form = useForm({
     start_date: '',
@@ -37,8 +47,27 @@ const rentalDays = computed(() => {
     const end = new Date(`${form.end_date}T00:00:00`);
     const difference = end.getTime() - start.getTime();
 
-    return Math.round(difference / (1000 * 60 * 60 * 24));
+    return Math.max(0, Math.round(difference / (1000 * 60 * 60 * 24)));
 });
+
+const dateRangeHasConflict = computed(() => {
+    if (!form.start_date || !form.end_date) return false;
+    return bookedRanges.value.some((range) => {
+        return !(form.end_date < range.from || form.start_date > range.to);
+    });
+});
+
+const formatDisplayDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    return dateObj.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+};
 
 const dailyRate = computed(() => Number(car.value?.price_per_day) || 0);
 
@@ -63,7 +92,8 @@ const canSubmit = computed(() =>
         form.end_date &&
         form.pickup_location &&
         form.return_location &&
-        rentalDays.value > 0
+        rentalDays.value > 0 &&
+        !dateRangeHasConflict.value
     )
 );
 
@@ -238,61 +268,54 @@ const commonLocations = [
 
                             <form class="space-y-8" @submit.prevent="submitBooking">
                                 <!-- Dates -->
-                                <div>
-                                    <h3 class="mb-4 flex items-center gap-2 font-semibold text-[#101D35]">
+                                <div class="space-y-5">
+                                    <h3 class="flex items-center gap-2 font-semibold text-[#101D35]">
                                         <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-[#58779D]">
                                             1
                                         </span>
-                                        Rental period
+                                        Rental period *
                                     </h3>
 
-                                    <div class="grid gap-5 sm:grid-cols-2">
-                                        <div>
-                                            <label for="start_date" class="mb-2 block text-sm font-semibold text-slate-700">
-                                                Pickup date *
-                                            </label>
+                                    <BookingCalendar
+                                        v-model:start-date="form.start_date"
+                                        v-model:end-date="form.end_date"
+                                        :booked-ranges="bookedRanges"
+                                        :min-date="minBookingDate"
+                                    />
 
-                                            <input
-                                                id="start_date"
-                                                v-model="form.start_date"
-                                                type="date"
-                                                :min="$page.props.minDate"
-                                                :max="$page.props.maxDate"
-                                                required
-                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-slate-800 outline-none transition focus:border-[#58779D] focus:ring-2 focus:ring-[#58779D]/20"
-                                                :class="{ 'border-red-500': form.errors.start_date }"
-                                            />
-
-                                            <p v-if="form.errors.start_date" class="mt-2 text-sm text-red-600">
-                                                {{ form.errors.start_date }}
+                                    <!-- Quick selection summary -->
+                                    <div class="grid gap-4 sm:grid-cols-2">
+                                        <div class="rounded-xl border border-slate-200 bg-[#F4F6FA] p-4">
+                                            <p class="text-xs font-semibold uppercase tracking-wider text-[#58779D]">
+                                                Pickup date
+                                            </p>
+                                            <p class="mt-1.5 text-base font-bold text-[#101D35]">
+                                                {{ formatDisplayDate(form.start_date) || 'Select on calendar' }}
                                             </p>
                                         </div>
 
-                                        <div>
-                                            <label for="end_date" class="mb-2 block text-sm font-semibold text-slate-700">
-                                                Return date *
-                                            </label>
-
-                                            <input
-                                                id="end_date"
-                                                v-model="form.end_date"
-                                                type="date"
-                                                :min="form.start_date || $page.props.minDate"
-                                                :max="$page.props.maxDate"
-                                                required
-                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-slate-800 outline-none transition focus:border-[#58779D] focus:ring-2 focus:ring-[#58779D]/20"
-                                                :class="{ 'border-red-500': form.errors.end_date }"
-                                            />
-
-                                            <p v-if="form.errors.end_date" class="mt-2 text-sm text-red-600">
-                                                {{ form.errors.end_date }}
+                                        <div class="rounded-xl border border-slate-200 bg-[#F4F6FA] p-4">
+                                            <p class="text-xs font-semibold uppercase tracking-wider text-[#58779D]">
+                                                Return date
+                                            </p>
+                                            <p class="mt-1.5 text-base font-bold text-[#101D35]">
+                                                {{ formatDisplayDate(form.end_date) || 'Select on calendar' }}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <p v-if="form.start_date && form.end_date && rentalDays <= 0" class="mt-3 text-sm text-red-600">
-                                        The return date must be after the pickup date.
-                                    </p>
+                                    <!-- Error / validation notices -->
+                                    <div v-if="form.errors.start_date || form.errors.end_date || dateRangeHasConflict" class="rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-sm text-rose-800">
+                                        <p v-if="form.errors.start_date" class="font-medium">
+                                            {{ form.errors.start_date }}
+                                        </p>
+                                        <p v-if="form.errors.end_date" class="font-medium">
+                                            {{ form.errors.end_date }}
+                                        </p>
+                                        <p v-if="dateRangeHasConflict" class="font-medium">
+                                            The selected rental period overlaps with an existing reservation. Please select available dates.
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div class="border-t border-slate-200"></div>

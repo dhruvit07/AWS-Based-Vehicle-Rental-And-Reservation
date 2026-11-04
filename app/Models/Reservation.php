@@ -162,17 +162,11 @@ class Reservation extends Model
     }
 
     /**
-     * Scope for reservations by date range.
+     * Scope for reservations by date range (inclusive collision).
      */
     public function scopeBetweenDates($query, $startDate, $endDate)
     {
-        return $query->where(function ($q) use ($startDate, $endDate) {
-            $q->whereBetween('start_date', [$startDate, $endDate])
-                ->orWhereBetween('end_date', [$startDate, $endDate])
-                ->orWhere(function ($q2) use ($startDate, $endDate) {
-                    $q2->where('start_date', '<=', $startDate)
-                        ->where('end_date', '>=', $endDate);
-                });
-        });
+        return $query->whereDate('start_date', '<=', $endDate)
+            ->whereDate('end_date', '>=', $startDate);
     }
 }

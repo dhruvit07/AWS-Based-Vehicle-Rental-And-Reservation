@@ -137,11 +137,17 @@ class Car extends Model
     public function isAvailable(string $startDate, string $endDate, ?int $excludeReservationId = null): bool
     {
         $query = $this->reservations()
-            ->whereIn('status', [
-                ReservationStatus::CONFIRMED,
-                ReservationStatus::ACTIVE
-            ])
-            ->betweenDates($startDate, $endDate);
+            ->where(function ($q) {
+                $q->whereIn('status', [
+                    ReservationStatus::CONFIRMED,
+                    ReservationStatus::ACTIVE,
+                ])->orWhere(function ($pending) {
+                    $pending->where('status', ReservationStatus::PENDING)
+                        ->where('created_at', '>=', now()->subMinutes(30));
+                });
+            })
+            ->whereDate('start_date', '<=', $endDate)
+            ->whereDate('end_date', '>=', $startDate);
 
         if ($excludeReservationId) {
             $query->where('id', '!=', $excludeReservationId);
