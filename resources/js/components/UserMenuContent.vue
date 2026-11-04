@@ -10,7 +10,7 @@ import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
-import { LogOut, UserIcon } from 'lucide-vue-next';
+import { LogOut, ShieldCheck, UserIcon } from 'lucide-vue-next';
 
 interface Props {
     user: User;
@@ -31,12 +31,18 @@ defineProps<Props>();
     </DropdownMenuLabel>
     <DropdownMenuSeparator />
     <DropdownMenuGroup>
-        <!-- <DropdownMenuItem :as-child="true">
-            <Link class="block w-full" :href="edit()" prefetch as="button">
+        <DropdownMenuItem :as-child="true">
+            <Link class="flex w-full items-center" :href="edit()" prefetch as="button">
                 <UserIcon class="mr-2 h-4 w-4" />
-                Account
+                Account Settings
             </Link>
-        </DropdownMenuItem> -->
+        </DropdownMenuItem>
+        <DropdownMenuItem v-if="user.role === 'client'" :as-child="true">
+            <Link class="flex w-full items-center" href="/settings/kyc" prefetch as="button">
+                <ShieldCheck class="mr-2 h-4 w-4" />
+                Driver License
+            </Link>
+        </DropdownMenuItem>
     </DropdownMenuGroup>
     <DropdownMenuSeparator />
     <DropdownMenuItem :as-child="true">

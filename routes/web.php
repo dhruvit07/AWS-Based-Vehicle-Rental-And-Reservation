@@ -19,6 +19,13 @@ Route::post('/api/coupons/validate', [BookingController::class, 'validateCoupon'
 
 Route::get('/booking/{reservation}', [BookingController::class, 'confirmation'])->name('booking.confirmation');
 
+Route::get('/dashboard', function () {
+    if (auth()->user()->role === \App\Enums\UserRole::ADMIN) {
+        return redirect()->route('admin.home');
+    }
+    return redirect()->route('client.home');
+})->middleware('auth')->name('dashboard');
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

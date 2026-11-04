@@ -45,11 +45,15 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user && in_array($user->email, ['admin@example.com', 'client@example.com'])) {
+            return back()->with('error', 'Primary demo accounts cannot be deleted to avoid lockout.');
+        }
+
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);
-
-        $user = $request->user();
 
         Auth::logout();
 
