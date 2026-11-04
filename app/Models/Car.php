@@ -62,6 +62,8 @@ class Car extends Model
      */
     protected $appends = [
         'image_url',
+        'average_rating',
+        'reviews_count',
     ];
 
     /**
@@ -124,6 +126,73 @@ class Car extends Model
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    /**
+     * Get the reviews for the car.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(CarReview::class, 'car_id');
+    }
+
+    /**
+     * Get the average rating of the car.
+     */
+    public function getAverageRatingAttribute(): float
+    {
+        if (array_key_exists('average_rating', $this->attributes) && $this->attributes['average_rating'] !== null) {
+            return round((float) $this->attributes['average_rating'], 1);
+        }
+
+        if ($this->relationLoaded('reviews')) {
+            $published = $this->reviews->where('is_published', true);
+            return $published->count() > 0 ? round((float) $published->avg('rating'), 1) : 0.0;
+        }
+
+        $avg = $this->reviews()->where('is_published', true)->avg('rating');
+        return $avg ? round((float) $avg, 1) : 0.0;
+    }
+
+    /**
+     * Get the total number of published reviews.
+     */
+    public function getReviewsCountAttribute(): int
+    {
+        if (array_key_exists('reviews_count', $this->attributes) && $this->attributes['reviews_count'] !== null) {
+            return (int) $this->attributes['reviews_count'];
+        }
+
+        if ($this->relationLoaded('reviews')) {
+            return $this->reviews->where('is_published', true)->count();
+        }
+
+        return (int) $this->reviews()->where('is_published', true)->count();
+    }
+
+    /**
+     * Get the rating distribution breakdown (counts & percentages for 1..5 stars).
+     */
+    public function getRatingDistributionAttribute(): array
+    {
+        $reviews = $this->relationLoaded('reviews')
+            ? $this->reviews->where('is_published', true)
+            : $this->reviews()->where('is_published', true)->get(['rating']);
+
+        $total = $reviews->count();
+        $distribution = [];
+
+        for ($star = 5; $star >= 1; $star--) {
+            $count = $reviews->where('rating', $star)->count();
+            $percentage = $total > 0 ? (int) round(($count / $total) * 100) : 0;
+            $distribution[$star] = [
+                'star' => $star,
+                'count' => $count,
+                'percentage' => $percentage,
+            ];
+        }
+
+        return $distribution;
     }
 
     /**

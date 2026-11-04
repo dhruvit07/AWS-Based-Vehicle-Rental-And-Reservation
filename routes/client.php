@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\ReservationsController;
+use App\Http\Controllers\Client\ReviewController;
 use App\Http\Controllers\Client\SupportController;
 
 Route::middleware(['auth', 'verified', 'active', 'client'])
@@ -13,6 +14,7 @@ Route::middleware(['auth', 'verified', 'active', 'client'])
         Route::get('/reservations', [ReservationsController::class, 'index'])->name('reservations.index');
         Route::get('/reservations/{id}', [ReservationsController::class, 'show'])->name('reservations.show');
         Route::get('/reservations/{id}/print', [ReservationsController::class, 'print'])->name('reservations.print');
+        Route::post('/reservations/{reservation}/reviews', [ReviewController::class, 'store'])->name('reservations.reviews.store');
 
         // Support
         Route::get('/support', [SupportController::class, 'index'])->name('support.index');

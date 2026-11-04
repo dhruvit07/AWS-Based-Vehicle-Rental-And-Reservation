@@ -70,10 +70,47 @@ class BookingController extends Controller
             ])
             ->values();
 
+        // Load published reviews with author details
+        $reviews = $car->reviews()
+            ->where('is_published', true)
+            ->with('user:id,name')
+            ->latest()
+            ->get()
+            ->map(function ($review) {
+                $nameParts = explode(' ', trim($review->user?->name ?? 'Verified Renter'));
+                $initials = strtoupper(substr($nameParts[0], 0, 1) . (isset($nameParts[1]) ? substr($nameParts[1], 0, 1) : ''));
+                return [
+                    'id' => $review->id,
+                    'rating' => (int) $review->rating,
+                    'title' => $review->title,
+                    'comment' => $review->comment,
+                    'created_at' => $review->created_at?->toISOString(),
+                    'formatted_date' => $review->created_at ? $review->created_at->diffForHumans() : '',
+                    'user' => [
+                        'name' => $review->user?->name ?? 'Verified Renter',
+                        'initials' => $initials ?: 'VR',
+                    ],
+                ];
+            });
+
+        // Check if authenticated client has an eligible completed reservation to review
+        $eligibleReservation = null;
+        if (Auth::check()) {
+            $eligibleReservation = Reservation::where('user_id', Auth::id())
+                ->where('car_id', $car->id)
+                ->where('status', ReservationStatus::COMPLETED)
+                ->whereDoesntHave('review')
+                ->latest()
+                ->first(['id', 'reservation_number', 'start_date', 'end_date']);
+        }
+
         return inertia('Booking', [
             'car' => $car,
             'bookedRanges' => $bookedRanges,
             'extrasCatalog' => array_values(self::EXTRAS_CATALOG),
+            'reviews' => $reviews,
+            'ratingDistribution' => $car->rating_distribution,
+            'eligibleReservation' => $eligibleReservation,
         ]);
     }
 

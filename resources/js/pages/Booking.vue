@@ -3,11 +3,13 @@ import BookingCalendar, { type BookedRange } from '@/components/BookingCalendar.
 import MockPaymentModal from '@/components/MockPaymentModal.vue';
 import PromoCodeInput, { type AppliedCoupon } from '@/components/PromoCodeInput.vue';
 import RentalExtras from '@/components/RentalExtras.vue';
+import ReviewModal from '@/components/ReviewModal.vue';
+import StarRating from '@/components/StarRating.vue';
 import HomeLayout from '@/layouts/HomeLayout.vue';
 import { login } from '@/routes';
 import { book } from '@/routes/fleet';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { Clock, Lock, ShieldAlert, ShieldCheck } from 'lucide-vue-next';
+import { Clock, Lock, MessageSquare, ShieldAlert, ShieldCheck, Star, ThumbsUp } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface Car {
@@ -51,6 +53,41 @@ const form = useForm({
 
 const appliedCoupon = ref<AppliedCoupon | null>(null);
 const isPaymentModalOpen = ref(false);
+
+const reviewsList = computed(() => (page.props.reviews || []) as Array<{
+    id: number;
+    rating: number;
+    title: string | null;
+    comment: string;
+    created_at?: string;
+    formatted_date?: string;
+    user: { name: string; initials: string };
+}>);
+
+const ratingDistribution = computed(() => (page.props.ratingDistribution || {}) as Record<number, { star: number; count: number; percentage: number }>);
+const eligibleReservation = computed(() => (page.props as any).eligibleReservation as any);
+
+const isReviewModalOpen = ref(false);
+const selectedRatingFilter = ref<number | null>(null);
+
+const averageRating = computed(() => {
+    if (reviewsList.value.length === 0) return 0;
+    const sum = reviewsList.value.reduce((acc, r) => acc + Number(r.rating), 0);
+    return Math.round((sum / reviewsList.value.length) * 10) / 10;
+});
+
+const recommendationPercentage = computed(() => {
+    if (reviewsList.value.length === 0) return 0;
+    const positive = reviewsList.value.filter((r) => r.rating >= 4).length;
+    return Math.round((positive / reviewsList.value.length) * 100);
+});
+
+const filteredReviews = computed(() => {
+    if (!selectedRatingFilter.value) {
+        return reviewsList.value;
+    }
+    return reviewsList.value.filter((r) => r.rating === selectedRatingFilter.value);
+});
 
 const extrasCatalog = [
     {
@@ -309,6 +346,19 @@ const commonLocations = [
                                             {{ car.make }} {{ car.model }}
                                         </h2>
 
+                                        <div class="mt-2 flex items-center gap-2">
+                                            <StarRating
+                                                :rating="averageRating"
+                                                :readonly="true"
+                                                size="sm"
+                                                :compact="true"
+                                                :reviews-count="reviewsList.length"
+                                            />
+                                            <span v-if="reviewsList.length > 0" class="text-xs text-slate-500">
+                                                • {{ reviewsList.length }} verified {{ reviewsList.length === 1 ? 'renter review' : 'renter reviews' }}
+                                            </span>
+                                        </div>
+
                                         <div class="mt-4 flex flex-wrap gap-2">
                                             <span class="rounded-lg bg-slate-100 px-3 py-2 text-sm capitalize text-slate-700">
                                                 {{ car.fuel_type }}
@@ -562,6 +612,171 @@ const commonLocations = [
                                 </div>
                             </form>
                         </section>
+
+                        <!-- Customer Reviews Section -->
+                        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-8">
+                            <div class="mb-6 flex flex-col justify-between gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-center">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
+                                            <Star class="h-4 w-4 fill-amber-400" />
+                                        </div>
+                                        <h2 class="text-xl font-bold text-[#101D35] sm:text-2xl">
+                                            Customer Reviews & Ratings
+                                        </h2>
+                                    </div>
+                                    <p class="mt-1 text-sm text-slate-500">
+                                        Authentic feedback from verified renters who booked this car.
+                                    </p>
+                                </div>
+
+                                <button
+                                    v-if="eligibleReservation"
+                                    type="button"
+                                    @click="isReviewModalOpen = true"
+                                    class="inline-flex items-center gap-2 rounded-xl bg-[#101D35] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#263F60]"
+                                >
+                                    <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                                    <span>Rate Your Trip</span>
+                                </button>
+                            </div>
+
+                            <!-- Eligible Reservation Prompt Banner -->
+                            <div
+                                v-if="eligibleReservation"
+                                class="mb-6 flex flex-col justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50/80 p-4 sm:flex-row sm:items-center"
+                            >
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
+                                        <Star class="h-5 w-5 fill-white text-white" />
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold uppercase tracking-wide text-amber-950">
+                                            Trip Completed • Share Your Feedback
+                                        </p>
+                                        <p class="mt-0.5 text-xs text-amber-800">
+                                            You completed reservation {{ eligibleReservation.reservation_number }}. Review your experience to help future renters!
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="isReviewModalOpen = true"
+                                    class="shrink-0 rounded-xl bg-[#101D35] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#263F60]"
+                                >
+                                    Write a Review
+                                </button>
+                            </div>
+
+                            <!-- Rating Summary Hero & Distribution -->
+                            <div v-if="reviewsList.length > 0" class="mb-8 grid gap-6 rounded-xl bg-[#F4F6FA] p-6 sm:grid-cols-12 sm:items-center">
+                                <!-- Score Hero -->
+                                <div class="text-center sm:col-span-5 sm:border-r sm:border-slate-200 sm:pr-6">
+                                    <div class="text-5xl font-black text-[#101D35]">
+                                        {{ averageRating.toFixed(1) }}
+                                    </div>
+                                    <div class="mt-2 flex justify-center">
+                                        <StarRating :rating="averageRating" :readonly="true" size="md" />
+                                    </div>
+                                    <p class="mt-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                        Based on {{ reviewsList.length }} verified {{ reviewsList.length === 1 ? 'review' : 'reviews' }}
+                                    </p>
+                                    <div v-if="recommendationPercentage > 0" class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-100/90 px-3 py-1 text-xs font-semibold text-emerald-800">
+                                        <ThumbsUp class="h-3.5 w-3.5" />
+                                        <span>{{ recommendationPercentage }}% of renters recommend</span>
+                                    </div>
+                                </div>
+
+                                <!-- Star Distribution Bars -->
+                                <div class="space-y-2.5 sm:col-span-7 sm:pl-2">
+                                    <div
+                                        v-for="star in [5, 4, 3, 2, 1]"
+                                        :key="star"
+                                        class="flex items-center gap-3 text-xs"
+                                    >
+                                        <button
+                                            type="button"
+                                            class="flex w-14 items-center gap-1 font-semibold text-slate-600 transition hover:text-[#101D35]"
+                                            @click="selectedRatingFilter = selectedRatingFilter === star ? null : star"
+                                        >
+                                            <span>{{ star }}</span>
+                                            <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
+                                        </button>
+                                        <div class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-slate-200">
+                                            <div
+                                                class="h-full rounded-full transition-all duration-500"
+                                                :class="[
+                                                    selectedRatingFilter === star ? 'bg-[#101D35]' : 'bg-amber-400',
+                                                ]"
+                                                :style="{ width: `${ratingDistribution[star]?.percentage || 0}%` }"
+                                            ></div>
+                                        </div>
+                                        <span class="w-10 text-right font-medium text-slate-500">
+                                            {{ ratingDistribution[star]?.count || 0 }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rating filter chip -->
+                            <div v-if="selectedRatingFilter" class="mb-4 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 text-xs">
+                                <span class="text-slate-600">
+                                    Showing only <strong>{{ selectedRatingFilter }}★</strong> reviews
+                                </span>
+                                <button type="button" @click="selectedRatingFilter = null" class="font-bold text-[#58779D] hover:underline">
+                                    Show All
+                                </button>
+                            </div>
+
+                            <!-- Reviews List -->
+                            <div v-if="filteredReviews.length > 0" class="space-y-4">
+                                <div
+                                    v-for="review in filteredReviews"
+                                    :key="review.id"
+                                    class="rounded-xl border border-slate-100 bg-[#FAFBFD] p-4 transition hover:border-slate-200 hover:shadow-2xs sm:p-5"
+                                >
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#101D35] text-xs font-bold uppercase text-white">
+                                                {{ review.user.initials }}
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-bold text-[#101D35]">{{ review.user.name }}</span>
+                                                    <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200/60">
+                                                        <ShieldCheck class="h-3 w-3" />
+                                                        Verified Renter
+                                                    </span>
+                                                </div>
+                                                <p class="text-[11px] text-slate-400">{{ review.formatted_date }}</p>
+                                            </div>
+                                        </div>
+
+                                        <StarRating :rating="review.rating" :readonly="true" size="xs" />
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <h4 v-if="review.title" class="mb-1 text-sm font-bold text-[#101D35]">
+                                            {{ review.title }}
+                                        </h4>
+                                        <p class="text-xs leading-relaxed text-slate-600 sm:text-sm">
+                                            {{ review.comment }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Empty state -->
+                            <div v-else class="rounded-xl border border-dashed border-slate-200 p-8 text-center">
+                                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                                    <MessageSquare class="h-6 w-6" />
+                                </div>
+                                <p class="mt-3 text-sm font-bold text-[#101D35]">No reviews yet</p>
+                                <p class="mt-1 text-xs text-slate-500">
+                                    No reviews yet — be the first to review after your completed trip!
+                                </p>
+                            </div>
+                        </section>
                     </div>
 
                     <!-- Price summary sidebar -->
@@ -705,6 +920,14 @@ const commonLocations = [
             :amount="total"
             @close="isPaymentModalOpen = false"
             @submit="handlePaymentSubmit"
+        />
+
+        <!-- Review Modal -->
+        <ReviewModal
+            :is-open="isReviewModalOpen"
+            :reservation="eligibleReservation ? { id: eligibleReservation.id, reservation_number: eligibleReservation.reservation_number, start_date: eligibleReservation.start_date, end_date: eligibleReservation.end_date, car: car } : null"
+            @close="isReviewModalOpen = false"
+            @submitted="router.reload()"
         />
     </HomeLayout>
 </template>

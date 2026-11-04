@@ -25,7 +25,9 @@ class HomePagesController extends Controller
     public function fleet(Request $request)
     {
         $query = Car::where('status', CarStatus::AVAILABLE)
-            ->select('id', 'make', 'model', 'year', 'price_per_day', 'description', 'fuel_type');
+            ->select('id', 'make', 'model', 'year', 'price_per_day', 'description', 'fuel_type')
+            ->withAvg(['reviews as average_rating' => fn ($q) => $q->where('is_published', true)], 'rating')
+            ->withCount(['reviews as reviews_count' => fn ($q) => $q->where('is_published', true)]);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -61,6 +63,26 @@ class HomePagesController extends Controller
             $query->where('price_per_day', '<=', $request->max_price);
         }
 
+        // Minimum Rating filter
+        if ($request->filled('min_rating') && (float) $request->min_rating > 0) {
+            $minRating = (float) $request->min_rating;
+            $query->whereRaw('(select avg(rating) from car_reviews where car_reviews.car_id = cars.id and car_reviews.is_published = 1) >= CAST(? AS REAL)', [$minRating]);
+        }
+
+        // Sorting
+        if ($request->filled('sort')) {
+            match ($request->sort) {
+                'rating_desc' => $query->orderByDesc('average_rating'),
+                'price_asc' => $query->orderBy('price_per_day', 'asc'),
+                'price_desc' => $query->orderBy('price_per_day', 'desc'),
+                'year_desc' => $query->orderBy('year', 'desc'),
+                'year_asc' => $query->orderBy('year', 'asc'),
+                default => $query->orderBy('make', 'asc'),
+            };
+        } else {
+            $query->orderBy('make', 'asc');
+        }
+
         $cars = $query->paginate(10)->withQueryString();
 
         // Get filter options
@@ -79,7 +101,7 @@ class HomePagesController extends Controller
             ->pluck('year')
             ->toArray();
 
-        $filters = $request->only(['search', 'make', 'fuel_type', 'min_price', 'max_price', 'year']);
+        $filters = $request->only(['search', 'make', 'fuel_type', 'min_price', 'max_price', 'year', 'min_rating', 'sort']);
 
         return inertia('Fleet', compact('cars', 'makes', 'fuelTypes', 'years', 'filters'));
     }

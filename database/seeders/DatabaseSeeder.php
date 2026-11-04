@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             ReservationsPaymentsSeeder::class,
             TicketSeeder::class,
             CouponsSeeder::class,
+            CarReviewsSeeder::class,
         ]);
     }
 }

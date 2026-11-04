@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ReservationsController;
 use App\Http\Controllers\Admin\ClientsController;
 use App\Http\Controllers\Admin\PaymentsController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\ReviewsController;
 use App\Http\Controllers\Admin\SupportController;
 
 Route::middleware(['auth', 'verified', 'active', 'admin'])
@@ -34,6 +35,9 @@ Route::middleware(['auth', 'verified', 'active', 'admin'])
 
         // Reports
         Route::resource('reports', ReportsController::class)->except(['show']);
+
+        // Reviews
+        Route::resource('reviews', ReviewsController::class)->only(['index', 'destroy']);
 
         // Support
         Route::resource('support', SupportController::class)->only(['index']);

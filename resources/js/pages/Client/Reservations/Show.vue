@@ -1,9 +1,12 @@
 
 <script setup lang="ts">
 import ClientLayout from '@/layouts/ClientLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import ReviewModal from '@/components/ReviewModal.vue';
+import StarRating from '@/components/StarRating.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
-import { computed } from 'vue';
+import { ShieldCheck, Star } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import { index, print } from '@/routes/client/reservations';
 
 const props = defineProps<{
@@ -12,6 +15,8 @@ const props = defineProps<{
     paymentStatusMeta: Array<{ value: string; label: string }>;
     currency: { symbol: string; code: string };
 }>();
+
+const isReviewModalOpen = ref(false);
 
 const statusMap = computed(() => {
     const map: Record<string, { label: string; color: string }> = {};
@@ -147,6 +152,24 @@ function paymentStatusClass(status: string) {
                                 Print Reservation
                             </Button>
                         </a>
+
+                        <button
+                            v-if="props.reservation.status === 'completed' && !props.reservation.review"
+                            type="button"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 px-4 py-2 text-sm font-bold text-[#101D35] transition hover:bg-amber-300"
+                            @click="isReviewModalOpen = true"
+                        >
+                            <Star class="h-4 w-4 fill-[#101D35] text-[#101D35]" />
+                            Rate Trip
+                        </button>
+
+                        <div
+                            v-else-if="props.reservation.review"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-sm font-semibold text-white"
+                        >
+                            <Star class="h-4 w-4 fill-amber-400 text-amber-400" />
+                            Rated {{ props.reservation.review.rating }} / 5
+                        </div>
                     </div>
                 </div>
 
@@ -191,6 +214,72 @@ function paymentStatusClass(status: string) {
                         Currency: {{ props.currency.code }}
                     </p>
                 </div>
+            </section>
+
+            <!-- Verified Review Section (if already reviewed) -->
+            <section
+                v-if="props.reservation.review"
+                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+            >
+                <div class="flex items-center justify-between border-b border-[#E5EAF1] px-5 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                            <Star class="h-5 w-5 fill-amber-400" />
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-[#101D35]">Your Verified Trip Review</h2>
+                            <p class="text-xs text-slate-500">Submitted for this reservation</p>
+                        </div>
+                    </div>
+
+                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                        <ShieldCheck class="h-3.5 w-3.5" />
+                        Verified Renter
+                    </span>
+                </div>
+
+                <div class="space-y-3 p-5 sm:p-6">
+                    <div class="flex items-center gap-3">
+                        <StarRating :rating="props.reservation.review.rating" :readonly="true" size="sm" />
+                        <span class="text-xs font-bold text-[#101D35]">
+                            {{ props.reservation.review.rating }} out of 5 stars
+                        </span>
+                    </div>
+
+                    <h3 v-if="props.reservation.review.title" class="text-base font-bold text-[#101D35]">
+                        {{ props.reservation.review.title }}
+                    </h3>
+
+                    <p class="text-sm leading-relaxed text-slate-600">
+                        {{ props.reservation.review.comment }}
+                    </p>
+                </div>
+            </section>
+
+            <!-- Unreviewed completed prompt -->
+            <section
+                v-else-if="props.reservation.status === 'completed'"
+                class="flex flex-col justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:flex-row sm:items-center"
+            >
+                <div class="flex items-start gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
+                        <Star class="h-5 w-5 fill-white text-white" />
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-amber-950">How was your trip with this vehicle?</h3>
+                        <p class="mt-0.5 text-xs text-amber-800">
+                            Your feedback helps future drivers and rewards excellent fleet quality.
+                        </p>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="shrink-0 rounded-xl bg-[#101D35] px-5 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#263F60]"
+                    @click="isReviewModalOpen = true"
+                >
+                    Write a Review
+                </button>
             </section>
 
             <!-- Main details -->
@@ -490,5 +579,13 @@ function paymentStatusClass(status: string) {
                 </Link>
             </div>
         </main>
+
+        <!-- Rate Trip Modal -->
+        <ReviewModal
+            :is-open="isReviewModalOpen"
+            :reservation="props.reservation"
+            @close="isReviewModalOpen = false"
+            @submitted="router.reload()"
+        />
     </ClientLayout>
 </template>

@@ -15,7 +15,7 @@ class ReservationsController extends Controller
     {
 
         $reservations = Reservation::where('user_id', auth()->user()->id)
-            ->with('car')
+            ->with(['car', 'review'])
             ->orderByDesc('created_at')
             ->paginate(10)
             ->withQueryString();
@@ -28,7 +28,7 @@ class ReservationsController extends Controller
     public function show($id)
     {
         $reservation = Reservation::findOrFail($id);
-        $reservation->load(['user', 'car', 'payments']);
+        $reservation->load(['user', 'car', 'payments', 'review']);
 
         return inertia('Client/Reservations/Show', [
             'reservation' => $reservation,

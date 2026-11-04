@@ -15,10 +15,11 @@ import { index as reservationsIndex } from "@/routes/admin/reservations/index";
 import { index as clientsIndex } from "@/routes/admin/clients/index";
 import { index as paymentsIndex } from "@/routes/admin/payments/index";
 import { index as reportsIndex } from "@/routes/admin/reports/index";
+import { index as reviewsIndex } from "@/routes/admin/reviews/index";
 import { index as supportIndex } from "@/routes/admin/support/index";
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { Car, Calendar, User, CreditCard, BarChart, LifeBuoy } from 'lucide-vue-next';
+import { Car, Calendar, User, CreditCard, BarChart, LifeBuoy, Star } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { home } from '@/routes';
 
@@ -47,6 +48,11 @@ const mainNavItems: NavItem[] = [
         title: 'Reports',
         href: reportsIndex(),
         icon: BarChart,
+    },
+    {
+        title: 'Reviews',
+        href: reviewsIndex(),
+        icon: Star,
     },
     {
         title: 'Support',

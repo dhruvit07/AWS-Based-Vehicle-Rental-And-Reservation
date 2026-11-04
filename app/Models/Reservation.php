@@ -6,6 +6,7 @@ use App\Enums\ReservationStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -103,6 +104,30 @@ class Reservation extends Model
     public function car(): BelongsTo
     {
         return $this->belongsTo(Car::class);
+    }
+
+    /**
+     * Get the review associated with the reservation.
+     */
+    public function review(): HasOne
+    {
+        return $this->hasOne(CarReview::class);
+    }
+
+    /**
+     * Check if this reservation is eligible to be reviewed.
+     */
+    public function canBeReviewed(): bool
+    {
+        if ($this->status !== ReservationStatus::COMPLETED) {
+            return false;
+        }
+
+        if ($this->relationLoaded('review')) {
+            return $this->review === null;
+        }
+
+        return ! $this->review()->exists();
     }
 
     /**

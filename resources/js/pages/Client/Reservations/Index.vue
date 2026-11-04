@@ -1,8 +1,11 @@
 
 <script setup lang="ts">
 import ClientLayout from '@/layouts/ClientLayout.vue';
+import ReviewModal from '@/components/ReviewModal.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { show } from '@/routes/client/reservations';
+import { Star } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const props = defineProps<{
     reservations: {
@@ -15,17 +18,31 @@ const props = defineProps<{
                 model: string;
                 year: number;
                 license_plate: string;
+                image_url?: string;
             } | null;
             start_date: string;
             end_date: string;
             total_days: number;
             total_amount: number | string;
             status: string;
+            review?: {
+                id: number;
+                rating: number;
+                title: string | null;
+            } | null;
         }>;
         links: Array<{ url: string | null; label: string; active: boolean }>;
     };
     currency: { symbol: string; code: string };
 }>();
+
+const selectedReservationForReview = ref<any | null>(null);
+const isReviewModalOpen = ref(false);
+
+const openReviewModal = (res: any) => {
+    selectedReservationForReview.value = res;
+    isReviewModalOpen.value = true;
+};
 
 const navigateToReservation = (id: number) => {
     router.visit(show(id).url);
@@ -237,24 +254,46 @@ const statusClass = (status: string) => {
                                 </td>
 
                                 <td class="px-6 py-5">
-                                    <span
-                                        :class="[
-                                            'inline-flex rounded-full px-3 py-1.5 text-xs font-semibold capitalize ring-1 ring-inset',
-                                            statusClass(res.status),
-                                        ]"
-                                    >
-                                        {{ res.status }}
-                                    </span>
+                                    <div class="space-y-1.5">
+                                        <span
+                                            :class="[
+                                                'inline-flex rounded-full px-3 py-1.5 text-xs font-semibold capitalize ring-1 ring-inset',
+                                                statusClass(res.status),
+                                            ]"
+                                        >
+                                            {{ res.status }}
+                                        </span>
+
+                                        <div
+                                            v-if="res.review"
+                                            class="flex items-center gap-1 text-xs font-bold text-amber-700"
+                                        >
+                                            <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
+                                            <span>Rated {{ res.review.rating }}★</span>
+                                        </div>
+                                    </div>
                                 </td>
 
                                 <td class="px-6 py-5 text-right">
-                                    <button
-                                        type="button"
-                                        class="rounded-lg border border-[#DCE3ED] px-3 py-2 text-sm font-semibold text-[#263F60] transition hover:border-[#263F60] hover:bg-[#F4F6FA]"
-                                        @click.stop="navigateToReservation(res.id)"
-                                    >
-                                        View →
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button
+                                            v-if="res.status.toLowerCase() === 'completed' && !res.review"
+                                            type="button"
+                                            class="inline-flex items-center gap-1 rounded-lg bg-[#101D35] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#263F60]"
+                                            @click.stop="openReviewModal(res)"
+                                        >
+                                            <Star class="h-3 w-3 fill-amber-400 text-amber-400" />
+                                            Rate Trip
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="rounded-lg border border-[#DCE3ED] px-3 py-2 text-sm font-semibold text-[#263F60] transition hover:border-[#263F60] hover:bg-[#F4F6FA]"
+                                            @click.stop="navigateToReservation(res.id)"
+                                        >
+                                            View →
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -321,9 +360,29 @@ const statusClass = (status: string) => {
                             </div>
                         </div>
 
-                        <p class="text-sm font-semibold text-[#263F60]">
-                            View reservation details →
-                        </p>
+                        <div class="mt-3 flex items-center justify-between">
+                            <p class="text-sm font-semibold text-[#263F60]">
+                                View reservation details →
+                            </p>
+
+                            <div
+                                v-if="res.review"
+                                class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800 ring-1 ring-amber-200"
+                            >
+                                <Star class="h-3 w-3 fill-amber-400 text-amber-500" />
+                                <span>Rated {{ res.review.rating }}★</span>
+                            </div>
+
+                            <button
+                                v-else-if="res.status.toLowerCase() === 'completed'"
+                                type="button"
+                                class="inline-flex items-center gap-1 rounded-lg bg-[#101D35] px-3 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#263F60]"
+                                @click.stop="openReviewModal(res)"
+                            >
+                                <Star class="h-3 w-3 fill-amber-400 text-amber-400" />
+                                Rate Trip
+                            </button>
+                        </div>
                     </button>
                 </div>
 
@@ -351,5 +410,13 @@ const statusClass = (status: string) => {
                 </nav>
             </section>
         </main>
+
+        <!-- Rate Trip Modal -->
+        <ReviewModal
+            :is-open="isReviewModalOpen"
+            :reservation="selectedReservationForReview"
+            @close="isReviewModalOpen = false"
+            @submitted="router.reload()"
+        />
     </ClientLayout>
 </template>

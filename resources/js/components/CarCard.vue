@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { show } from '@/routes/fleet';
+import { Star } from 'lucide-vue-next';
 
 interface Car {
     id: number;
@@ -12,6 +13,8 @@ interface Car {
     description: string;
     fuel_type: string;
     image_url: string;
+    average_rating?: number;
+    reviews_count?: number;
 }
 
 interface Props {
@@ -52,10 +55,31 @@ const formatPrice = (price: string | number) => {
                 class="absolute inset-0 bg-gradient-to-t from-[#101D35]/50 via-transparent to-transparent"
             ></div>
 
-            <div
-                class="absolute left-4 top-4 rounded-lg border border-white/30 bg-[#101D35]/90 px-3 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-sm"
-            >
-                {{ car.year }} MODEL
+            <div class="absolute left-4 top-4 flex items-center gap-2">
+                <div
+                    class="rounded-lg border border-white/30 bg-[#101D35]/90 px-3 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-sm"
+                >
+                    {{ car.year }} MODEL
+                </div>
+
+                <div
+                    v-if="car.average_rating && Number(car.average_rating) > 0"
+                    class="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-black/60 px-2.5 py-1.5 text-xs font-bold text-white shadow-xs backdrop-blur-sm"
+                >
+                    <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                    <span>{{ Number(car.average_rating).toFixed(1) }}</span>
+                    <span v-if="car.reviews_count" class="font-normal text-white/75">
+                        ({{ car.reviews_count }})
+                    </span>
+                </div>
+
+                <div
+                    v-else
+                    class="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-black/60 px-2.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm"
+                >
+                    <Star class="h-3.5 w-3.5 text-amber-300" />
+                    <span>New</span>
+                </div>
             </div>
 
             <div

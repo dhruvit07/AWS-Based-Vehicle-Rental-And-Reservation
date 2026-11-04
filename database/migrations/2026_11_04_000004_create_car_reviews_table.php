@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('car_reviews', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('car_id')->constrained('cars')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('reservation_id')->unique()->constrained('reservations')->cascadeOnDelete();
+            $table->unsignedTinyInteger('rating');
+            $table->string('title', 100)->nullable();
+            $table->text('comment');
+            $table->boolean('is_published')->default(true);
+            $table->timestamps();
+
+            $table->index(['car_id', 'is_published']);
+            $table->index(['user_id', 'is_published']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('car_reviews');
+    }
+};

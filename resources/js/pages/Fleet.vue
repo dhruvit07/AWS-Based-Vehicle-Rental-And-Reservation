@@ -19,6 +19,7 @@ const selectedFuelType = ref(filters.value.fuel_type || '');
 const minPrice = ref(filters.value.min_price || '');
 const maxPrice = ref(filters.value.max_price || '');
 const selectedYear = ref(filters.value.year || '');
+const selectedMinRating = ref(filters.value.min_rating || '');
 const sortBy = ref(filters.value.sort || 'make_asc');
 
 const showFilters = ref(false);
@@ -32,6 +33,7 @@ const activeFilterCount = computed(() => {
         minPrice.value,
         maxPrice.value,
         selectedYear.value,
+        selectedMinRating.value,
     ].filter(Boolean).length;
 });
 
@@ -48,6 +50,7 @@ const applyFilters = () => {
     if (minPrice.value !== '') params.min_price = String(minPrice.value);
     if (maxPrice.value !== '') params.max_price = String(maxPrice.value);
     if (selectedYear.value) params.year = String(selectedYear.value);
+    if (selectedMinRating.value) params.min_rating = String(selectedMinRating.value);
     if (sortBy.value && sortBy.value !== 'make_asc') params.sort = sortBy.value;
 
     isLoading.value = true;
@@ -68,6 +71,7 @@ const clearFilters = () => {
     minPrice.value = '';
     maxPrice.value = '';
     selectedYear.value = '';
+    selectedMinRating.value = '';
     sortBy.value = 'make_asc';
 
     isLoading.value = true;
@@ -262,6 +266,21 @@ const goToPage = (url: string | null) => {
                                 </div>
                             </div>
 
+                            <!-- Rating -->
+                            <div>
+                                <label for="fleet-rating" class="mb-2 block text-sm font-bold">Minimum rating</label>
+                                <select
+                                    id="fleet-rating"
+                                    v-model="selectedMinRating"
+                                    class="w-full rounded-xl border border-[#DCE3ED] bg-white px-4 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
+                                >
+                                    <option value="">Any rating</option>
+                                    <option value="4.5">4.5+ Stars (Exceptional)</option>
+                                    <option value="4.0">4.0+ Stars (Great)</option>
+                                    <option value="3.0">3.0+ Stars (Good)</option>
+                                </select>
+                            </div>
+
                             <!-- Sort -->
                             <div>
                                 <label for="fleet-sort" class="mb-2 block text-sm font-bold">Sort vehicles</label>
@@ -271,6 +290,7 @@ const goToPage = (url: string | null) => {
                                     class="w-full rounded-xl border border-[#DCE3ED] bg-white px-4 py-3 text-sm outline-none focus:border-[#58779D] focus:ring-4 focus:ring-[#58779D]/10"
                                 >
                                     <option value="make_asc">Make: A to Z</option>
+                                    <option value="rating_desc">Highest Rated First</option>
                                     <option value="price_asc">Price: Low to High</option>
                                     <option value="price_desc">Price: High to Low</option>
                                     <option value="year_desc">Newest First</option>
