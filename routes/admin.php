@@ -26,6 +26,8 @@ Route::middleware(['auth', 'verified', 'active', 'admin'])
         Route::resource('clients', ClientsController::class)->only(['index', 'show']);
         Route::patch('clients/{client}/suspend', [ClientsController::class, 'suspend'])->name('clients.suspend');
         Route::patch('clients/{client}/activate', [ClientsController::class, 'activate'])->name('clients.activate');
+        Route::patch('clients/{client}/kyc/approve', [ClientsController::class, 'approveKyc'])->name('clients.kyc.approve');
+        Route::patch('clients/{client}/kyc/reject', [ClientsController::class, 'rejectKyc'])->name('clients.kyc.reject');
 
         // Payments
         Route::resource('payments', PaymentsController::class)->only(['index']);

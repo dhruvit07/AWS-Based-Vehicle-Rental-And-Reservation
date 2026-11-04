@@ -1,4 +1,3 @@
-```vue
 <script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -8,12 +7,37 @@ import {
   Dialog, DialogClose, DialogContent, DialogDescription,
   DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { AlertCircle, ArrowLeft, CalendarDays, CarFront, CreditCard, ShieldCheck, UserRound, Wallet } from 'lucide-vue-next';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CalendarDays,
+  CarFront,
+  CheckCircle2,
+  CreditCard,
+  Eye,
+  ShieldAlert,
+  ShieldCheck,
+  UserRound,
+  Wallet,
+} from 'lucide-vue-next';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { index, suspend, activate } from '@/routes/admin/clients';
 
 const props = defineProps<{
-  client: { id: number; name: string; email: string; is_active: boolean; created_at?: string };
+  client: {
+    id: number;
+    name: string;
+    email: string;
+    is_active: boolean;
+    created_at?: string;
+    kyc_status?: string;
+    license_number?: string | null;
+    license_expiry?: string | null;
+    license_front_url?: string | null;
+    license_back_url?: string | null;
+    kyc_rejection_reason?: string | null;
+    kyc_verified_at?: string | null;
+  };
   stats: { total_reservations: number; total_payments: number; total_spent: number };
   reservations: {
     data: Array<{
@@ -48,6 +72,12 @@ const showSuspendDialog = ref(false);
 const processingSuspend = ref(false);
 const showActivateDialog = ref(false);
 const processingActivate = ref(false);
+
+const showRejectDialog = ref(false);
+const rejectionReason = ref('');
+const rejectionError = ref('');
+const processingKyc = ref(false);
+const previewImage = ref<{ url: string; title: string } | null>(null);
 
 function fmtMoney(n?: number | string) {
   return `${props.currency.symbol}${Number(n ?? 0).toFixed(2)}`;
@@ -84,6 +114,73 @@ function activateClient() {
 const statusStyle = computed(() => props.client.is_active
   ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
   : 'bg-red-50 text-red-700 ring-red-200');
+
+const kycBadge = computed(() => {
+  const status = (props.client.kyc_status || 'unsubmitted').toLowerCase();
+  switch (status) {
+    case 'verified':
+      return {
+        label: 'Verified Driver',
+        class: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        dot: 'bg-emerald-500',
+      };
+    case 'pending':
+      return {
+        label: 'Under Review',
+        class: 'bg-amber-50 text-amber-700 ring-amber-200',
+        dot: 'bg-amber-500',
+      };
+    case 'rejected':
+      return {
+        label: 'Rejected',
+        class: 'bg-rose-50 text-rose-700 ring-rose-200',
+        dot: 'bg-rose-500',
+      };
+    default:
+      return {
+        label: 'Not Submitted',
+        class: 'bg-slate-100 text-slate-700 ring-slate-200',
+        dot: 'bg-slate-400',
+      };
+  }
+});
+
+function approveKyc() {
+  processingKyc.value = true;
+  router.patch(`/admin/clients/${props.client.id}/kyc/approve`, {}, {
+    preserveScroll: true,
+    onFinish: () => {
+      processingKyc.value = false;
+    },
+  });
+}
+
+function openRejectDialog() {
+  rejectionReason.value = props.client.kyc_rejection_reason || '';
+  rejectionError.value = '';
+  showRejectDialog.value = true;
+}
+
+function submitRejectKyc() {
+  if (!rejectionReason.value.trim()) {
+    rejectionError.value = 'Please provide a feedback reason for rejecting the license.';
+    return;
+  }
+
+  processingKyc.value = true;
+  router.patch(`/admin/clients/${props.client.id}/kyc/reject`, {
+    rejection_reason: rejectionReason.value.trim(),
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      showRejectDialog.value = false;
+      rejectionReason.value = '';
+    },
+    onFinish: () => {
+      processingKyc.value = false;
+    },
+  });
+}
 
 function badgeStyle(status: string) {
   const value = status.toLowerCase();
@@ -188,6 +285,162 @@ function badgeStyle(status: string) {
           <div>
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Account Status</p>
             <p class="mt-1 font-semibold text-[#101D35]">{{ client.is_active ? 'Active' : 'Suspended' }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Driver Verification & License -->
+      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div class="mb-5 flex flex-col justify-between gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center">
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-[#E9EEF5] p-2 text-[#263F60]">
+              <ShieldCheck class="size-5" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h2 class="font-semibold text-[#101D35]">Driver Verification & License</h2>
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset"
+                  :class="kycBadge.class"
+                >
+                  <span class="size-1.5 rounded-full" :class="kycBadge.dot" />
+                  {{ kycBadge.label }}
+                </span>
+              </div>
+              <p class="text-xs text-slate-500">Government driving credentials inspection and verification</p>
+            </div>
+          </div>
+
+          <!-- Review Controls -->
+          <div class="flex flex-wrap items-center gap-2">
+            <Button
+              v-if="client.kyc_status !== 'verified'"
+              class="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+              :disabled="processingKyc"
+              @click="approveKyc"
+            >
+              <CheckCircle2 class="size-4" />
+              {{ processingKyc ? 'Processing...' : 'Approve License' }}
+            </Button>
+            <Button
+              v-else
+              variant="outline"
+              class="gap-1.5 border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+              :disabled="processingKyc"
+              @click="approveKyc"
+            >
+              <CheckCircle2 class="size-4 text-emerald-600" />
+              Re-approve
+            </Button>
+
+            <Button
+              variant="outline"
+              class="gap-1.5 border-rose-300 text-rose-700 hover:bg-rose-50"
+              :disabled="processingKyc"
+              @click="openRejectDialog"
+            >
+              <ShieldAlert class="size-4 text-rose-600" />
+              Reject License
+            </Button>
+          </div>
+        </div>
+
+        <!-- Rejection feedback banner if rejected -->
+        <div
+          v-if="client.kyc_status === 'rejected' && client.kyc_rejection_reason"
+          class="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"
+        >
+          <div class="flex items-start gap-2.5">
+            <ShieldAlert class="mt-0.5 size-4 shrink-0 text-rose-600" />
+            <div>
+              <p class="font-semibold text-rose-950">Current Rejection Feedback</p>
+              <p class="mt-1 text-rose-800">{{ client.kyc_rejection_reason }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- License Metadata Grid -->
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">License Number</p>
+            <p class="mt-1 font-mono font-semibold text-[#101D35]">{{ client.license_number || '—' }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Expiration Date</p>
+            <p class="mt-1 font-semibold text-[#101D35]">{{ client.license_expiry ? fmtDate(client.license_expiry) : '—' }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Verification Status</p>
+            <p class="mt-1 font-semibold capitalize text-[#101D35]">{{ client.kyc_status || 'Unsubmitted' }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Verified At</p>
+            <p class="mt-1 font-semibold text-[#101D35]">{{ client.kyc_verified_at ? fmtDateTime(client.kyc_verified_at) : '—' }}</p>
+          </div>
+        </div>
+
+        <!-- Document photo thumbnails -->
+        <div class="mt-6 border-t border-slate-100 pt-5">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#58779D]">
+            License Documents
+          </p>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <!-- Front photo -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
+              <div class="mb-2 flex items-center justify-between">
+                <span class="text-xs font-semibold text-[#101D35]">Front of License</span>
+                <span v-if="client.license_front_url" class="text-[11px] text-slate-500">Click to enlarge</span>
+              </div>
+              <div
+                v-if="client.license_front_url"
+                class="group relative h-48 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-900"
+                @click="previewImage = { url: client.license_front_url, title: 'License Front - ' + client.name }"
+              >
+                <img
+                  :src="client.license_front_url"
+                  alt="License Front"
+                  class="h-full w-full object-cover transition duration-200 group-hover:scale-102 group-hover:opacity-90"
+                />
+                <div class="absolute inset-0 flex items-center justify-center bg-[#101D35]/30 opacity-0 transition group-hover:opacity-100">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#101D35] shadow-xs">
+                    <Eye class="size-3.5" />
+                    Enlarge Image
+                  </span>
+                </div>
+              </div>
+              <div v-else class="flex h-48 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-xs text-slate-400">
+                Front image not submitted
+              </div>
+            </div>
+
+            <!-- Back photo -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
+              <div class="mb-2 flex items-center justify-between">
+                <span class="text-xs font-semibold text-[#101D35]">Back of License</span>
+                <span v-if="client.license_back_url" class="text-[11px] text-slate-500">Click to enlarge</span>
+              </div>
+              <div
+                v-if="client.license_back_url"
+                class="group relative h-48 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-900"
+                @click="previewImage = { url: client.license_back_url, title: 'License Back - ' + client.name }"
+              >
+                <img
+                  :src="client.license_back_url"
+                  alt="License Back"
+                  class="h-full w-full object-cover transition duration-200 group-hover:scale-102 group-hover:opacity-90"
+                />
+                <div class="absolute inset-0 flex items-center justify-center bg-[#101D35]/30 opacity-0 transition group-hover:opacity-100">
+                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#101D35] shadow-xs">
+                    <Eye class="size-3.5" />
+                    Enlarge Image
+                  </span>
+                </div>
+              </div>
+              <div v-else class="flex h-48 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-xs text-slate-400">
+                Back image not submitted
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -383,6 +636,70 @@ function badgeStyle(status: string) {
       </section>
     </main>
 
+    <!-- Reject KYC Dialog -->
+    <Dialog v-model:open="showRejectDialog">
+      <DialogContent class="sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2 text-[#101D35]">
+            <ShieldAlert class="size-5 text-rose-600" />
+            Reject Driver License
+          </DialogTitle>
+          <DialogDescription>
+            Specify why {{ client.name }}'s driving license is being rejected. This note will be shown to them so they can upload correct documents.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="mt-3 space-y-2">
+          <label for="rejection_reason" class="text-xs font-semibold uppercase tracking-wider text-slate-600">
+            Rejection Feedback Note *
+          </label>
+          <textarea
+            id="rejection_reason"
+            v-model="rejectionReason"
+            rows="3"
+            class="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+            placeholder="e.g. Front image is blurry and license number is unreadable. Please upload a clear photo."
+          ></textarea>
+          <p v-if="rejectionError" class="text-xs font-medium text-rose-600">
+            {{ rejectionError }}
+          </p>
+        </div>
+
+        <DialogFooter class="mt-4">
+          <DialogClose as-child>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button
+            type="button"
+            class="bg-rose-600 text-white hover:bg-rose-700"
+            :disabled="processingKyc"
+            @click="submitRejectKyc"
+          >
+            {{ processingKyc ? 'Rejecting...' : 'Confirm Rejection' }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Image Lightbox Modal -->
+    <Dialog :open="!!previewImage" @update:open="(val) => { if (!val) previewImage = null; }">
+      <DialogContent class="max-w-2xl p-4 sm:p-6">
+        <DialogHeader class="mb-2">
+          <DialogTitle class="text-base text-[#101D35]">
+            {{ previewImage?.title || 'Document Inspection' }}
+          </DialogTitle>
+        </DialogHeader>
+        <div class="overflow-hidden rounded-xl bg-slate-900">
+          <img
+            v-if="previewImage?.url"
+            :src="previewImage.url"
+            :alt="previewImage.title"
+            class="max-h-[70vh] w-full object-contain"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+
     <!-- Suspend confirmation -->
     <Dialog v-model:open="showSuspendDialog">
       <DialogContent class="sm:max-w-[440px]">
@@ -446,4 +763,3 @@ function badgeStyle(status: string) {
     </Dialog>
   </AdminLayout>
 </template>
-```

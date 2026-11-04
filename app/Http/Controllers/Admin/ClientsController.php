@@ -83,6 +83,13 @@ class ClientsController extends Controller
                 'email' => $client->email,
                 'is_active' => (bool) $client->is_active,
                 'created_at' => $client->created_at,
+                'kyc_status' => $client->kyc_status ?? 'unsubmitted',
+                'license_number' => $client->license_number,
+                'license_expiry' => $client->license_expiry?->format('Y-m-d'),
+                'license_front_url' => $client->license_front_url,
+                'license_back_url' => $client->license_back_url,
+                'kyc_rejection_reason' => $client->kyc_rejection_reason,
+                'kyc_verified_at' => $client->kyc_verified_at?->toIso8601String(),
             ],
             'stats' => [
                 'total_reservations' => $client->reservations()->count(),
@@ -122,5 +129,35 @@ class ClientsController extends Controller
         return redirect()
             ->route('admin.clients.show', $client)
             ->with('success', 'Client activated successfully.');
+    }
+
+    public function approveKyc(User $client)
+    {
+        $client->update([
+            'kyc_status' => 'verified',
+            'kyc_verified_at' => now(),
+            'kyc_rejection_reason' => null,
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Client driver license has been approved.');
+    }
+
+    public function rejectKyc(Request $request, User $client)
+    {
+        $validated = $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $client->update([
+            'kyc_status' => 'rejected',
+            'kyc_rejection_reason' => $validated['rejection_reason'],
+            'kyc_verified_at' => null,
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Client driver license has been rejected with feedback.');
     }
 }

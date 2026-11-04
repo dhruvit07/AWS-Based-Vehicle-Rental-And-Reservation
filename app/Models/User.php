@@ -9,6 +9,7 @@ use App\Enums\UserRole;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 
 class User extends Authenticatable
@@ -27,6 +28,13 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'kyc_status',
+        'license_number',
+        'license_expiry',
+        'license_front_image',
+        'license_back_image',
+        'kyc_rejection_reason',
+        'kyc_verified_at',
     ];
 
     /**
@@ -37,6 +45,16 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'license_front_url',
+        'license_back_url',
     ];
 
     /**
@@ -51,7 +69,41 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => UserRole::class,
             'is_active' => 'boolean',
+            'license_expiry' => 'date',
+            'kyc_verified_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Check if the user's KYC verification is approved.
+     */
+    public function isKycVerified(): bool
+    {
+        return $this->kyc_status === 'verified';
+    }
+
+    /**
+     * Check if the user's KYC verification is pending review.
+     */
+    public function isKycPending(): bool
+    {
+        return $this->kyc_status === 'pending';
+    }
+
+    /**
+     * Get public URL for front license image.
+     */
+    public function getLicenseFrontUrlAttribute(): ?string
+    {
+        return $this->license_front_image ? Storage::disk('public')->url($this->license_front_image) : null;
+    }
+
+    /**
+     * Get public URL for back license image.
+     */
+    public function getLicenseBackUrlAttribute(): ?string
+    {
+        return $this->license_back_image ? Storage::disk('public')->url($this->license_back_image) : null;
     }
 
     /**

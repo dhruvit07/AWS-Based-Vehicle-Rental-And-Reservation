@@ -64,6 +64,7 @@ interface Reservation {
     user: {
         name: string;
         email: string;
+        kyc_status?: string | null;
     };
 }
 
@@ -73,6 +74,12 @@ interface PageProps {
 
 const page = usePage<PageProps>();
 const reservation = computed(() => page.props.reservation);
+const isVerifiedDriver = computed(() => {
+    return (
+        reservation.value?.user?.kyc_status === 'verified' ||
+        (page.props as any).auth?.user?.kyc_status === 'verified'
+    );
+});
 const latestPayment = computed(() => {
     if (reservation.value.payments && reservation.value.payments.length > 0) {
         return reservation.value.payments[0];
@@ -469,7 +476,16 @@ const printVoucher = () => {
                             <div class="mt-3 space-y-2 text-sm">
                                 <div>
                                     <span class="text-xs text-slate-500">Name</span>
-                                    <p class="font-semibold text-[#101D35]">{{ reservation.user.name }}</p>
+                                    <div class="mt-0.5 flex flex-wrap items-center gap-2">
+                                        <p class="font-semibold text-[#101D35]">{{ reservation.user.name }}</p>
+                                        <span
+                                            v-if="isVerifiedDriver"
+                                            class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200"
+                                        >
+                                            <ShieldCheck class="h-3 w-3 text-emerald-600" />
+                                            Verified Driver
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="border-t border-slate-100 pt-2">
                                     <span class="text-xs text-slate-500">Email</span>

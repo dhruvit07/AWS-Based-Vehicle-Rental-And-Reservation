@@ -8,28 +8,52 @@ import { edit as editPassword } from '@/routes/password';
 import { edit as editProfile } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { KeyRound, Lock, ShieldCheck, Sparkles, User } from 'lucide-vue-next';
+import { computed } from 'vue';
 
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: editProfile(),
-    },
-    {
-        title: 'Password',
-        href: editPassword(),
-    },
-    {
-        title: 'Two-Factor Auth',
-        href: show(),
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
-    },
-];
+const page = usePage();
+const isClient = computed(() => page.props.auth?.user?.role === 'client');
 
-const currentPath = typeof window !== undefined ? window.location.pathname : '';
+const sidebarNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+        {
+            title: 'Profile',
+            href: editProfile(),
+            icon: User,
+        },
+    ];
+
+    if (isClient.value) {
+        items.push({
+            title: 'Driver License',
+            href: '/settings/kyc',
+            icon: ShieldCheck,
+        });
+    }
+
+    items.push(
+        {
+            title: 'Password',
+            href: editPassword(),
+            icon: KeyRound,
+        },
+        {
+            title: 'Two-Factor Auth',
+            href: show(),
+            icon: Lock,
+        },
+        {
+            title: 'Appearance',
+            href: editAppearance(),
+            icon: Sparkles,
+        },
+    );
+
+    return items;
+});
+
+const currentPath = computed(() => page.url);
 </script>
 
 <template>
@@ -48,11 +72,11 @@ const currentPath = typeof window !== undefined ? window.location.pathname : '';
                         variant="ghost"
                         :class="[
                             'w-full justify-start',
-                            { 'bg-muted': urlIsActive(item.href, currentPath) },
+                            { 'bg-muted font-medium text-foreground': urlIsActive(item.href, currentPath) },
                         ]"
                         as-child
                     >
-                        <Link :href="item.href">
+                        <Link :href="item.href" class="flex items-center gap-2">
                             <component :is="item.icon" class="h-4 w-4" />
                             {{ item.title }}
                         </Link>

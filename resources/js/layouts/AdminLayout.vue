@@ -1,8 +1,16 @@
-```vue
 <script setup lang="ts">
 import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
+import type { BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/vue3';
-import { ref, watch, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, ref, watch } from 'vue';
+
+interface Props {
+    breadcrumbs?: BreadcrumbItemType[];
+}
+
+withDefaults(defineProps<Props>(), {
+    breadcrumbs: () => [],
+});
 
 const page = usePage();
 const message = ref<string | null>(
@@ -36,7 +44,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <AppSidebarLayout>
+    <AppSidebarLayout :breadcrumbs="breadcrumbs">
         <div
             v-if="message"
             role="alert"
@@ -74,4 +82,3 @@ onBeforeUnmount(() => {
         <slot />
     </AppSidebarLayout>
 </template>
-```

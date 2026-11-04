@@ -7,7 +7,7 @@ import HomeLayout from '@/layouts/HomeLayout.vue';
 import { login } from '@/routes';
 import { book } from '@/routes/fleet';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { Lock, ShieldCheck } from 'lucide-vue-next';
+import { Clock, Lock, ShieldAlert, ShieldCheck } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface Car {
@@ -27,6 +27,8 @@ interface Car {
 const page = usePage();
 const car = computed(() => page.props.car as Car);
 const bookedRanges = computed(() => (page.props.bookedRanges || []) as BookedRange[]);
+const authUser = computed(() => (page.props as any).auth?.user as { id: number; name: string; role: string; kyc_status?: string } | null | undefined);
+const isKycVerified = computed(() => authUser.value?.kyc_status === 'verified');
 
 const minBookingDate = computed(() => {
     const today = new Date();
@@ -355,6 +357,63 @@ const commonLocations = [
                                         Select your schedule, pickup stations, and optional vehicle upgrades.
                                     </p>
                                 </div>
+                            </div>
+
+                            <!-- Driver Verification Banner -->
+                            <div
+                                v-if="authUser && isKycVerified"
+                                class="mb-8 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3.5 text-emerald-900"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                                        <ShieldCheck class="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                                                Verified Driver
+                                            </p>
+                                            <span class="rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                                                Fast-Track Pickup
+                                            </span>
+                                        </div>
+                                        <p class="mt-0.5 text-xs text-emerald-700">
+                                            Your driving credentials are authenticated. Keys will be ready for immediate handover.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                v-else-if="authUser"
+                                class="mb-8 flex flex-col justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-amber-900 sm:flex-row sm:items-center"
+                            >
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white">
+                                        <Clock v-if="authUser?.kyc_status === 'pending'" class="h-4 w-4" />
+                                        <ShieldAlert v-else-if="authUser?.kyc_status === 'rejected'" class="h-4 w-4" />
+                                        <ShieldCheck v-else class="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-amber-950">
+                                            {{ authUser?.kyc_status === 'pending'
+                                                ? 'KYC Verification In Progress'
+                                                : (authUser?.kyc_status === 'rejected' ? 'KYC Action Required' : 'Driver License Verification Advisory') }}
+                                        </p>
+                                        <p class="mt-0.5 text-xs text-amber-800">
+                                            {{ authUser?.kyc_status === 'pending'
+                                                ? 'Your documents are currently under review. You can complete this reservation now and drive once verified.'
+                                                : 'Verify your driving license online for contactless key pickup, or present physical documents at the counter.' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <a
+                                    href="/settings/kyc"
+                                    class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 shadow-2xs transition hover:bg-amber-100"
+                                >
+                                    <span>{{ authUser?.kyc_status === 'pending' ? 'View Review Status' : 'Verify License' }}</span>
+                                    <span aria-hidden="true">&rarr;</span>
+                                </a>
                             </div>
 
                             <form class="space-y-8" @submit.prevent="openPaymentModal">
