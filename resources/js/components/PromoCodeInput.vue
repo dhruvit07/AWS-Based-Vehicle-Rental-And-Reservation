@@ -30,11 +30,12 @@ const demoCodes = [
     { code: 'FIRSTDRIVE', label: 'FIRSTDRIVE (15% off)' },
 ];
 
-const getCsrfToken = (): string => {
+const getMetaCsrfToken = (): string => {
     const meta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
-    if (meta && meta.content) return meta.content;
+    return meta?.content ?? '';
+};
 
-    // Check cookie XSRF-TOKEN
+const getXsrfCookie = (): string => {
     const match = document.cookie.match(new RegExp('(^|;\\s*)XSRF-TOKEN=([^;]*)'));
     return match ? decodeURIComponent(match[2]) : '';
 };
@@ -55,13 +56,20 @@ const validateAndApply = async (codeToTest?: string) => {
     errorMessage.value = null;
 
     try {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        };
+
+        const csrf = getMetaCsrfToken();
+        if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+
+        const xsrf = getXsrfCookie();
+        if (xsrf) headers['X-XSRF-TOKEN'] = xsrf;
+
         const response = await fetch('/api/coupons/validate', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'X-CSRF-TOKEN': getCsrfToken(),
-            },
+            headers,
             body: JSON.stringify({
                 code: targetCode,
                 subtotal: props.subtotal,
