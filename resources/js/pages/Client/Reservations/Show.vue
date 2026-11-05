@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import CancelReservationModal from '@/components/CancelReservationModal.vue';
+import EarlyReturnModal from '@/components/EarlyReturnModal.vue';
+import ExtendRentalModal from '@/components/ExtendRentalModal.vue';
 import ReviewModal from '@/components/ReviewModal.vue';
 import StarRating from '@/components/StarRating.vue';
 import ClientLayout from '@/layouts/ClientLayout.vue';
@@ -9,6 +11,7 @@ import {
     AlertTriangle,
     ArrowLeft,
     Calendar,
+    CalendarPlus,
     FileCheck2,
     Printer,
     RotateCcw,
@@ -25,6 +28,18 @@ const props = defineProps<{
 
 const isReviewModalOpen = ref(false);
 const isCancelModalOpen = ref(false);
+const isExtendModalOpen = ref(false);
+const isEarlyReturnModalOpen = ref(false);
+
+const isExtendable = computed(() => {
+    const s = String(props.reservation?.status || '').toLowerCase();
+    return ['confirmed', 'active'].includes(s);
+});
+
+const isEarlyReturnable = computed(() => {
+    const s = String(props.reservation?.status || '').toLowerCase();
+    return s === 'active';
+});
 
 const isCancellable = computed(() => {
     if (typeof props.reservation?.can_be_cancelled === 'boolean') {
@@ -248,6 +263,26 @@ const statusClass = computed(() => {
                             <Printer class="h-3.5 w-3.5" />
                             <span>Print Voucher</span>
                         </a>
+
+                        <button
+                            v-if="isExtendable"
+                            type="button"
+                            @click="isExtendModalOpen = true"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-sky-400/30 bg-sky-500/10 px-3.5 py-2 text-xs font-semibold text-sky-300 transition hover:bg-sky-500/20"
+                        >
+                            <CalendarPlus class="h-3.5 w-3.5 text-sky-400" />
+                            <span>Extend Trip</span>
+                        </button>
+
+                        <button
+                            v-if="isEarlyReturnable"
+                            type="button"
+                            @click="isEarlyReturnModalOpen = true"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3.5 py-2 text-xs font-semibold text-amber-300 transition hover:bg-amber-500/20"
+                        >
+                            <RotateCcw class="h-3.5 w-3.5 text-amber-400" />
+                            <span>Early Return</span>
+                        </button>
 
                         <button
                             v-if="
@@ -735,6 +770,24 @@ const statusClass = computed(() => {
             :currency-symbol="props.currency?.symbol || '₹'"
             @close="isCancelModalOpen = false"
             @cancelled="router.reload()"
+        />
+
+        <!-- Extend Rental Modal -->
+        <ExtendRentalModal
+            :is-open="isExtendModalOpen"
+            :reservation="props.reservation"
+            :currency-symbol="props.currency?.symbol || '₹'"
+            @close="isExtendModalOpen = false"
+            @extended="router.reload()"
+        />
+
+        <!-- Early Return Modal -->
+        <EarlyReturnModal
+            :is-open="isEarlyReturnModalOpen"
+            :reservation="props.reservation"
+            :currency-symbol="props.currency?.symbol || '₹'"
+            @close="isEarlyReturnModalOpen = false"
+            @returned="router.reload()"
         />
     </ClientLayout>
 </template>
