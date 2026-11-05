@@ -139,4 +139,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(CarReview::class);
     }
+
+    /**
+     * Get vehicle inspections conducted by this administrator.
+     */
+    public function conductedInspections(): HasMany
+    {
+        return $this->hasMany(VehicleInspection::class, 'inspector_id');
+    }
 }

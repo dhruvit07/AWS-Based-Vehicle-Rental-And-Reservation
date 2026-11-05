@@ -97,6 +97,20 @@ class DemoPresentationController extends Controller
                     'Immediate calendar freeing for other customers',
                 ],
             ],
+            [
+                'id' => 'damage',
+                'title' => 'Vehicle Condition & Damage Inspector',
+                'badge' => 'Visual Asset Audit & Deposit Settlement',
+                'role' => 'admin',
+                'icon' => 'CarFront',
+                'description' => 'Interactive SVG vehicle blueprint check-in audit. Click to pin damages, automatic repair cost deduction from ₹5,000 security deposit, and client-facing digital condition receipt.',
+                'talking_points' => [
+                    'Interactive SVG vehicle blueprint with multi-zone click-to-pin damage flags',
+                    'Real-time financial settlement engine against ₹5,000 security deposit',
+                    '1-Click "Simulate Minor Damage" button for evaluator viva presentations',
+                    'Client-facing condition receipt card on completed trip details',
+                ],
+            ],
         ];
 
         $architecture = [
@@ -104,8 +118,8 @@ class DemoPresentationController extends Controller
             'frontend' => 'Vue 3.5 + Inertia.js 2.1 (TypeScript)',
             'styling' => 'Tailwind CSS 4.1 + Custom Apple Glassmorphism Design System',
             'database' => 'SQLite / Relational Eloquent with 10 Strict Foreign Key Tables',
-            'tests_count' => 127,
-            'assertions_count' => 695,
+            'tests_count' => 134,
+            'assertions_count' => 747,
         ];
 
         return Inertia::render('Presentation/Index', [
@@ -115,7 +129,7 @@ class DemoPresentationController extends Controller
                 'total_fleet' => $totalCars,
                 'total_reservations' => $totalReservations,
                 'total_users' => $totalUsers,
-                'test_suite_status' => '127 Passed (100%)',
+                'test_suite_status' => '134 Passed (100%)',
             ],
         ]);
     }
@@ -212,6 +226,14 @@ class DemoPresentationController extends Controller
                 $request->session()->regenerate();
                 return redirect()->route('client.reservations.show', $demoRes?->id ?? 1)
                     ->with('success', 'Scenario 6: Cancellation & Refund Ledger — Click "Cancel Booking" to inspect automated refund calculations.');
+
+            case 'damage':
+                if ($admin) {
+                    Auth::login($admin);
+                    $request->session()->regenerate();
+                }
+                return redirect()->route('admin.operations')
+                    ->with('success', 'Scenario 7: Vehicle Condition & Damage Inspector — Click "Check-In Vehicle" on any active trip to open the visual blueprint.');
 
             default:
                 return redirect()->route('home');

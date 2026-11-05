@@ -27,6 +27,7 @@ import {
     Terminal,
     UserCheck,
     Users,
+    Wrench,
     Zap,
 } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -75,6 +76,8 @@ const getScenarioIcon = (id: string) => {
             return CalendarPlus;
         case 'cancel':
             return RotateCcw;
+        case 'damage':
+            return Wrench;
         default:
             return Sparkles;
     }

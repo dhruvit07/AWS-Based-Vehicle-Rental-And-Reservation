@@ -18,6 +18,7 @@ import {
     Sparkles,
     UserCheck,
     Users,
+    Wrench,
     X,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -71,6 +72,13 @@ const scenarios = [
         role: 'Client',
         icon: RotateCcw,
         desc: 'Self-service cancel & automated refund ledger',
+    },
+    {
+        id: 'damage',
+        title: 'Condition & Damage Inspector',
+        role: 'Admin',
+        icon: Wrench,
+        desc: 'SVG body blueprint & deposit settlement engine',
     },
 ];
 

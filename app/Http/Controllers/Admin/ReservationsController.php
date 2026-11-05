@@ -85,7 +85,7 @@ class ReservationsController extends Controller
      */
     public function show(Reservation $reservation): Response
     {
-        $reservation->load(['user', 'car', 'payments']);
+        $reservation->load(['user', 'car', 'payments', 'inspection']);
 
         return Inertia::render('Admin/Reservations/Show', [
             'reservation' => $reservation,

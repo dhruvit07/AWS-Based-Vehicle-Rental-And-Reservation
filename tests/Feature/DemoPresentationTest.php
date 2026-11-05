@@ -81,7 +81,7 @@ it('renders presentation deck with metrics and scenarios', function () {
     $response->assertStatus(200);
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Presentation/Index')
-        ->has('scenarios', 6)
+        ->has('scenarios', 7)
         ->has('architecture')
         ->has('metrics')
         ->where('metrics.total_fleet', 1)
@@ -160,6 +160,13 @@ it('launches cancel scenario as client and redirects to reservation show', funct
 
     $response->assertRedirect(route('client.reservations.show', $this->reservation->id));
     $this->assertAuthenticatedAs($this->client);
+});
+
+it('launches damage scenario as admin and redirects to operations', function () {
+    $response = $this->post(route('demo.launchScenario', ['scenario' => 'damage']));
+
+    $response->assertRedirect(route('admin.operations'));
+    $this->assertAuthenticatedAs($this->admin);
 });
 
 it('handles unknown scenario by redirecting to home', function () {

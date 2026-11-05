@@ -34,7 +34,12 @@ class ReservationsController extends Controller
     public function show($id)
     {
         $reservation = Reservation::findOrFail($id);
-        $reservation->load(['user', 'car', 'payments', 'review']);
+
+        if ($reservation->user_id !== auth()->id() && auth()->user()->role !== \App\Enums\UserRole::ADMIN) {
+            abort(403, 'Unauthorized access to reservation.');
+        }
+
+        $reservation->load(['user', 'car', 'payments', 'review', 'inspection.inspector']);
 
         return inertia('Client/Reservations/Show', [
             'reservation' => $reservation,

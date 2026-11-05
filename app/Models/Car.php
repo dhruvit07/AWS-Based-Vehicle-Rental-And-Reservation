@@ -137,6 +137,14 @@ class Car extends Model
     }
 
     /**
+     * Get all inspections for this vehicle.
+     */
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(VehicleInspection::class, 'car_id');
+    }
+
+    /**
      * Get the average rating of the car.
      */
     public function getAverageRatingAttribute(): float

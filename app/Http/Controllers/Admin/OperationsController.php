@@ -7,8 +7,10 @@ use App\Enums\ReservationStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Car;
 use App\Models\Reservation;
+use App\Models\VehicleInspection;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -209,13 +211,68 @@ class OperationsController extends Controller
             'return_odometer' => ['required', 'integer', 'min:' . $currentMileage],
             'fuel_level' => ['required', 'string', 'in:full,good,low,empty'],
             'next_status' => ['required', 'string', 'in:available,cleaning,maintenance'],
-            'condition_notes' => ['nullable', 'string', 'max:500'],
+            'condition_notes' => ['nullable', 'string', 'max:1000'],
+            'damages' => ['nullable', 'array'],
+            'damages.*.id' => ['nullable', 'string'],
+            'damages.*.zone' => ['required_with:damages', 'string'],
+            'damages.*.type' => ['required_with:damages', 'string'],
+            'damages.*.severity' => ['required_with:damages', 'string'],
+            'damages.*.cost' => ['required_with:damages', 'numeric', 'min:0'],
+            'damages.*.notes' => ['nullable', 'string'],
+            'damages.*.x' => ['nullable', 'numeric'],
+            'damages.*.y' => ['nullable', 'numeric'],
         ]);
 
-        DB::transaction(function () use ($reservation, $validated) {
+        $standardDeposit = 5000.00;
+        $damagesList = $validated['damages'] ?? [];
+        $totalDamageCost = 0.00;
+        foreach ($damagesList as $damage) {
+            $totalDamageCost += (float) ($damage['cost'] ?? 0);
+        }
+        $totalDamageCost = round($totalDamageCost, 2);
+
+        if ($totalDamageCost <= 0.00) {
+            $overallCondition = 'pristine';
+            $depositDeducted = 0.00;
+            $depositRefunded = $standardDeposit;
+            $settlementStatus = 'refunded_full';
+            $settlementNotes = 'Pristine return. Full security deposit (₹5,000) released to customer.';
+        } elseif ($totalDamageCost <= $standardDeposit) {
+            $overallCondition = count($damagesList) > 2 ? 'damaged' : 'minor_wear';
+            $depositDeducted = $totalDamageCost;
+            $depositRefunded = round($standardDeposit - $totalDamageCost, 2);
+            $settlementStatus = 'deducted_partial';
+            $settlementNotes = "Repair deductions of ₹" . number_format($depositDeducted, 2) . " applied against security deposit. Net refund of ₹" . number_format($depositRefunded, 2) . " processed to customer.";
+        } else {
+            $overallCondition = 'severe';
+            $depositDeducted = $standardDeposit;
+            $depositRefunded = 0.00;
+            $settlementStatus = 'shortfall_owed';
+            $shortfall = round($totalDamageCost - $standardDeposit, 2);
+            $settlementNotes = "Damage repair costs (₹" . number_format($totalDamageCost, 2) . ") exceeded security deposit. Entire deposit (₹5,000) forfeited. Outstanding shortfall of ₹" . number_format($shortfall, 2) . " logged.";
+        }
+
+        DB::transaction(function () use ($reservation, $validated, $damagesList, $standardDeposit, $totalDamageCost, $depositDeducted, $depositRefunded, $settlementStatus, $settlementNotes, $overallCondition) {
             $reservation->update([
                 'status' => ReservationStatus::COMPLETED,
-                'notes' => trim(($reservation->notes ? $reservation->notes . "\n" : '') . "Return Check-in: Odometer {$validated['return_odometer']} km, Fuel: {$validated['fuel_level']}. " . ($validated['condition_notes'] ?? '')),
+                'notes' => trim(($reservation->notes ? $reservation->notes . "\n" : '') . "Return Check-in: Odometer {$validated['return_odometer']} km, Fuel: {$validated['fuel_level']}. " . ($validated['condition_notes'] ?? '') . ($totalDamageCost > 0 ? " [Damage Assessment: ₹{$totalDamageCost}]" : ' [Pristine Return]')),
+            ]);
+
+            VehicleInspection::create([
+                'reservation_id' => $reservation->id,
+                'car_id' => $reservation->car_id,
+                'inspector_id' => Auth::id() ?? $reservation->user_id,
+                'inspection_type' => 'checkin',
+                'odometer' => $validated['return_odometer'],
+                'fuel_level' => $validated['fuel_level'],
+                'overall_condition' => $overallCondition,
+                'damages' => $damagesList,
+                'standard_deposit' => $standardDeposit,
+                'total_damage_cost' => $totalDamageCost,
+                'deposit_deducted' => $depositDeducted,
+                'deposit_refunded' => $depositRefunded,
+                'settlement_status' => $settlementStatus,
+                'settlement_notes' => $settlementNotes,
             ]);
 
             if ($reservation->car) {
@@ -229,8 +286,11 @@ class OperationsController extends Controller
 
         $reservation->load('car');
         $carDesc = $reservation->car ? "{$reservation->car->make} {$reservation->car->model}" : 'Vehicle';
+        $summaryMsg = $totalDamageCost > 0
+            ? "Check-in complete: {$carDesc} inspected. ₹" . number_format($totalDamageCost, 2) . " damage logged; ₹" . number_format($depositRefunded, 2) . " deposit balance refunded."
+            : "Check-in complete: {$carDesc} inspected in pristine condition. Full ₹5,000 deposit refunded.";
 
-        return back()->with('success', "Check-in complete: {$carDesc} safely checked in and updated to {$validated['next_status']}.");
+        return back()->with('success', $summaryMsg);
     }
 
     public function updateCarStatus(Request $request, Car $car)

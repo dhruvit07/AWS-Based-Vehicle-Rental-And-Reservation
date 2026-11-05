@@ -151,6 +151,22 @@ class Reservation extends Model
     }
 
     /**
+     * Get the inspections associated with the reservation.
+     */
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(VehicleInspection::class);
+    }
+
+    /**
+     * Get the latest check-in inspection for the reservation.
+     */
+    public function inspection(): HasOne
+    {
+        return $this->hasOne(VehicleInspection::class)->latestOfMany();
+    }
+
+    /**
      * Get the formatted total amount attribute.
      *
      * @return string

@@ -4,6 +4,7 @@ import EarlyReturnModal from '@/components/EarlyReturnModal.vue';
 import ExtendRentalModal from '@/components/ExtendRentalModal.vue';
 import ReviewModal from '@/components/ReviewModal.vue';
 import StarRating from '@/components/StarRating.vue';
+import VehicleDamageBlueprint from '@/components/VehicleDamageBlueprint.vue';
 import ClientLayout from '@/layouts/ClientLayout.vue';
 import { index, print } from '@/routes/client/reservations';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -13,8 +14,12 @@ import {
     Calendar,
     CalendarPlus,
     FileCheck2,
+    Fuel,
+    Gauge,
     Printer,
     RotateCcw,
+    Shield,
+    ShieldCheck,
     Star,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -412,6 +417,100 @@ const statusClass = computed(() => {
                             {{ refundTransactionId || 'REF-AUTOMATED' }}
                         </p>
                     </div>
+                </div>
+            </section>
+
+            <!-- Vehicle Return Inspection & Deposit Settlement Receipt -->
+            <section
+                v-if="props.reservation.inspection"
+                class="glass-card overflow-hidden p-6"
+            >
+                <div class="flex flex-col justify-between gap-4 border-b border-slate-200/80 pb-5 sm:flex-row sm:items-center dark:border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+                            :class="props.reservation.inspection.settlement_status === 'refunded_full'
+                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                : props.reservation.inspection.settlement_status === 'deducted_partial'
+                                    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                                    : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'"
+                        >
+                            <ShieldCheck v-if="props.reservation.inspection.settlement_status === 'refunded_full'" class="h-6 w-6" />
+                            <AlertTriangle v-else class="h-6 w-6" />
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-base font-bold text-slate-950 dark:text-white">
+                                    Return Inspection & Deposit Settlement
+                                </h2>
+                                <span
+                                    class="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                                    :class="props.reservation.inspection.settlement_status === 'refunded_full'
+                                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                        : props.reservation.inspection.settlement_status === 'deducted_partial'
+                                            ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                                            : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'"
+                                >
+                                    {{ props.reservation.inspection.settlement_status === 'refunded_full'
+                                        ? 'Certified Pristine'
+                                        : props.reservation.inspection.settlement_status === 'deducted_partial'
+                                            ? 'Deductions Applied'
+                                            : 'Shortfall Logged' }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Verified by Hub Inspector • Audit Ref: INS-{{ props.reservation.inspection.id }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Financial Summary Quick Numbers -->
+                    <div class="flex items-center gap-4 text-right">
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-400">Net Refund Credited</span>
+                            <p class="font-mono text-base font-black text-emerald-600 dark:text-emerald-400">
+                                ₹{{ Number(props.reservation.inspection.deposit_refunded || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inspection Telemetry Strip -->
+                <div class="mt-4 grid gap-3 sm:grid-cols-3 text-xs">
+                    <div class="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-white/5">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Return Odometer</span>
+                        <p class="mt-0.5 font-mono font-bold text-slate-900 dark:text-white">
+                            {{ Number(props.reservation.inspection.odometer || 0).toLocaleString() }} KM
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-white/5">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Fuel Level Logged</span>
+                        <p class="mt-0.5 font-semibold text-slate-900 capitalize dark:text-white">
+                            {{ props.reservation.inspection.fuel_level }} Fuel Tank
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-white/5">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Inspector Sign-off</span>
+                        <p class="mt-0.5 font-semibold text-slate-900 dark:text-white">
+                            {{ props.reservation.inspection.inspector?.name || 'Operations Fleet Desk' }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Embedded Blueprint in Readonly Mode -->
+                <div class="mt-5">
+                    <VehicleDamageBlueprint
+                        :model-value="props.reservation.inspection.damages || []"
+                        :readonly="true"
+                    />
+                </div>
+
+                <!-- Audit Settlement Statement -->
+                <div class="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 text-xs text-slate-600 dark:border-white/10 dark:bg-white/[0.02] dark:text-slate-300">
+                    <p class="font-bold text-slate-900 dark:text-white">Settlement Audit Record:</p>
+                    <p class="mt-0.5 leading-relaxed">{{ props.reservation.inspection.settlement_notes }}</p>
                 </div>
             </section>
 
