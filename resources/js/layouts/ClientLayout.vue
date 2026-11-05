@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DemoPresenterBar from '@/components/DemoPresenterBar.vue';
 import AppHeaderLayout from '@/layouts/app/AppHeaderLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 
@@ -14,5 +15,6 @@ withDefaults(defineProps<Props>(), {
 <template>
     <AppHeaderLayout :breadcrumbs="breadcrumbs">
         <slot />
+        <DemoPresenterBar />
     </AppHeaderLayout>
 </template>

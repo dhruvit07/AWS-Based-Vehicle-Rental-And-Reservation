@@ -6,6 +6,7 @@ import { index as adminCarsIndex } from '@/routes/admin/cars/index';
 import { index as clientReservationsIndex } from '@/routes/client/reservations/index';
 import { home, fleet, about, contact } from '@/routes';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import DemoPresenterBar from '@/components/DemoPresenterBar.vue';
 import { Car, LayoutDashboard, ArrowRight, Phone, Mail, Compass } from 'lucide-vue-next';
 
 const page = usePage();
@@ -230,5 +231,7 @@ const isActive = (path: string) => {
                 </div>
             </div>
         </footer>
+
+        <DemoPresenterBar />
     </div>
 </template>

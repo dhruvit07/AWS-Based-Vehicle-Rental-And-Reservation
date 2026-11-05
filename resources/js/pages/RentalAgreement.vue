@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DemoPresenterBar from '@/components/DemoPresenterBar.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeft,
@@ -666,6 +667,8 @@ const agreementDate = computed(() => {
 
             </article>
         </main>
+
+        <DemoPresenterBar />
     </div>
 </template>
 

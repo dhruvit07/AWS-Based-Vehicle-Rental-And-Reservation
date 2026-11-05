@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\DemoPresentationController;
 use App\Http\Controllers\HomePagesController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,6 +21,11 @@ Route::post('/api/coupons/validate', [BookingController::class, 'validateCoupon'
 Route::get('/booking/{reservation}', [BookingController::class, 'confirmation'])->name('booking.confirmation');
 Route::get('/booking/{reservation}/agreement', [BookingController::class, 'agreement'])->middleware('auth')->name('booking.agreement');
 Route::get('/verify/voucher/{reservation_number}', [BookingController::class, 'verifyVoucher'])->name('voucher.verify');
+
+// Academic Presentation & Evaluator Demo Mode
+Route::get('/presentation', [DemoPresentationController::class, 'index'])->name('demo.presentation');
+Route::match(['get', 'post'], '/demo/switch-role', [DemoPresentationController::class, 'switchRole'])->name('demo.switchRole');
+Route::match(['get', 'post'], '/demo/launch-scenario/{scenario}', [DemoPresentationController::class, 'launchScenario'])->name('demo.launchScenario');
 
 Route::get('/dashboard', function () {
     if (auth()->user()->role === \App\Enums\UserRole::ADMIN) {
