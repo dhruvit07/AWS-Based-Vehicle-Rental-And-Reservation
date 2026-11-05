@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CarsController;
+use App\Http\Controllers\Admin\OperationsController;
 use App\Http\Controllers\Admin\ReservationsController;
 use App\Http\Controllers\Admin\ClientsController;
 use App\Http\Controllers\Admin\PaymentsController;
@@ -13,8 +14,14 @@ Route::middleware(['auth', 'verified', 'active', 'admin'])
     ->prefix('admin')
     ->as('admin.')
     ->group(function () {
-        // Redirect '/admin' to '/admin/cars' with a named route we can reference
-        Route::redirect('/', '/admin/cars')->name('home');
+        // Default admin landing is Fleet Operations Command Center
+        Route::get('/', [OperationsController::class, 'index'])->name('home');
+
+        // Operations Command Center
+        Route::get('operations', [OperationsController::class, 'index'])->name('operations');
+        Route::patch('operations/dispatch/{reservation}', [OperationsController::class, 'dispatch'])->name('operations.dispatch');
+        Route::patch('operations/checkin/{reservation}', [OperationsController::class, 'checkin'])->name('operations.checkin');
+        Route::patch('operations/cars/{car}/status', [OperationsController::class, 'updateCarStatus'])->name('operations.carStatus');
 
         // Cars
         Route::resource('cars', CarsController::class)->except(['show']);

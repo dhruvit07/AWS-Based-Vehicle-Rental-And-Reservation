@@ -19,11 +19,16 @@ import { index as reviewsIndex } from "@/routes/admin/reviews/index";
 import { index as supportIndex } from "@/routes/admin/support/index";
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { Car, Calendar, User, CreditCard, BarChart, LifeBuoy, Star } from 'lucide-vue-next';
+import { Activity, Car, Calendar, User, CreditCard, BarChart, LifeBuoy, Star } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { home } from '@/routes';
 
 const mainNavItems: NavItem[] = [
+    {
+        title: 'Operations',
+        href: '/admin/operations',
+        icon: Activity,
+    },
     {
         title: 'Cars',
         href: carsIndex(),
