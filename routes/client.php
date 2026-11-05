@@ -16,7 +16,7 @@ Route::middleware(['auth', 'verified', 'active', 'client'])
         Route::get('/reservations/{id}/print', [ReservationsController::class, 'print'])->name('reservations.print');
         Route::post('/reservations/{reservation}/reviews', [ReviewController::class, 'store'])->name('reservations.reviews.store');
         Route::post('/reservations/{reservation}/cancel', [ReservationsController::class, 'cancel'])->name('reservations.cancel');
-        Route::post('/reservations/{reservation}/extend/check', [ReservationsController::class, 'checkExtension'])->name('reservations.extend.check');
+        Route::match(['get', 'post'], '/reservations/{reservation}/extend/check', [ReservationsController::class, 'checkExtension'])->name('reservations.extend.check');
         Route::post('/reservations/{reservation}/extend', [ReservationsController::class, 'extend'])->name('reservations.extend');
         Route::post('/reservations/{reservation}/early-return', [ReservationsController::class, 'earlyReturn'])->name('reservations.earlyReturn');
 

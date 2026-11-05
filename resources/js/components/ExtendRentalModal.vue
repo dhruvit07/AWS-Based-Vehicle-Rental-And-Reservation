@@ -109,20 +109,23 @@ const runExtensionCheck = async (days: number) => {
     errorMessage.value = null;
 
     try {
-        const csrfToken =
-            (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
-
-        const res = await fetch(`/client/reservations/${props.reservation.id}/extend/check`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
+        const res = await fetch(
+            `/client/reservations/${props.reservation.id}/extend/check?additional_days=${encodeURIComponent(days)}`,
+            {
+                method: 'GET',
+                headers: {
+                    Accept: 'application/json',
+                },
+                credentials: 'same-origin',
             },
-            body: JSON.stringify({ additional_days: days }),
-        });
+        );
 
         const data = await res.json();
+        if (!res.ok) {
+            errorMessage.value = data.message || 'Unable to verify availability for these dates.';
+            return;
+        }
+
         checkResult.value = data;
         if (!data.available && data.message) {
             errorMessage.value = data.message;
