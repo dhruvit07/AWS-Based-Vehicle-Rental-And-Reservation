@@ -6,6 +6,7 @@ import {
     ArrowLeft,
     Car,
     CreditCard,
+    FileCheck2,
     Pencil,
     Printer,
     RotateCcw,
@@ -142,6 +143,14 @@ function formatMoney(amount?: number | string) {
                     >
                         <Pencil class="h-3.5 w-3.5" />
                         Edit Reservation
+                    </Link>
+
+                    <Link
+                        :href="`/booking/${reservation.id}/agreement`"
+                        class="inline-flex items-center gap-1.5 rounded-xl border border-[#58779D]/30 bg-[#58779D]/10 px-4 py-2.5 text-xs font-semibold text-[#58779D] transition hover:bg-[#58779D]/20 dark:border-[#7094BF]/30 dark:bg-[#7094BF]/10 dark:text-[#7094BF]"
+                    >
+                        <FileCheck2 class="h-3.5 w-3.5" />
+                        Official Agreement & Pass
                     </Link>
 
                     <a

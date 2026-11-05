@@ -7,6 +7,7 @@ import {
     Calendar,
     CheckCircle2,
     CreditCard,
+    FileCheck2,
     FileText,
     MapPin,
     Printer,
@@ -273,14 +274,13 @@ const printVoucher = () => {
                                     Itemized Statement
                                 </h3>
 
-                                <button
-                                    type="button"
-                                    @click="printVoucher"
+                                <Link
+                                    :href="`/booking/${reservation.id}/agreement`"
                                     class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-xs transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white print:hidden"
                                 >
-                                    <Printer class="h-3.5 w-3.5 text-[#58779D] dark:text-[#7094BF]" />
-                                    <span>Print Voucher</span>
-                                </button>
+                                    <FileCheck2 class="h-3.5 w-3.5 text-[#58779D] dark:text-[#7094BF]" />
+                                    <span>Agreement & Voucher</span>
+                                </Link>
                             </div>
 
                             <div class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-white/10">
@@ -429,8 +429,16 @@ const printVoucher = () => {
                         <!-- Action Buttons -->
                         <div class="space-y-2.5 print:hidden">
                             <Link
-                                :href="index.url()"
+                                :href="`/booking/${reservation.id}/agreement`"
                                 class="apple-btn-primary flex w-full items-center justify-center gap-2 py-3 text-xs font-semibold"
+                            >
+                                <FileCheck2 class="h-4 w-4" />
+                                <span>Official Agreement & QR Voucher</span>
+                            </Link>
+
+                            <Link
+                                :href="index.url()"
+                                class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 text-xs font-semibold text-slate-900 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
                             >
                                 <FileText class="h-4 w-4" />
                                 <span>View In Client Portal</span>

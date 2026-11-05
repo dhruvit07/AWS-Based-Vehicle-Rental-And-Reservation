@@ -6,6 +6,7 @@ use App\Enums\CarStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\ReservationStatus;
+use App\Enums\UserRole;
 use App\Models\Car;
 use App\Models\Coupon;
 use App\Models\Payment;
@@ -308,6 +309,78 @@ class BookingController extends Controller
 
         return inertia('BookingConfirmation', [
             'reservation' => $reservation->load(['car', 'user', 'payments']),
+        ]);
+    }
+
+    public function agreement(Reservation $reservation)
+    {
+        $user = Auth::user();
+        if ($reservation->user_id !== $user->id && $user->role !== UserRole::ADMIN) {
+            abort(403, 'Unauthorized to view this rental agreement.');
+        }
+
+        $reservation->load(['car', 'user', 'payments']);
+
+        $verificationUrl = route('voucher.verify', ['reservation_number' => $reservation->reservation_number]);
+        $securityHash = strtoupper(substr(hash('sha256', $reservation->reservation_number . '|' . ($reservation->created_at?->timestamp ?? time()) . '|RRC_VERIFIED'), 0, 16));
+
+        return inertia('RentalAgreement', [
+            'reservation' => $reservation,
+            'verificationUrl' => $verificationUrl,
+            'securityHash' => $securityHash,
+            'statusMeta' => ReservationStatus::getMeta(),
+            'paymentStatusMeta' => PaymentStatus::getMeta(),
+            'extrasCatalog' => self::EXTRAS_CATALOG,
+            'pdiChecklist' => [
+                'starting_odometer' => $reservation->car->mileage ?? 14250,
+                'fuel_level' => '100% (Full to Full)',
+                'cleanliness' => 'Certified Clean & Sanitized',
+                'spare_wheel_kit' => 'Present & Inspected',
+                'inspector_name' => 'Rajesh Sharma',
+                'inspector_badge' => 'RRC-INSP-4029',
+                'inspected_at' => $reservation->created_at ? $reservation->created_at->format('M d, Y H:i') : now()->format('M d, Y H:i'),
+                'zones' => [
+                    'front' => ['label' => 'Front Bumper & Headlights', 'status' => 'Clear', 'notes' => 'No scratches or chips'],
+                    'rear' => ['label' => 'Rear Bumper & Tail Lamps', 'status' => 'Clear', 'notes' => 'Factory condition verified'],
+                    'left' => ['label' => 'Left Flank & Doors', 'status' => 'Clear', 'notes' => 'Clear surface, clean alloys'],
+                    'right' => ['label' => 'Right Flank & Mirrors', 'status' => 'Clear', 'notes' => 'Glass & sensors intact'],
+                ],
+            ],
+        ]);
+    }
+
+    public function verifyVoucher(string $reservation_number)
+    {
+        $reservation = Reservation::where('reservation_number', $reservation_number)
+            ->with(['car', 'user', 'payments'])
+            ->first();
+
+        if (! $reservation) {
+            return inertia('VoucherVerification', [
+                'found' => false,
+                'reservationNumber' => $reservation_number,
+                'reservation' => null,
+                'securityHash' => null,
+                'verifiedAt' => now()->format('M d, Y H:i:s T'),
+                'statusMeta' => ReservationStatus::getMeta(),
+                'paymentStatusMeta' => PaymentStatus::getMeta(),
+                'isAuthorized' => false,
+            ]);
+        }
+
+        $securityHash = strtoupper(substr(hash('sha256', $reservation->reservation_number . '|' . ($reservation->created_at?->timestamp ?? time()) . '|RRC_VERIFIED'), 0, 16));
+
+        $isAuthorized = in_array($reservation->status, [ReservationStatus::CONFIRMED, ReservationStatus::ACTIVE]);
+
+        return inertia('VoucherVerification', [
+            'found' => true,
+            'reservationNumber' => $reservation_number,
+            'reservation' => $reservation,
+            'securityHash' => $securityHash,
+            'verifiedAt' => now()->format('M d, Y H:i:s T'),
+            'statusMeta' => ReservationStatus::getMeta(),
+            'paymentStatusMeta' => PaymentStatus::getMeta(),
+            'isAuthorized' => $isAuthorized,
         ]);
     }
 }

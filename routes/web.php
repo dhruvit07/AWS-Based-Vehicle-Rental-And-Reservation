@@ -18,6 +18,8 @@ Route::post('/fleet/{car}', [BookingController::class, 'book'])->name('fleet.boo
 Route::post('/api/coupons/validate', [BookingController::class, 'validateCoupon'])->name('coupons.validate');
 
 Route::get('/booking/{reservation}', [BookingController::class, 'confirmation'])->name('booking.confirmation');
+Route::get('/booking/{reservation}/agreement', [BookingController::class, 'agreement'])->middleware('auth')->name('booking.agreement');
+Route::get('/verify/voucher/{reservation_number}', [BookingController::class, 'verifyVoucher'])->name('voucher.verify');
 
 Route::get('/dashboard', function () {
     if (auth()->user()->role === \App\Enums\UserRole::ADMIN) {
