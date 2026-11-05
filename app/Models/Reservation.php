@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentStatus;
 use App\Enums\ReservationStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -74,6 +76,16 @@ class Reservation extends Model
      */
     protected $hidden = [
         'deleted_at',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'can_be_cancelled',
+        'refund_amount',
     ];
 
     /**
@@ -175,10 +187,35 @@ class Reservation extends Model
      */
     public function canBeCancelled(): bool
     {
-        return in_array($this->status, [
-            ReservationStatus::PENDING,
-            ReservationStatus::CONFIRMED
-        ]);
+        return ($this->status === ReservationStatus::CONFIRMED || $this->status === ReservationStatus::PENDING)
+            && Carbon::parse($this->start_date)->startOfDay()->gte(now()->startOfDay());
+    }
+
+    /**
+     * Accessor for can_be_cancelled.
+     */
+    public function getCanBeCancelledAttribute(): bool
+    {
+        return $this->canBeCancelled();
+    }
+
+    /**
+     * Accessor for estimated or actual refund amount.
+     */
+    public function getRefundAmountAttribute(): float
+    {
+        if ($this->relationLoaded('payments')) {
+            $completed = $this->payments->where('status', PaymentStatus::COMPLETED)->sum('amount');
+            if ($completed > 0) {
+                return (float) $completed;
+            }
+            $refunded = $this->payments->where('status', PaymentStatus::REFUNDED)->sum('refunded_amount');
+            if ($refunded > 0) {
+                return (float) $refunded;
+            }
+        }
+
+        return (float) $this->total_amount;
     }
 
     /**

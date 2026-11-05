@@ -15,6 +15,7 @@ Route::middleware(['auth', 'verified', 'active', 'client'])
         Route::get('/reservations/{id}', [ReservationsController::class, 'show'])->name('reservations.show');
         Route::get('/reservations/{id}/print', [ReservationsController::class, 'print'])->name('reservations.print');
         Route::post('/reservations/{reservation}/reviews', [ReviewController::class, 'store'])->name('reservations.reviews.store');
+        Route::post('/reservations/{reservation}/cancel', [ReservationsController::class, 'cancel'])->name('reservations.cancel');
 
         // Support
         Route::get('/support', [SupportController::class, 'index'])->name('support.index');

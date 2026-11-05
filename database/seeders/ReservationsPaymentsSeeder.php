@@ -89,6 +89,64 @@ class ReservationsPaymentsSeeder extends Seeder
             $this->createPaymentsForReservation($reservation, $reservationData);
         }
 
+        // Ensure client@example.com has an upcoming confirmed reservation ready to cancel live during evaluations
+        $demoClient = User::where('email', 'client@example.com')->first();
+        if ($demoClient) {
+            $demoCar = Car::where('status', 'available')->first() ?? $cars->first();
+            if ($demoCar) {
+                $startDate = Carbon::now()->addDays(5)->format('Y-m-d');
+                $endDate = Carbon::now()->addDays(8)->format('Y-m-d');
+                $totalDays = 4;
+                $dailyRate = $demoCar->price_per_day;
+                $subtotal = $dailyRate * $totalDays;
+                $taxAmount = $subtotal * 0.07;
+                $totalAmount = $subtotal + $taxAmount;
+
+                $demoReservation = Reservation::updateOrCreate(
+                    [
+                        'reservation_number' => 'RES-DEMOCAN1',
+                    ],
+                    [
+                        'user_id' => $demoClient->id,
+                        'car_id' => $demoCar->id,
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'pickup_time' => '10:00',
+                        'return_time' => '18:00',
+                        'pickup_location' => 'Airport Terminal 1',
+                        'return_location' => 'Airport Terminal 1',
+                        'total_days' => $totalDays,
+                        'daily_rate' => $dailyRate,
+                        'subtotal' => $subtotal,
+                        'tax_amount' => $taxAmount,
+                        'discount_amount' => 0,
+                        'total_amount' => $totalAmount,
+                        'status' => ReservationStatus::CONFIRMED,
+                        'notes' => 'College evaluation live demo booking for self-service cancellation.',
+                        'created_at' => Carbon::now()->subDays(1),
+                        'updated_at' => Carbon::now()->subDays(1),
+                    ]
+                );
+
+                Payment::updateOrCreate(
+                    [
+                        'payment_number' => 'PAY-DEMOCAN1',
+                    ],
+                    [
+                        'reservation_id' => $demoReservation->id,
+                        'user_id' => $demoClient->id,
+                        'amount' => $totalAmount,
+                        'currency' => config('app.currency_code', 'INR'),
+                        'payment_method' => PaymentMethod::CREDIT_CARD,
+                        'status' => PaymentStatus::COMPLETED,
+                        'transaction_id' => 'TXN-DEMOCAN1',
+                        'notes' => 'Initial payment captured for booking.',
+                        'processed_at' => Carbon::now()->subDays(1),
+                    ]
+                );
+            }
+        }
+
         $this->command->info('Created ' . count($reservations) . ' reservations with payments and updated car statuses.');
     }
 
