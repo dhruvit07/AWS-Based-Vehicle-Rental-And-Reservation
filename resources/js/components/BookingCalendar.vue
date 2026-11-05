@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, RotateCcw, Calendar as CalendarIcon, Lock } from 'lucide-vue-next';
 
 export interface BookedRange {
     from: string;
@@ -249,7 +249,7 @@ const getCellClasses = (cell: DayCell): string => {
     }
 
     if (isBooked) {
-        return 'text-slate-400 dark:text-slate-600 bg-slate-100/80 dark:bg-white/5 line-through decoration-slate-400 dark:decoration-slate-600 cursor-not-allowed select-none';
+        return 'text-slate-400 dark:text-slate-600 bg-[repeating-linear-gradient(45deg,rgba(0,0,0,0.05),rgba(0,0,0,0.05)_4px,transparent_4px,transparent_8px)] dark:bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.05),rgba(255,255,255,0.05)_4px,transparent_4px,transparent_8px)] line-through decoration-slate-400 dark:decoration-slate-600 cursor-not-allowed select-none rounded-lg';
     }
 
     const isStart = date === props.startDate;
@@ -271,28 +271,28 @@ const getCellClasses = (cell: DayCell): string => {
         !rangeHasBookedDate(props.startDate, hoveredDate.value);
 
     if (isStart && isEnd) {
-        return 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold rounded-lg shadow-xs';
+        return 'bg-[#06090E] text-white dark:bg-white dark:text-[#06090E] font-bold rounded-xl shadow-sm';
     }
 
     if (isStart) {
         return props.endDate
-            ? 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold rounded-l-lg shadow-xs'
-            : 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold rounded-lg shadow-xs';
+            ? 'bg-[#06090E] text-white dark:bg-white dark:text-[#06090E] font-bold rounded-l-xl shadow-sm'
+            : 'bg-[#06090E] text-white dark:bg-white dark:text-[#06090E] font-bold rounded-xl shadow-sm';
     }
 
     if (isEnd) {
-        return 'bg-[#101D35] text-white dark:bg-white dark:text-slate-950 font-semibold rounded-r-lg shadow-xs';
+        return 'bg-[#06090E] text-white dark:bg-white dark:text-[#06090E] font-bold rounded-r-xl shadow-sm';
     }
 
     if (isBetween) {
-        return 'bg-[#58779D]/15 text-slate-950 dark:bg-[#7094BF]/20 dark:text-white font-medium rounded-none';
+        return 'bg-[#58779D]/15 text-slate-950 dark:bg-sky-400/20 dark:text-sky-100 font-semibold rounded-none';
     }
 
     if (isHoveredRange) {
-        return 'bg-slate-200/70 text-slate-950 dark:bg-white/10 dark:text-white rounded-none';
+        return 'bg-slate-200/80 text-slate-950 dark:bg-white/10 dark:text-white rounded-none';
     }
 
-    return 'text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 font-medium rounded-lg transition-colors cursor-pointer';
+    return 'text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 font-medium rounded-xl transition-all cursor-pointer active:scale-95';
 };
 
 // Formatted label helper for dates (e.g. "Nov 12, 2026")
@@ -317,40 +317,49 @@ const totalDays = computed(() => {
 </script>
 
 <template>
-    <div class="glass-card p-5 sm:p-6">
-        <!-- Top bar: Header & Month controls -->
-        <div class="flex flex-col gap-3 border-b border-slate-200/80 pb-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+    <div class="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs dark:border-white/10 dark:bg-[#0A101D] sm:p-6">
+        <!-- Top Header & Duration Chip Bar -->
+        <div class="flex flex-col gap-3 border-b border-slate-100 pb-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h4 class="text-base font-bold text-slate-950 dark:text-white">
-                    Select Rental Duration
-                </h4>
-                <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    <span v-if="!startDate">Select pickup date to initiate reservation</span>
-                    <span v-else-if="startDate && !endDate">Now choose return date</span>
-                    <span v-else class="font-semibold text-slate-950 dark:text-white">
-                        {{ totalDays }} day{{ totalDays === 1 ? '' : 's' }} selected:
-                        {{ formatDisplayDate(startDate) }} – {{ formatDisplayDate(endDate) }}
+                <div class="flex items-center gap-2">
+                    <h4 class="text-sm font-bold tracking-tight text-slate-950 dark:text-white sm:text-base">
+                        Select Reservation Duration
+                    </h4>
+                    <!-- Duration Chip -->
+                    <span
+                        v-if="startDate && endDate && totalDays > 0"
+                        class="inline-flex items-center rounded-full bg-[#06090E] px-2.5 py-0.5 font-mono text-[11px] font-bold text-white dark:bg-white dark:text-[#06090E]"
+                    >
+                        {{ totalDays }} Day{{ totalDays === 1 ? '' : 's' }} Selected
+                    </span>
+                </div>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    <span v-if="!startDate">Select pick-up date on the tactile calendar</span>
+                    <span v-else-if="startDate && !endDate">Now select your return date</span>
+                    <span v-else class="font-medium text-slate-800 dark:text-slate-200">
+                        {{ formatDisplayDate(startDate) }} ➔ {{ formatDisplayDate(endDate) }}
                     </span>
                 </p>
             </div>
 
+            <!-- Month Controls & Reset -->
             <div class="flex items-center gap-2 self-end sm:self-auto">
                 <button
                     v-if="startDate || endDate"
                     type="button"
-                    class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+                    class="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white cursor-pointer"
                     @click="clearSelection"
                 >
                     <RotateCcw class="h-3 w-3" />
                     <span>Clear</span>
                 </button>
 
-                <div class="inline-flex items-center gap-0.5 rounded-lg border border-slate-200/80 bg-slate-50/70 p-0.5 dark:border-white/10 dark:bg-white/5">
+                <div class="inline-flex items-center gap-0.5 rounded-xl border border-slate-200 bg-slate-50 p-0.5 dark:border-white/10 dark:bg-white/5">
                     <button
                         type="button"
                         :disabled="!canGoPrev"
                         aria-label="Previous month"
-                        class="flex h-7 w-7 items-center justify-center rounded-md text-slate-700 transition hover:bg-white hover:shadow-xs disabled:cursor-not-allowed disabled:text-slate-300 dark:text-slate-300 dark:hover:bg-white/10 dark:disabled:text-slate-700"
+                        class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-700 transition hover:bg-white hover:shadow-xs disabled:cursor-not-allowed disabled:text-slate-300 dark:text-slate-300 dark:hover:bg-white/10 dark:disabled:text-slate-700 cursor-pointer"
                         @click="prevMonth"
                     >
                         <ChevronLeft class="h-4 w-4" />
@@ -359,7 +368,7 @@ const totalDays = computed(() => {
                     <button
                         type="button"
                         aria-label="Next month"
-                        class="flex h-7 w-7 items-center justify-center rounded-md text-slate-700 transition hover:bg-white hover:shadow-xs dark:text-slate-300 dark:hover:bg-white/10"
+                        class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-700 transition hover:bg-white hover:shadow-xs dark:text-slate-300 dark:hover:bg-white/10 cursor-pointer"
                         @click="nextMonth"
                     >
                         <ChevronRight class="h-4 w-4" />
@@ -368,11 +377,11 @@ const totalDays = computed(() => {
             </div>
         </div>
 
-        <!-- Months Grid: 1 on mobile, 2 side-by-side on md+ -->
+        <!-- 2-Month Dual Grid Layout -->
         <div class="grid grid-cols-1 gap-8 pt-5 md:grid-cols-2">
             <!-- Month 1 -->
             <div class="space-y-3">
-                <div class="text-center text-sm font-bold text-slate-950 dark:text-white">
+                <div class="text-center text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white">
                     {{ monthNames[baseMonth - 1] }} {{ baseYear }}
                 </div>
 
@@ -380,7 +389,7 @@ const totalDays = computed(() => {
                     <div
                         v-for="day in dayHeaders"
                         :key="'m1-' + day"
-                        class="py-1 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+                        class="py-1 text-[11px] font-mono font-semibold uppercase text-slate-400 dark:text-slate-500"
                     >
                         {{ day }}
                     </div>
@@ -391,8 +400,8 @@ const totalDays = computed(() => {
                         type="button"
                         :disabled="!cell.isCurrentMonth || cell.isPast || cell.isBooked"
                         :aria-label="cell.isBooked ? `Reserved, ${cell.date}` : cell.date"
-                        :title="cell.isBooked ? 'Reserved' : ''"
-                        class="relative flex h-9 w-full items-center justify-center text-xs transition-all focus:outline-none focus:ring-2 focus:ring-[#58779D]"
+                        :title="cell.isBooked ? 'Reserved by another driver' : ''"
+                        class="relative flex h-9 w-full items-center justify-center text-xs font-mono transition-all focus:outline-none"
                         :class="getCellClasses(cell)"
                         @click="handleDateClick(cell)"
                         @mouseenter="hoveredDate = cell.date"
@@ -403,15 +412,15 @@ const totalDays = computed(() => {
                         </span>
                         <span
                             v-if="cell.isToday && !cell.isBooked && cell.date !== startDate && cell.date !== endDate"
-                            class="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#58779D] dark:bg-[#7094BF]"
+                            class="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#58779D] dark:bg-sky-400"
                         />
                     </button>
                 </div>
             </div>
 
             <!-- Month 2 (Desktop / md+) -->
-            <div class="hidden space-y-3 md:block md:border-l md:border-slate-200/80 md:pl-8 dark:md:border-white/10">
-                <div class="text-center text-sm font-bold text-slate-950 dark:text-white">
+            <div class="hidden space-y-3 md:block md:border-l md:border-slate-100 md:pl-8 dark:md:border-white/10">
+                <div class="text-center text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white">
                     {{ monthNames[nextMonthNumber - 1] }} {{ nextMonthYear }}
                 </div>
 
@@ -419,7 +428,7 @@ const totalDays = computed(() => {
                     <div
                         v-for="day in dayHeaders"
                         :key="'m2-' + day"
-                        class="py-1 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+                        class="py-1 text-[11px] font-mono font-semibold uppercase text-slate-400 dark:text-slate-500"
                     >
                         {{ day }}
                     </div>
@@ -430,8 +439,8 @@ const totalDays = computed(() => {
                         type="button"
                         :disabled="!cell.isCurrentMonth || cell.isPast || cell.isBooked"
                         :aria-label="cell.isBooked ? `Reserved, ${cell.date}` : cell.date"
-                        :title="cell.isBooked ? 'Reserved' : ''"
-                        class="relative flex h-9 w-full items-center justify-center text-xs transition-all focus:outline-none focus:ring-2 focus:ring-[#58779D]"
+                        :title="cell.isBooked ? 'Reserved by another driver' : ''"
+                        class="relative flex h-9 w-full items-center justify-center text-xs font-mono transition-all focus:outline-none"
                         :class="getCellClasses(cell)"
                         @click="handleDateClick(cell)"
                         @mouseenter="hoveredDate = cell.date"
@@ -442,7 +451,7 @@ const totalDays = computed(() => {
                         </span>
                         <span
                             v-if="cell.isToday && !cell.isBooked && cell.date !== startDate && cell.date !== endDate"
-                            class="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#58779D] dark:bg-[#7094BF]"
+                            class="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#58779D] dark:bg-sky-400"
                         />
                     </button>
                 </div>
@@ -450,28 +459,29 @@ const totalDays = computed(() => {
         </div>
 
         <!-- Legend & Guidelines -->
-        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 pt-4 text-xs text-slate-600 dark:border-white/10 dark:text-slate-400">
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
             <div class="flex flex-wrap items-center gap-4">
                 <div class="flex items-center gap-1.5">
-                    <span class="h-3 w-3 rounded-sm bg-[#101D35] dark:bg-white" />
-                    <span>Selected</span>
+                    <span class="h-3 w-3 rounded-md bg-[#06090E] dark:bg-white" />
+                    <span class="text-slate-800 dark:text-slate-200">Selected</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="h-3 w-3 rounded-sm border border-[#58779D]/30 bg-[#58779D]/20 dark:border-[#7094BF]/30 dark:bg-[#7094BF]/20" />
-                    <span>Duration</span>
+                    <span class="h-3 w-3 rounded-md bg-[#58779D]/20 dark:bg-sky-400/25" />
+                    <span class="text-slate-800 dark:text-slate-200">Duration</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="h-3 w-3 rounded-sm border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-white/5" />
+                    <span class="h-3 w-3 rounded-md border border-slate-200 bg-white dark:border-white/10 dark:bg-white/5" />
                     <span>Available</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="flex h-3 w-3 items-center justify-center rounded-sm bg-slate-100/80 text-[9px] font-bold text-slate-400 line-through dark:bg-white/5 dark:text-slate-600">✕</span>
+                    <span class="h-3 w-3 rounded-md bg-[repeating-linear-gradient(45deg,rgba(0,0,0,0.1),rgba(0,0,0,0.1)_2px,transparent_2px,transparent_4px)] dark:bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.15),rgba(255,255,255,0.15)_2px,transparent_2px,transparent_4px)] line-through" />
                     <span>Reserved</span>
                 </div>
             </div>
 
-            <span class="hidden text-slate-400 dark:text-slate-500 sm:inline">
-                Real-time conflict prevention
+            <span class="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
+                <Lock class="h-3 w-3" />
+                <span>Atomic Server Locking Active</span>
             </span>
         </div>
     </div>

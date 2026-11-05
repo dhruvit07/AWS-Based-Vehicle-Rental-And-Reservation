@@ -16,11 +16,12 @@ import {
     FileCheck2,
     Fuel,
     Gauge,
+    Layers,
     MapPin,
-    Play,
     Radio,
     RefreshCw,
     RotateCcw,
+    Search,
     Send,
     ShieldAlert,
     ShieldCheck,
@@ -101,6 +102,7 @@ interface QueueReservation {
         name: string;
         email: string;
         license_number?: string | null;
+        loyalty_tier?: string | null;
     } | null;
     car?: {
         id: number;
@@ -130,9 +132,12 @@ const props = defineProps<{
 
 // Selected vehicle in telemetry inspector
 const selectedCarId = ref<number>(props.fleet[0]?.id || 0);
-const selectedCar = computed(() => {
-    return localFleet.value.find((c) => c.id === selectedCarId.value) || localFleet.value[0];
-});
+
+// Hub filter selection ('all' or hub.code)
+const selectedHubCode = ref<string>('all');
+
+// Search filter in fleet list
+const fleetSearchQuery = ref<string>('');
 
 // Local simulated fleet copy for dynamic live updates
 const localFleet = ref<FleetVehicle[]>(JSON.parse(JSON.stringify(props.fleet)));
@@ -158,18 +163,39 @@ onUnmounted(() => {
     if (radarTimer) clearInterval(radarTimer);
 });
 
+// Selected car computed
+const selectedCar = computed(() => {
+    return localFleet.value.find((c) => c.id === selectedCarId.value) || localFleet.value[0];
+});
+
+// Filtered fleet by hub & search query
+const filteredFleet = computed(() => {
+    return localFleet.value.filter((car) => {
+        const matchesHub =
+            selectedHubCode.value === 'all' ||
+            car.telemetry.hub_code === selectedHubCode.value;
+        const q = fleetSearchQuery.value.trim().toLowerCase();
+        const matchesSearch =
+            !q ||
+            car.make.toLowerCase().includes(q) ||
+            car.model.toLowerCase().includes(q) ||
+            car.license_plate.toLowerCase().includes(q);
+        return matchesHub && matchesSearch;
+    });
+});
+
 // 1-Click Simulation of live fleet telemetry
 const triggerFleetSimulation = () => {
     isSimulating.value = true;
-    simulationToast.value = 'Ping dispatched to GPS satellites...';
+    simulationToast.value = 'GPS Polling Dispatched • Synchronizing Satellite Telemetry...';
 
     setTimeout(() => {
         localFleet.value = localFleet.value.map((car) => {
             if (car.status === 'rented') {
                 const newSpeed = Math.floor(Math.random() * 45) + 35;
                 const newFuel = Math.max(15, car.telemetry.fuel_level - 1);
-                const deltaX = (Math.random() * 4) - 2;
-                const deltaY = (Math.random() * 4) - 2;
+                const deltaX = Math.random() * 4 - 2;
+                const deltaY = Math.random() * 4 - 2;
                 return {
                     ...car,
                     mileage: car.mileage + 3,
@@ -194,7 +220,7 @@ const triggerFleetSimulation = () => {
         });
 
         isSimulating.value = false;
-        simulationToast.value = 'Live Telemetry Synchronized • All Node Telemetry Updated';
+        simulationToast.value = 'Telemetry Synchronized • All Active Transponders Acknowledged';
 
         setTimeout(() => {
             simulationToast.value = null;
@@ -204,7 +230,11 @@ const triggerFleetSimulation = () => {
 
 // Dispatch a pickup (Handover)
 const dispatchReservation = (res: QueueReservation) => {
-    if (!confirm(`Confirm vehicle handover for ${res.car?.make} ${res.car?.model} to ${res.user?.name}?`)) {
+    if (
+        !confirm(
+            `Confirm vehicle handover for ${res.car?.make} ${res.car?.model} to ${res.user?.name}?`,
+        )
+    ) {
         return;
     }
 
@@ -214,7 +244,6 @@ const dispatchReservation = (res: QueueReservation) => {
         {
             preserveScroll: true,
             onSuccess: () => {
-                // Update local state smoothly
                 const target = localFleet.value.find((c) => c.id === res.car?.id);
                 if (target) {
                     target.status = 'rented';
@@ -244,7 +273,8 @@ const quickChangeStatus = (carId: number, newStatus: string) => {
                 const target = localFleet.value.find((c) => c.id === carId);
                 if (target) {
                     target.status = newStatus;
-                    target.status_label = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                    target.status_label =
+                        newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
                     if (newStatus !== 'rented') {
                         target.telemetry.speed_kmh = 0;
                         target.telemetry.is_moving = false;
@@ -260,9 +290,9 @@ const getStatusBadgeClass = (status: string) => {
         case 'available':
             return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400';
         case 'rented':
-            return 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400';
+            return 'bg-sky-500/10 text-sky-600 border-sky-500/20 dark:text-sky-400';
         case 'cleaning':
-            return 'bg-violet-500/10 text-violet-600 border-violet-500/20 dark:text-violet-400';
+            return 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400';
         case 'maintenance':
             return 'bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400';
         default:
@@ -275,9 +305,9 @@ const getStatusDotClass = (status: string) => {
         case 'available':
             return 'bg-emerald-500';
         case 'rented':
-            return 'bg-blue-500';
+            return 'bg-sky-500';
         case 'cleaning':
-            return 'bg-violet-500';
+            return 'bg-amber-500';
         case 'maintenance':
             return 'bg-rose-500';
         default:
@@ -286,146 +316,210 @@ const getStatusDotClass = (status: string) => {
 };
 
 const breadcrumbs = [
-    { title: 'Admin', href: '/admin/operations' },
-    { title: 'Fleet Operations', href: '/admin/operations' },
+    { title: 'Operations', href: '/admin/operations' },
+    { title: 'Fleet Radar Mission Control', href: '/admin/operations' },
 ];
 </script>
 
 <template>
-    <Head title="Fleet Operations Command Center | Real Rent Car" />
+    <Head title="Operations Mission Control | Real Rent Car" />
 
     <AdminLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 pb-12">
-            
             <!-- Command Center Header Banner -->
-            <div class="flex flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:bg-[#0c1017]">
+            <div
+                class="flex flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:bg-[#0A101D]"
+            >
                 <div class="flex items-center gap-3.5">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#58779D]/15 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]">
+                    <div
+                        class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#58779D]/15 text-[#58779D] dark:bg-[#7094BF]/20 dark:text-[#7094BF]"
+                    >
                         <Compass class="h-6 w-6" />
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white">
-                                Fleet Operations Command Center
+                                Fleet Operations Mission Control
                             </h1>
-                            <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                            <span
+                                class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400"
+                            >
                                 <span class="relative flex h-2 w-2">
-                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                    <span
+                                        class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"
+                                    ></span>
+                                    <span
+                                        class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"
+                                    ></span>
                                 </span>
-                                <span>Radar Live</span>
+                                <span>Radar 25 Hz Live</span>
                             </span>
                         </div>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
-                            Real-time telemetry, geographic hub dispersion, and 1-click dispatch operations.
+                            Real-time GPS telemetry, regional mobility hubs, and 1-click dispatch operations.
                         </p>
                     </div>
                 </div>
 
-                <!-- Simulation & Controls -->
+                <!-- Simulation & Hub Filter Ribbon -->
                 <div class="flex flex-wrap items-center gap-2.5">
-                    <div v-if="simulationToast" class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    <div
+                        v-if="simulationToast"
+                        class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+                    >
                         {{ simulationToast }}
                     </div>
 
+                    <!-- Hub Quick Filter Pills -->
+                    <div
+                        class="flex items-center rounded-xl border border-slate-200/80 bg-slate-50 p-1 dark:border-white/10 dark:bg-white/5"
+                    >
+                        <button
+                            type="button"
+                            @click="selectedHubCode = 'all'"
+                            class="rounded-lg px-2.5 py-1 text-xs font-semibold transition"
+                            :class="
+                                selectedHubCode === 'all'
+                                    ? 'bg-white text-slate-900 shadow-xs dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+                            "
+                        >
+                            All Hubs
+                        </button>
+                        <button
+                            v-for="hub in props.hubs"
+                            :key="hub.id"
+                            type="button"
+                            @click="selectedHubCode = hub.code"
+                            class="rounded-lg px-2.5 py-1 font-mono text-xs font-semibold transition"
+                            :class="
+                                selectedHubCode === hub.code
+                                    ? 'bg-white text-slate-900 shadow-xs dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+                            "
+                        >
+                            {{ hub.code }}
+                        </button>
+                    </div>
+
+                    <!-- Simulate Movement Action -->
                     <button
                         type="button"
                         @click="triggerFleetSimulation"
                         :disabled="isSimulating"
-                        class="apple-btn-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold"
+                        class="inline-flex items-center gap-2 rounded-xl bg-[#101D35] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1a2d52] disabled:opacity-50 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                     >
-                        <RefreshCw class="h-3.5 w-3.5" :class="{ 'animate-spin': isSimulating }" />
-                        <span>Simulate Fleet Movement</span>
+                        <RefreshCw
+                            class="h-3.5 w-3.5"
+                            :class="{ 'animate-spin': isSimulating }"
+                        />
+                        <span>Simulate Movement</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Operational KPI Metrics Ribbon -->
+            <!-- Operational KPI Metrics Ribbon (5 Telemetry Cards) -->
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                <!-- Total Fleet -->
-                <div class="glass-card p-4">
+                <!-- Fleet Utilization Rate -->
+                <div
+                    class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-[#0A101D]"
+                >
                     <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                        <span class="text-[11px] font-bold uppercase tracking-wider">Total Fleet</span>
-                        <Car class="h-4 w-4 text-[#58779D] dark:text-[#7094BF]" />
+                        <span class="text-[11px] font-bold uppercase tracking-wider">Utilization</span>
+                        <Activity class="h-4 w-4 text-sky-500" />
                     </div>
-                    <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">
-                        {{ props.kpis.total_fleet }}
+                    <p class="mt-2 font-mono text-2xl font-black text-slate-900 dark:text-white">
+                        {{ props.kpis.utilization_rate }}%
                     </p>
-                    <p class="mt-1 text-[10px] text-slate-400">
-                        Active registered assets
+                    <div class="mt-1 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+                        <div
+                            class="h-full bg-sky-500"
+                            :style="{ width: `${props.kpis.utilization_rate}%` }"
+                        ></div>
+                    </div>
+                    <p class="mt-1.5 text-[10px] text-slate-400">
+                        {{ props.kpis.on_road }} of {{ props.kpis.total_fleet }} assets deployed
                     </p>
                 </div>
 
-                <!-- On Road / In Transit -->
-                <div class="glass-card p-4">
+                <!-- Active on Road -->
+                <div
+                    class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-[#0A101D]"
+                >
                     <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                        <span class="text-[11px] font-bold uppercase tracking-wider">On Road</span>
-                        <Activity class="h-4 w-4 text-blue-500" />
+                        <span class="text-[11px] font-bold uppercase tracking-wider">In Service</span>
+                        <Car class="h-4 w-4 text-sky-500" />
                     </div>
-                    <p class="mt-2 text-2xl font-black text-blue-600 dark:text-blue-400">
+                    <p class="mt-2 font-mono text-2xl font-black text-sky-600 dark:text-sky-400">
                         {{ props.kpis.on_road }}
                     </p>
                     <p class="mt-1 text-[10px] text-slate-400">
-                        {{ props.kpis.utilization_rate }}% fleet utilization
+                        Active customer journeys
                     </p>
                 </div>
 
-                <!-- Ready Available -->
-                <div class="glass-card p-4">
+                <!-- Ready & Available -->
+                <div
+                    class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-[#0A101D]"
+                >
                     <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
                         <span class="text-[11px] font-bold uppercase tracking-wider">Available</span>
                         <CheckCircle2 class="h-4 w-4 text-emerald-500" />
                     </div>
-                    <p class="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                    <p class="mt-2 font-mono text-2xl font-black text-emerald-600 dark:text-emerald-400">
                         {{ props.kpis.available }}
                     </p>
                     <p class="mt-1 text-[10px] text-slate-400">
-                        Stationed & pre-inspected
+                        PDI inspected & ready
                     </p>
                 </div>
 
-                <!-- Pickups Due -->
-                <div class="glass-card p-4">
+                <!-- Pickups Due Today -->
+                <div
+                    class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-[#0A101D]"
+                >
                     <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
                         <span class="text-[11px] font-bold uppercase tracking-wider">Pickups Due</span>
                         <Send class="h-4 w-4 text-amber-500" />
                     </div>
-                    <p class="mt-2 text-2xl font-black text-amber-600 dark:text-amber-400">
+                    <p class="mt-2 font-mono text-2xl font-black text-amber-600 dark:text-amber-400">
                         {{ props.kpis.pickups_due_count }}
                     </p>
                     <p class="mt-1 text-[10px] text-slate-400">
-                        Awaiting customer handover
+                        Awaiting client handover
                     </p>
                 </div>
 
-                <!-- Returns Due -->
-                <div class="glass-card col-span-2 sm:col-span-1 p-4">
+                <!-- Returns Due Today -->
+                <div
+                    class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs col-span-2 sm:col-span-1 dark:border-white/10 dark:bg-[#0A101D]"
+                >
                     <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
                         <span class="text-[11px] font-bold uppercase tracking-wider">Returns Due</span>
-                        <RotateCcw class="h-4 w-4 text-violet-500" />
+                        <RotateCcw class="h-4 w-4 text-[#58779D] dark:text-[#7094BF]" />
                     </div>
-                    <p class="mt-2 text-2xl font-black text-violet-600 dark:text-violet-400">
+                    <p class="mt-2 font-mono text-2xl font-black text-slate-900 dark:text-white">
                         {{ props.kpis.returns_due_count }}
                     </p>
                     <p class="mt-1 text-[10px] text-slate-400">
-                        Active trips checking in
+                        Checking in for inspection
                     </p>
                 </div>
             </div>
 
-            <!-- Main Spatial Radar & Telemetry Split View -->
+            <!-- Main Spatial Radar & Telemetry Split Screen (12 cols) -->
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
-                
                 <!-- Left Section: Interactive Hub Radar & Map (7 cols) -->
                 <div class="space-y-4 lg:col-span-7">
-                    <div class="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#0c1017]">
-                        
+                    <div
+                        class="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-white/10 dark:bg-[#0A101D]"
+                    >
                         <!-- Radar Top Bar -->
                         <div class="mb-4 flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <Radio class="h-4 w-4 text-[#58779D] dark:text-[#7094BF]" />
                                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                                    Regional Hub Radar • NCR Mobility Corridor
+                                    Regional Mobility Radar • Northern Corridor
                                 </h2>
                             </div>
 
@@ -435,10 +529,10 @@ const breadcrumbs = [
                                     <span class="h-2 w-2 rounded-full bg-emerald-500"></span> Available
                                 </span>
                                 <span class="flex items-center gap-1">
-                                    <span class="h-2 w-2 rounded-full bg-blue-500"></span> On Road
+                                    <span class="h-2 w-2 rounded-full bg-sky-500"></span> On Road
                                 </span>
                                 <span class="flex items-center gap-1">
-                                    <span class="h-2 w-2 rounded-full bg-violet-500"></span> Prep
+                                    <span class="h-2 w-2 rounded-full bg-amber-500"></span> Prep
                                 </span>
                                 <span class="flex items-center gap-1">
                                     <span class="h-2 w-2 rounded-full bg-rose-500"></span> Service
@@ -447,13 +541,14 @@ const breadcrumbs = [
                         </div>
 
                         <!-- Vector Radar Viewport -->
-                        <div class="relative aspect-4/3 w-full overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-950 p-4 shadow-inner dark:border-white/10">
-                            
-                            <!-- Radar Circular Rings Background -->
+                        <div
+                            class="relative aspect-4/3 w-full overflow-hidden rounded-2xl border border-slate-200/90 bg-[#04070D] p-4 shadow-inner dark:border-white/10"
+                        >
+                            <!-- Polar Grid Rings Background -->
                             <svg class="pointer-events-none absolute inset-0 h-full w-full stroke-white/10" fill="none">
-                                <circle cx="50%" cy="50%" r="20%" stroke-dasharray="4 4" />
-                                <circle cx="50%" cy="50%" r="35%" stroke-dasharray="4 4" />
-                                <circle cx="50%" cy="50%" r="48%" stroke-dasharray="4 4" />
+                                <circle cx="50%" cy="50%" r="18%" stroke-dasharray="3 3" />
+                                <circle cx="50%" cy="50%" r="34%" stroke-dasharray="3 3" />
+                                <circle cx="50%" cy="50%" r="48%" stroke-dasharray="3 3" />
                                 <line x1="50%" y1="0%" x2="50%" y2="100%" />
                                 <line x1="0%" y1="50%" x2="100%" y2="50%" />
                             </svg>
@@ -462,7 +557,7 @@ const breadcrumbs = [
                             <div
                                 class="pointer-events-none absolute left-1/2 top-1/2 h-[96%] w-[96%] -translate-x-1/2 -translate-y-1/2 rounded-full"
                                 :style="{
-                                    background: `conic-gradient(from ${radarAngle}deg at 50% 50%, rgba(88,119,157,0.2) 0deg, rgba(88,119,157,0) 60deg, transparent 60deg)`,
+                                    background: `conic-gradient(from ${radarAngle}deg at 50% 50%, rgba(88,119,157,0.25) 0deg, rgba(88,119,157,0) 60deg, transparent 60deg)`,
                                 }"
                             ></div>
 
@@ -470,10 +565,17 @@ const breadcrumbs = [
                             <div
                                 v-for="hub in props.hubs"
                                 :key="hub.id"
-                                class="absolute -translate-x-1/2 -translate-y-1/2 transform text-center"
+                                class="absolute -translate-x-1/2 -translate-y-1/2 transform text-center transition-opacity"
+                                :class="{
+                                    'opacity-40':
+                                        selectedHubCode !== 'all' &&
+                                        selectedHubCode !== hub.code,
+                                }"
                                 :style="{ left: `${hub.x}%`, top: `${hub.y}%` }"
                             >
-                                <div class="flex items-center gap-1.5 rounded-lg border border-white/20 bg-slate-900/90 px-2 py-1 shadow-lg backdrop-blur-md">
+                                <div
+                                    class="flex items-center gap-1 rounded-lg border border-white/20 bg-slate-900/90 px-2 py-0.5 shadow-lg backdrop-blur-md"
+                                >
                                     <MapPin class="h-3 w-3 text-cyan-400" />
                                     <span class="font-mono text-[9px] font-bold text-white">{{ hub.code }}</span>
                                 </div>
@@ -484,7 +586,7 @@ const breadcrumbs = [
 
                             <!-- Fleet Vehicle GPS Nodes -->
                             <button
-                                v-for="car in localFleet"
+                                v-for="car in filteredFleet"
                                 :key="car.id"
                                 type="button"
                                 @click="selectedCarId = car.id"
@@ -503,23 +605,27 @@ const breadcrumbs = [
                                     class="relative flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shadow-md transition"
                                     :class="[
                                         getStatusDotClass(car.status),
-                                        selectedCarId === car.id ? 'ring-4 ring-cyan-400' : ''
+                                        selectedCarId === car.id ? 'ring-4 ring-cyan-400' : '',
                                     ]"
                                 >
                                     <Car class="h-2.5 w-2.5 text-white" />
                                 </div>
 
                                 <!-- Tooltip on Hover -->
-                                <div class="pointer-events-none absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-white/20 bg-slate-900/95 px-2 py-1 text-[9px] font-bold text-white shadow-xl group-hover:block z-20">
+                                <div
+                                    class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-white/20 bg-slate-900/95 px-2 py-1 text-[9px] font-bold text-white shadow-xl group-hover:block"
+                                >
                                     {{ car.make }} {{ car.model }} ({{ car.license_plate }})
                                 </div>
                             </button>
                         </div>
 
                         <!-- Radar Status Bar -->
-                        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                        <div
+                            class="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400"
+                        >
                             <span>Click any vehicle node to inspect real-time telemetry.</span>
-                            <span class="font-mono text-[10px]">Radar Sweep Frequency: 25 Hz</span>
+                            <span class="font-mono text-[10px]">Active Transponders: {{ filteredFleet.length }} Nodes</span>
                         </div>
                     </div>
                 </div>
@@ -528,13 +634,15 @@ const breadcrumbs = [
                 <div class="space-y-4 lg:col-span-5">
                     <div
                         v-if="selectedCar"
-                        class="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#0c1017]"
+                        class="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-white/10 dark:bg-[#0A101D]"
                     >
                         <!-- Inspector Header -->
                         <div class="flex items-start justify-between border-b border-slate-100 pb-4 dark:border-white/5">
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <span class="rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-bold text-slate-700 dark:bg-white/10 dark:text-slate-300">
+                                    <span
+                                        class="rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-bold text-slate-700 dark:bg-white/10 dark:text-slate-300"
+                                    >
                                         {{ selectedCar.license_plate }}
                                     </span>
                                     <span
@@ -554,7 +662,7 @@ const breadcrumbs = [
 
                             <!-- Live Heartbeat Ping -->
                             <div class="text-right">
-                                <span class="text-[10px] uppercase font-bold text-slate-400">GPS Ping</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Transponder</span>
                                 <p class="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
                                     {{ selectedCar.telemetry.last_ping }}
                                 </p>
@@ -563,9 +671,10 @@ const breadcrumbs = [
 
                         <!-- Telemetry Dials & Readings -->
                         <div class="mt-4 grid grid-cols-2 gap-3">
-                            
                             <!-- Fuel / Battery Gauge -->
-                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-white/10 dark:bg-white/5">
+                            <div
+                                class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-white/10 dark:bg-white/5"
+                            >
                                 <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
                                     <span class="text-[10px] font-bold uppercase tracking-wider">
                                         {{ selectedCar.telemetry.is_electric ? 'Battery SoC' : 'Fuel Level' }}
@@ -594,7 +703,9 @@ const breadcrumbs = [
                             </div>
 
                             <!-- Speedometer / Transit -->
-                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-white/10 dark:bg-white/5">
+                            <div
+                                class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-white/10 dark:bg-white/5"
+                            >
                                 <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
                                     <span class="text-[10px] font-bold uppercase tracking-wider">Live Speed</span>
                                     <Gauge class="h-3.5 w-3.5 text-[#58779D] dark:text-[#7094BF]" />
@@ -604,19 +715,21 @@ const breadcrumbs = [
                                     <span class="font-mono text-2xl font-black text-slate-900 dark:text-white">
                                         {{ selectedCar.telemetry.speed_kmh }}
                                     </span>
-                                    <span class="text-[10px] uppercase font-bold text-slate-400">KM/H</span>
+                                    <span class="font-mono text-[10px] font-bold uppercase text-slate-400">KM/H</span>
                                 </div>
 
                                 <span
                                     class="mt-1 inline-block text-[10px] font-semibold"
-                                    :class="selectedCar.telemetry.is_moving ? 'text-blue-500' : 'text-slate-400'"
+                                    :class="selectedCar.telemetry.is_moving ? 'text-sky-500' : 'text-slate-400'"
                                 >
                                     {{ selectedCar.telemetry.is_moving ? '• In Transit on Road' : '• Stationary at Hub' }}
                                 </span>
                             </div>
 
                             <!-- Odometer -->
-                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-white/10 dark:bg-white/5">
+                            <div
+                                class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-white/10 dark:bg-white/5"
+                            >
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Odometer</span>
                                 <p class="mt-1 font-mono text-base font-bold text-slate-900 dark:text-white">
                                     {{ selectedCar.mileage.toLocaleString() }} KM
@@ -625,7 +738,9 @@ const breadcrumbs = [
                             </div>
 
                             <!-- Health & Diagnostics -->
-                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-white/10 dark:bg-white/5">
+                            <div
+                                class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-white/10 dark:bg-white/5"
+                            >
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tire Pressure</span>
                                 <p class="mt-1 font-mono text-base font-bold text-emerald-600 dark:text-emerald-400">
                                     {{ selectedCar.telemetry.tire_pressure_psi }} PSI • Normal
@@ -635,9 +750,12 @@ const breadcrumbs = [
                         </div>
 
                         <!-- Active Hirer if Rented -->
-                        <div v-if="selectedCar.active_reservation" class="mt-4 rounded-2xl border border-blue-500/20 bg-blue-50/60 p-3.5 dark:border-blue-500/20 dark:bg-blue-950/20">
+                        <div
+                            v-if="selectedCar.active_reservation"
+                            class="mt-4 rounded-2xl border border-sky-500/20 bg-sky-50/60 p-3.5 dark:border-sky-500/20 dark:bg-sky-950/20"
+                        >
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400">Active Hirer</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">Active Hirer</span>
                                 <span class="font-mono text-[10px] text-slate-500 dark:text-slate-400">#{{ selectedCar.active_reservation.reservation_number }}</span>
                             </div>
                             <p class="mt-1 text-xs font-bold text-slate-900 dark:text-white">
@@ -651,7 +769,7 @@ const breadcrumbs = [
                         <!-- Quick Status Switcher Actions -->
                         <div class="mt-4 border-t border-slate-100 pt-4 dark:border-white/5">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                Quick Status Override
+                                Operational Status Override
                             </span>
 
                             <div class="mt-2 grid grid-cols-3 gap-2">
@@ -665,7 +783,7 @@ const breadcrumbs = [
                                 <button
                                     type="button"
                                     @click="quickChangeStatus(selectedCar.id, 'cleaning')"
-                                    class="rounded-xl border border-violet-500/30 bg-violet-500/10 px-2 py-1.5 text-center text-xs font-bold text-violet-600 transition hover:bg-violet-500/20 dark:text-violet-400"
+                                    class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-center text-xs font-bold text-amber-600 transition hover:bg-amber-500/20 dark:text-amber-400"
                                 >
                                     Cleaning
                                 </button>
@@ -678,19 +796,20 @@ const breadcrumbs = [
                                 </button>
                             </div>
                         </div>
-
                     </div>
                 </div>
-
             </div>
 
-            <!-- "Due Today" Operational Handover Queue (Pickups & Returns) -->
-            <div class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#0c1017]">
-                
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-white/5">
+            <!-- Operational Handover Queue (Pickups & Returns) -->
+            <div
+                class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-white/10 dark:bg-[#0A101D]"
+            >
+                <div
+                    class="flex flex-col gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/5"
+                >
                     <div>
                         <h2 class="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                            Operational Handover Queue
+                            Operational Handover & Check-in Queue
                         </h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             Execute instant customer dispatches and drop-off returns.
@@ -698,18 +817,24 @@ const breadcrumbs = [
                     </div>
 
                     <!-- Queue Tabs -->
-                    <div class="flex items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-50 p-1 dark:border-white/10 dark:bg-white/5">
+                    <div
+                        class="flex items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-50 p-1 dark:border-white/10 dark:bg-white/5"
+                    >
                         <button
                             type="button"
                             @click="activeQueueTab = 'pickups'"
                             class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition"
-                            :class="activeQueueTab === 'pickups'
-                                ? 'bg-white text-slate-900 shadow-xs dark:bg-white/10 dark:text-white'
-                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'"
+                            :class="
+                                activeQueueTab === 'pickups'
+                                    ? 'bg-white text-slate-900 shadow-xs dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+                            "
                         >
                             <Send class="h-3 w-3 text-emerald-500" />
                             <span>Pickups Due</span>
-                            <span class="rounded-full bg-emerald-500/15 px-1.5 py-0.2 text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                            <span
+                                class="rounded-full bg-emerald-500/15 px-1.5 py-0.2 font-mono text-[10px] text-emerald-600 dark:text-emerald-400"
+                            >
                                 {{ props.pickupsDue.length }}
                             </span>
                         </button>
@@ -718,13 +843,17 @@ const breadcrumbs = [
                             type="button"
                             @click="activeQueueTab = 'returns'"
                             class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition"
-                            :class="activeQueueTab === 'returns'
-                                ? 'bg-white text-slate-900 shadow-xs dark:bg-white/10 dark:text-white'
-                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'"
+                            :class="
+                                activeQueueTab === 'returns'
+                                    ? 'bg-white text-slate-900 shadow-xs dark:bg-white/10 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+                            "
                         >
-                            <RotateCcw class="h-3 w-3 text-violet-500" />
+                            <RotateCcw class="h-3 w-3 text-[#58779D] dark:text-[#7094BF]" />
                             <span>Returns Due</span>
-                            <span class="rounded-full bg-violet-500/15 px-1.5 py-0.2 text-[10px] text-violet-600 dark:text-violet-400 font-mono">
+                            <span
+                                class="rounded-full bg-[#58779D]/15 px-1.5 py-0.2 font-mono text-[10px] text-[#58779D] dark:text-[#7094BF]"
+                            >
                                 {{ props.returnsDue.length }}
                             </span>
                         </button>
@@ -733,7 +862,10 @@ const breadcrumbs = [
 
                 <!-- Tab 1: Pickups Due -->
                 <div v-if="activeQueueTab === 'pickups'" class="mt-4">
-                    <div v-if="props.pickupsDue.length === 0" class="py-8 text-center text-xs text-slate-400">
+                    <div
+                        v-if="props.pickupsDue.length === 0"
+                        class="py-8 text-center text-xs text-slate-400"
+                    >
                         No pending customer pickups awaiting handover today.
                     </div>
 
@@ -744,12 +876,14 @@ const breadcrumbs = [
                             class="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between"
                         >
                             <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                                <div
+                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                                >
                                     <Car class="h-5 w-5" />
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-2">
-                                        <span class="font-bold text-xs text-slate-900 dark:text-white">
+                                        <span class="text-xs font-bold text-slate-900 dark:text-white">
                                             {{ res.car?.make }} {{ res.car?.model }}
                                         </span>
                                         <span class="font-mono text-[10px] text-slate-400">
@@ -763,10 +897,14 @@ const breadcrumbs = [
                                         <span
                                             v-if="res.user?.loyalty_tier === 'platinum' || res.user?.loyalty_tier === 'gold'"
                                             class="inline-flex items-center gap-1 rounded-full px-2 py-0.2 text-[9px] font-bold uppercase tracking-wider"
-                                            :class="res.user?.loyalty_tier === 'platinum' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'"
+                                            :class="
+                                                res.user?.loyalty_tier === 'platinum'
+                                                    ? 'bg-slate-100 text-slate-800 border border-slate-300 dark:bg-white/10 dark:text-white dark:border-white/20'
+                                                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                                            "
                                         >
                                             <Crown class="h-2.5 w-2.5" />
-                                            <span>{{ res.user?.loyalty_tier === 'platinum' ? 'Platinum VIP 👑' : 'Gold 🌟' }}</span>
+                                            <span>{{ res.user?.loyalty_tier === 'platinum' ? 'Platinum VIP' : 'Gold VIP' }}</span>
                                         </span>
                                     </div>
                                     <p class="text-[10px] text-slate-400">
@@ -788,7 +926,7 @@ const breadcrumbs = [
                                 <button
                                     type="button"
                                     @click="dispatchReservation(res)"
-                                    class="apple-btn-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-[#101D35] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1a2d52] dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                                 >
                                     <Send class="h-3.5 w-3.5" />
                                     <span>Dispatch & Handover</span>
@@ -800,7 +938,10 @@ const breadcrumbs = [
 
                 <!-- Tab 2: Returns Due -->
                 <div v-if="activeQueueTab === 'returns'" class="mt-4">
-                    <div v-if="props.returnsDue.length === 0" class="py-8 text-center text-xs text-slate-400">
+                    <div
+                        v-if="props.returnsDue.length === 0"
+                        class="py-8 text-center text-xs text-slate-400"
+                    >
                         No active vehicles currently due for check-in return.
                     </div>
 
@@ -811,12 +952,14 @@ const breadcrumbs = [
                             class="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between"
                         >
                             <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                                <div
+                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400"
+                                >
                                     <Activity class="h-5 w-5" />
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-2">
-                                        <span class="font-bold text-xs text-slate-900 dark:text-white">
+                                        <span class="text-xs font-bold text-slate-900 dark:text-white">
                                             {{ res.car?.make }} {{ res.car?.model }}
                                         </span>
                                         <span class="font-mono text-[10px] text-slate-400">
@@ -830,10 +973,14 @@ const breadcrumbs = [
                                         <span
                                             v-if="res.user?.loyalty_tier === 'platinum' || res.user?.loyalty_tier === 'gold'"
                                             class="inline-flex items-center gap-1 rounded-full px-2 py-0.2 text-[9px] font-bold uppercase tracking-wider"
-                                            :class="res.user?.loyalty_tier === 'platinum' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'"
+                                            :class="
+                                                res.user?.loyalty_tier === 'platinum'
+                                                    ? 'bg-slate-100 text-slate-800 border border-slate-300 dark:bg-white/10 dark:text-white dark:border-white/20'
+                                                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                                            "
                                         >
                                             <Crown class="h-2.5 w-2.5" />
-                                            <span>{{ res.user?.loyalty_tier === 'platinum' ? 'Platinum VIP 👑' : 'Gold 🌟' }}</span>
+                                            <span>{{ res.user?.loyalty_tier === 'platinum' ? 'Platinum VIP' : 'Gold VIP' }}</span>
                                         </span>
                                     </div>
                                     <p class="text-[10px] text-slate-400">
@@ -846,7 +993,7 @@ const breadcrumbs = [
                                 <button
                                     type="button"
                                     @click="openCheckinModal(res)"
-                                    class="apple-btn-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-[#101D35] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1a2d52] dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                                 >
                                     <RotateCcw class="h-3.5 w-3.5" />
                                     <span>Process Check-in</span>
@@ -855,9 +1002,118 @@ const breadcrumbs = [
                         </div>
                     </div>
                 </div>
-
             </div>
 
+            <!-- Live Fleet Inventory & Telemetry Table -->
+            <div
+                class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-white/10 dark:bg-[#0A101D]"
+            >
+                <div class="flex flex-col gap-4 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/5">
+                    <div>
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                            Fleet Inventory & Transponder Telemetry
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Active registry of all registered vehicles, fuel/battery levels, and hub locations.
+                        </p>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative w-full sm:w-64">
+                        <Search class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                        <input
+                            v-model="fleetSearchQuery"
+                            type="text"
+                            placeholder="Search make, model, plate..."
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 pl-9 pr-3 text-xs text-slate-900 transition focus:border-slate-400 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white/30"
+                        />
+                    </div>
+                </div>
+
+                <div class="mt-4 overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="border-b border-slate-100 font-semibold uppercase tracking-wider text-slate-400 dark:border-white/5">
+                            <tr>
+                                <th class="pb-3 pr-4">Vehicle</th>
+                                <th class="pb-3 pr-4">Hub Station</th>
+                                <th class="pb-3 pr-4">Status</th>
+                                <th class="pb-3 pr-4">SoC / Fuel</th>
+                                <th class="pb-3 pr-4">Odometer</th>
+                                <th class="pb-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+                            <tr
+                                v-for="car in filteredFleet"
+                                :key="car.id"
+                                class="transition hover:bg-slate-50/50 dark:hover:bg-white/[0.02]"
+                                :class="{ 'bg-slate-50/80 dark:bg-white/[0.03]': selectedCarId === car.id }"
+                            >
+                                <td class="py-3 pr-4">
+                                    <button
+                                        type="button"
+                                        @click="selectedCarId = car.id"
+                                        class="flex items-center gap-2.5 text-left focus:outline-hidden"
+                                    >
+                                        <div
+                                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/5"
+                                        >
+                                            <Car class="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-900 dark:text-white">
+                                                {{ car.make }} {{ car.model }}
+                                            </p>
+                                            <p class="font-mono text-[10px] text-slate-400">
+                                                {{ car.license_plate }} • {{ car.year }}
+                                            </p>
+                                        </div>
+                                    </button>
+                                </td>
+                                <td class="py-3 pr-4">
+                                    <span class="inline-flex items-center gap-1 font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <MapPin class="h-3 w-3 text-cyan-500" />
+                                        {{ car.telemetry.hub_code }}
+                                    </span>
+                                </td>
+                                <td class="py-3 pr-4">
+                                    <span
+                                        class="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-bold"
+                                        :class="getStatusBadgeClass(car.status)"
+                                    >
+                                        <span class="h-1.5 w-1.5 rounded-full" :class="getStatusDotClass(car.status)"></span>
+                                        {{ car.status_label }}
+                                    </span>
+                                </td>
+                                <td class="py-3 pr-4 font-mono font-bold text-slate-700 dark:text-slate-300">
+                                    <div class="flex items-center gap-2">
+                                        <span>{{ car.telemetry.fuel_level }}%</span>
+                                        <div class="h-1.5 w-16 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                                            <div
+                                                class="h-full rounded-full"
+                                                :class="car.telemetry.fuel_level > 30 ? 'bg-emerald-500' : 'bg-rose-500'"
+                                                :style="{ width: `${car.telemetry.fuel_level}%` }"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 pr-4 font-mono text-slate-600 dark:text-slate-400">
+                                    {{ car.mileage.toLocaleString() }} KM
+                                </td>
+                                <td class="py-3 text-right">
+                                    <button
+                                        type="button"
+                                        @click="selectedCarId = car.id"
+                                        class="rounded-lg border border-slate-200/80 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+                                    >
+                                        Inspect
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <!-- Checkin Return Modal -->

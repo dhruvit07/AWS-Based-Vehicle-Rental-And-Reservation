@@ -14,10 +14,16 @@ class HomePagesController extends Controller
     public function index()
     {
         $homeCars = Car::whereIn('id', [6, 8, 13, 17, 23, 29])
-        ->select('id', 'make', 'model', 'year', 'price_per_day', 'description', 'fuel_type')
-        ->orderBy('year', 'asc')
+            ->select('id', 'make', 'model', 'year', 'price_per_day', 'description', 'fuel_type', 'transmission', 'seats')
+            ->orderBy('year', 'asc')
             ->limit(30)
             ->get();
+
+        if ($homeCars->isEmpty()) {
+            $homeCars = Car::select('id', 'make', 'model', 'year', 'price_per_day', 'description', 'fuel_type', 'transmission', 'seats')
+                ->limit(6)
+                ->get();
+        }
 
         return inertia('Welcome', compact('homeCars'));
     }
