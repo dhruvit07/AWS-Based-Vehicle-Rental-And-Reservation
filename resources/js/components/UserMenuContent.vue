@@ -10,7 +10,7 @@ import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
-import { LogOut, ShieldCheck, UserIcon } from 'lucide-vue-next';
+import { Crown, LogOut, ShieldCheck, UserIcon } from 'lucide-vue-next';
 
 interface Props {
     user: User;
@@ -35,6 +35,12 @@ defineProps<Props>();
             <Link class="flex w-full items-center" :href="edit()" prefetch as="button">
                 <UserIcon class="mr-2 h-4 w-4" />
                 Account Settings
+            </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem v-if="user.role === 'client'" :as-child="true">
+            <Link class="flex w-full items-center" href="/client/loyalty" prefetch as="button">
+                <Crown class="mr-2 h-4 w-4 text-purple-500" />
+                VIP Rewards Club
             </Link>
         </DropdownMenuItem>
         <DropdownMenuItem v-if="user.role === 'client'" :as-child="true">

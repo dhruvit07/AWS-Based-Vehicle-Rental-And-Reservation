@@ -63,7 +63,7 @@ class OperationsController extends Controller
     {
         $cars = Car::with(['reservations' => function ($q) {
             $q->whereIn('status', [ReservationStatus::CONFIRMED, ReservationStatus::ACTIVE])
-                ->with('user:id,name,email,license_number')
+                ->with('user:id,name,email,license_number,loyalty_tier')
                 ->latest();
         }])->get();
 

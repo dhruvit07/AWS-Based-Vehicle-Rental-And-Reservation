@@ -81,7 +81,7 @@ it('renders presentation deck with metrics and scenarios', function () {
     $response->assertStatus(200);
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Presentation/Index')
-        ->has('scenarios', 7)
+        ->has('scenarios', 8)
         ->has('architecture')
         ->has('metrics')
         ->where('metrics.total_fleet', 1)
@@ -167,6 +167,13 @@ it('launches damage scenario as admin and redirects to operations', function () 
 
     $response->assertRedirect(route('admin.operations'));
     $this->assertAuthenticatedAs($this->admin);
+});
+
+it('launches loyalty scenario as client and redirects to loyalty hub', function () {
+    $response = $this->post(route('demo.launchScenario', ['scenario' => 'loyalty']));
+
+    $response->assertRedirect(route('client.loyalty.index'));
+    $this->assertAuthenticatedAs($this->client);
 });
 
 it('handles unknown scenario by redirecting to home', function () {

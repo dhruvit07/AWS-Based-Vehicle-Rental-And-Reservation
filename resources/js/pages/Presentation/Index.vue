@@ -10,6 +10,7 @@ import {
     CheckCircle2,
     Code2,
     Compass,
+    Crown,
     Cpu,
     Database,
     FileCheck2,
@@ -78,6 +79,8 @@ const getScenarioIcon = (id: string) => {
             return RotateCcw;
         case 'damage':
             return Wrench;
+        case 'loyalty':
+            return Crown;
         default:
             return Sparkles;
     }

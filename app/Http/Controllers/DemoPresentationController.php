@@ -111,6 +111,20 @@ class DemoPresentationController extends Controller
                     'Client-facing condition receipt card on completed trip details',
                 ],
             ],
+            [
+                'id' => 'loyalty',
+                'title' => 'Customer Loyalty Tiers & VIP Rewards',
+                'badge' => 'Gamified Retention & Pricing Engine',
+                'role' => 'client',
+                'icon' => 'Crown',
+                'description' => '4-Tier dynamic customer progression (Bronze, Silver, Gold, Platinum VIP). Grants 5% to 15% automatic checkout discounts, dedicated /client/loyalty VIP hub, and Operations priority dispatch tags.',
+                'talking_points' => [
+                    'Dynamic tier progression engine based on completed trips or lifetime spend',
+                    'Automatic checkout discount line item stackable with promo coupons',
+                    'Dedicated Apple-style VIP Rewards Passport (/client/loyalty) with progress bar',
+                    '1-Click Viva Evaluator Tier Simulator (instantly test Platinum 15% discount)',
+                ],
+            ],
         ];
 
         $architecture = [
@@ -118,8 +132,8 @@ class DemoPresentationController extends Controller
             'frontend' => 'Vue 3.5 + Inertia.js 2.1 (TypeScript)',
             'styling' => 'Tailwind CSS 4.1 + Custom Apple Glassmorphism Design System',
             'database' => 'SQLite / Relational Eloquent with 10 Strict Foreign Key Tables',
-            'tests_count' => 134,
-            'assertions_count' => 747,
+            'tests_count' => 143,
+            'assertions_count' => 812,
         ];
 
         return Inertia::render('Presentation/Index', [
@@ -129,7 +143,7 @@ class DemoPresentationController extends Controller
                 'total_fleet' => $totalCars,
                 'total_reservations' => $totalReservations,
                 'total_users' => $totalUsers,
-                'test_suite_status' => '134 Passed (100%)',
+                'test_suite_status' => '143 Passed (100%)',
             ],
         ]);
     }
@@ -234,6 +248,15 @@ class DemoPresentationController extends Controller
                 }
                 return redirect()->route('admin.operations')
                     ->with('success', 'Scenario 7: Vehicle Condition & Damage Inspector — Click "Check-In Vehicle" on any active trip to open the visual blueprint.');
+
+            case 'loyalty':
+                if ($client) {
+                    $client->setSimulatedTier('platinum');
+                    Auth::login($client);
+                }
+                $request->session()->regenerate();
+                return redirect()->route('client.loyalty.index')
+                    ->with('success', 'Scenario 8: Customer Loyalty Tiers & VIP Rewards — Client activated as Platinum VIP! Explore the rewards hub or start a booking to see 15% automatic checkout discounts.');
 
             default:
                 return redirect()->route('home');

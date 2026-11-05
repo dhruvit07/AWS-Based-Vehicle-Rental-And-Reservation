@@ -7,6 +7,7 @@ import {
     ChevronDown,
     ChevronUp,
     Compass,
+    Crown,
     ExternalLink,
     GraduationCap,
     Play,
@@ -79,6 +80,13 @@ const scenarios = [
         role: 'Admin',
         icon: Wrench,
         desc: 'SVG body blueprint & deposit settlement engine',
+    },
+    {
+        id: 'loyalty',
+        title: 'VIP Loyalty Tiers & Rewards',
+        role: 'Client',
+        icon: Crown,
+        desc: 'Tier progression, 15% discount & perks hub',
     },
 ];
 

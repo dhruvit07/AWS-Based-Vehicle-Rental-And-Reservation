@@ -11,6 +11,7 @@ import {
     CheckCircle2,
     Clock,
     Compass,
+    Crown,
     ExternalLink,
     FileCheck2,
     Fuel,
@@ -755,11 +756,21 @@ const breadcrumbs = [
                                             ({{ res.car?.license_plate }})
                                         </span>
                                     </div>
-                                    <p class="text-xs text-slate-600 dark:text-slate-300">
-                                        Hirer: <strong class="text-slate-900 dark:text-white">{{ res.user?.name }}</strong> • Ref: <span class="font-mono">{{ res.reservation_number }}</span>
-                                    </p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-xs text-slate-600 dark:text-slate-300">
+                                            Hirer: <strong class="text-slate-900 dark:text-white">{{ res.user?.name }}</strong>
+                                        </p>
+                                        <span
+                                            v-if="res.user?.loyalty_tier === 'platinum' || res.user?.loyalty_tier === 'gold'"
+                                            class="inline-flex items-center gap-1 rounded-full px-2 py-0.2 text-[9px] font-bold uppercase tracking-wider"
+                                            :class="res.user?.loyalty_tier === 'platinum' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'"
+                                        >
+                                            <Crown class="h-2.5 w-2.5" />
+                                            <span>{{ res.user?.loyalty_tier === 'platinum' ? 'Platinum VIP 👑' : 'Gold 🌟' }}</span>
+                                        </span>
+                                    </div>
                                     <p class="text-[10px] text-slate-400">
-                                        Scheduled from {{ res.start_date }} ({{ res.total_days }} days)
+                                        Scheduled from {{ res.start_date }} ({{ res.total_days }} days) • Ref: <span class="font-mono">{{ res.reservation_number }}</span>
                                     </p>
                                 </div>
                             </div>
@@ -812,9 +823,19 @@ const breadcrumbs = [
                                             ({{ res.car?.license_plate }})
                                         </span>
                                     </div>
-                                    <p class="text-xs text-slate-600 dark:text-slate-300">
-                                        Active Hirer: <strong class="text-slate-900 dark:text-white">{{ res.user?.name }}</strong>
-                                    </p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-xs text-slate-600 dark:text-slate-300">
+                                            Active Hirer: <strong class="text-slate-900 dark:text-white">{{ res.user?.name }}</strong>
+                                        </p>
+                                        <span
+                                            v-if="res.user?.loyalty_tier === 'platinum' || res.user?.loyalty_tier === 'gold'"
+                                            class="inline-flex items-center gap-1 rounded-full px-2 py-0.2 text-[9px] font-bold uppercase tracking-wider"
+                                            :class="res.user?.loyalty_tier === 'platinum' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'"
+                                        >
+                                            <Crown class="h-2.5 w-2.5" />
+                                            <span>{{ res.user?.loyalty_tier === 'platinum' ? 'Platinum VIP 👑' : 'Gold 🌟' }}</span>
+                                        </span>
+                                    </div>
                                     <p class="text-[10px] text-slate-400">
                                         Scheduled Return: {{ res.end_date }}
                                     </p>

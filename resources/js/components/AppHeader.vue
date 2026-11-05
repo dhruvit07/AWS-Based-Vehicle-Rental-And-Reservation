@@ -32,7 +32,7 @@ import { index as supportIndex } from '@/routes/client/support/index';
 import { home } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
-import { Menu, FileCheck, LifeBuoy } from 'lucide-vue-next';
+import { Menu, FileCheck, LifeBuoy, Crown } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -63,6 +63,11 @@ const mainNavItems: NavItem[] = [
         title: 'Reservations',
         href: reservationsIndex(),
         icon: FileCheck,
+    },
+    {
+        title: 'VIP Loyalty',
+        href: '/client/loyalty',
+        icon: Crown,
     },
     {
         title: 'Support',

@@ -112,6 +112,7 @@ class BookingController extends Controller
             'reviews' => $reviews,
             'ratingDistribution' => $car->rating_distribution,
             'eligibleReservation' => $eligibleReservation,
+            'loyaltyTier' => Auth::check() ? Auth::user()->loyalty_tier_meta : null,
         ]);
     }
 
@@ -236,6 +237,15 @@ class BookingController extends Controller
             $extrasTotal = round($extrasTotal, 2);
             $subtotal    = round($carBase + $extrasTotal, 2);
 
+            // Loyalty Tier discount calculation
+            $loyaltyDiscount = 0.0;
+            $appliedTier = null;
+            $user = Auth::user();
+            if ($user && $user->loyalty_discount_rate > 0) {
+                $loyaltyDiscount = round($subtotal * (float) $user->loyalty_discount_rate, 2);
+                $appliedTier = $user->loyalty_tier;
+            }
+
             // coupon discount calculation
             $discount = 0.0;
             $appliedCouponCode = null;
@@ -254,27 +264,29 @@ class BookingController extends Controller
             }
             $discount = round($discount, 2);
 
-            $taxableAmount = max(0, $subtotal - $discount);
+            $taxableAmount = max(0, $subtotal - $loyaltyDiscount - $discount);
             $taxRate       = 0.07;
             $taxAmount     = round($taxableAmount * $taxRate, 2);
             $total         = round($taxableAmount + $taxAmount, 2);
 
             $newReservation = Reservation::create([
-                'car_id'          => $lockedCar->id,
-                'user_id'         => Auth::id(),
-                'start_date'      => $startDate,
-                'end_date'        => $endDate,
-                'pickup_location' => $request->pickup_location,
-                'return_location' => $request->return_location,
-                'extras'          => !empty($frozenExtras) ? $frozenExtras : null,
-                'total_days'      => $days,
-                'daily_rate'      => $dailyRate,
-                'subtotal'        => $subtotal,
-                'tax_amount'      => $taxAmount,
-                'discount_amount' => $discount,
-                'coupon_code'     => $appliedCouponCode,
-                'total_amount'    => $total,
-                'status'          => ReservationStatus::CONFIRMED,
+                'car_id'                  => $lockedCar->id,
+                'user_id'                 => Auth::id(),
+                'start_date'              => $startDate,
+                'end_date'                => $endDate,
+                'pickup_location'         => $request->pickup_location,
+                'return_location'         => $request->return_location,
+                'extras'                  => !empty($frozenExtras) ? $frozenExtras : null,
+                'total_days'              => $days,
+                'daily_rate'              => $dailyRate,
+                'subtotal'                => $subtotal,
+                'tax_amount'              => $taxAmount,
+                'discount_amount'         => $discount,
+                'loyalty_discount_amount' => $loyaltyDiscount,
+                'applied_loyalty_tier'    => $appliedTier,
+                'coupon_code'             => $appliedCouponCode,
+                'total_amount'            => $total,
+                'status'                  => ReservationStatus::CONFIRMED,
             ]);
 
             // Create completed payment record

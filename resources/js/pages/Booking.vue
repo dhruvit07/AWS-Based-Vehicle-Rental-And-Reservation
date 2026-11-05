@@ -9,7 +9,7 @@ import HomeLayout from '@/layouts/HomeLayout.vue';
 import { login, fleet } from '@/routes';
 import { book } from '@/routes/fleet';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { Clock, Lock, MessageSquare, ShieldAlert, ShieldCheck, Star, ThumbsUp, ArrowLeft, Fuel, Gauge, Calendar } from 'lucide-vue-next';
+import { Clock, Crown, Lock, MessageSquare, ShieldAlert, ShieldCheck, Star, ThumbsUp, ArrowLeft, Fuel, Gauge, Calendar } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface Car {
@@ -172,12 +172,19 @@ const subtotal = computed(() => {
     return carBaseCost.value + extrasTotal.value;
 });
 
+const loyaltyTier = computed(() => (page.props as any).loyaltyTier || (authUser.value as any)?.loyalty_tier_meta || null);
+
+const loyaltyDiscountAmount = computed(() => {
+    if (!loyaltyTier.value || !loyaltyTier.value.discount_rate) return 0;
+    return Math.round(subtotal.value * Number(loyaltyTier.value.discount_rate) * 100) / 100;
+});
+
 const discountAmount = computed(() => {
     return appliedCoupon.value ? appliedCoupon.value.discount_amount : 0;
 });
 
 const taxableAmount = computed(() => {
-    return Math.max(0, subtotal.value - discountAmount.value);
+    return Math.max(0, subtotal.value - loyaltyDiscountAmount.value - discountAmount.value);
 });
 
 const tax = computed(() => taxableAmount.value * 0.07);
@@ -785,6 +792,20 @@ const commonLocations = [
                                         @apply="handleCouponApplied"
                                         @remove="handleCouponRemoved"
                                     />
+                                </div>
+
+                                <!-- Loyalty Tier VIP Discount Row (if applicable) -->
+                                <div
+                                    v-if="loyaltyDiscountAmount > 0"
+                                    class="flex items-center justify-between gap-3 text-xs text-purple-600 dark:text-purple-400 font-semibold"
+                                >
+                                    <span class="flex items-center gap-1.5">
+                                        <Crown class="h-3.5 w-3.5" />
+                                        <span>{{ loyaltyTier.label }} ({{ loyaltyTier.discount_percent }}% Off)</span>
+                                    </span>
+                                    <span class="font-bold font-mono">
+                                        -{{ formatPrice(loyaltyDiscountAmount) }}
+                                    </span>
                                 </div>
 
                                 <!-- Discount Row (if applied) -->

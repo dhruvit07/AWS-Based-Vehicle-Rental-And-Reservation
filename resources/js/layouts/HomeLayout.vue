@@ -7,7 +7,7 @@ import { index as clientReservationsIndex } from '@/routes/client/reservations/i
 import { home, fleet, about, contact } from '@/routes';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import DemoPresenterBar from '@/components/DemoPresenterBar.vue';
-import { Car, LayoutDashboard, ArrowRight, Phone, Mail, Compass } from 'lucide-vue-next';
+import { Car, LayoutDashboard, ArrowRight, Phone, Mail, Compass, Crown } from 'lucide-vue-next';
 
 const page = usePage();
 
@@ -85,6 +85,15 @@ const isActive = (path: string) => {
                     <!-- Right Controls: Theme Toggle & Authentication -->
                     <div class="flex shrink-0 items-center gap-2 sm:gap-3">
                         <ThemeToggle />
+
+                        <Link
+                            v-if="page.props.auth?.user?.role === 'client'"
+                            href="/client/loyalty"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-2.5 py-1.5 text-xs font-bold text-purple-700 transition hover:bg-purple-500/20 dark:text-purple-300"
+                        >
+                            <Crown class="h-3.5 w-3.5" />
+                            <span class="capitalize">{{ page.props.auth.user.loyalty_tier || 'Bronze' }} VIP</span>
+                        </Link>
 
                         <Link
                             v-if="page.props.auth?.user"

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Client\LoyaltyController;
 use App\Http\Controllers\Client\ReservationsController;
 use App\Http\Controllers\Client\ReviewController;
 use App\Http\Controllers\Client\SupportController;
@@ -19,6 +20,10 @@ Route::middleware(['auth', 'verified', 'active', 'client'])
         Route::match(['get', 'post'], '/reservations/{reservation}/extend/check', [ReservationsController::class, 'checkExtension'])->name('reservations.extend.check');
         Route::post('/reservations/{reservation}/extend', [ReservationsController::class, 'extend'])->name('reservations.extend');
         Route::post('/reservations/{reservation}/early-return', [ReservationsController::class, 'earlyReturn'])->name('reservations.earlyReturn');
+
+        // Loyalty & VIP Rewards
+        Route::get('/loyalty', [LoyaltyController::class, 'index'])->name('loyalty.index');
+        Route::match(['get', 'post'], '/loyalty/simulate', [LoyaltyController::class, 'simulateTier'])->name('loyalty.simulate');
 
         // Support
         Route::get('/support', [SupportController::class, 'index'])->name('support.index');
